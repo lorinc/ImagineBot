@@ -292,3 +292,37 @@ DEAD_ENDS: "Always inherit" — assigns Room 101 to Tuesday incorrectly (test ca
            "Inherit only column 0" — not quite right; continuation rows need ALL columns
            inherited, not just the anchor column.
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+
+[2026-03-23]
+CATEGORY: OTHER
+SERVICE: knowledge
+TASK: Architecture decision — retrieval mechanism for knowledge service
+SYMPTOM: Not a bug — a strategic decision recorded for future reference.
+         Graphiti + Neo4j was the chosen retrieval architecture after the Sprint 1 spike.
+         Before Sprint 2 implementation began, the approach was re-evaluated and replaced.
+ROOT_CAUSE: The corpus (~100K tokens across 7 documents) is small enough to fit in a single
+            Vertex AI context cache. Full-context retrieval over the whole corpus is strictly
+            superior to RAG at this scale: no chunking errors, no missed cross-document
+            relationships, no embedding drift, no graph extraction failures (as observed
+            in Sprint 1 with Graphiti fixating on staff names instead of operational facts).
+            RAG adds complexity (chunking, embedding, graph, retrieval tuning) without
+            providing any benefit when the corpus fits in one cache.
+            At 500 queries/day max and ~100K tokens, cost is acceptable.
+PREVENTED_BY: A scale-vs-complexity decision framework in CLAUDE.md would surface this
+              earlier: "If corpus fits in context cache, prefer full-context over RAG.
+              Re-evaluate only when corpus exceeds cache limits or cost becomes prohibitive."
+SOLUTION: Replace Graphiti + Neo4j + OpenAI with Vertex AI Context Caching + Gemini 2.5 Flash.
+          Cache ID persisted in Firestore (config/context_cache). API contract unchanged:
+          POST /search → { answer, facts: [{ fact, source_id, valid_at }] }.
+          Citations returned as structured JSON via response_schema. Ingestion pipeline
+          simplified to Steps 1–4 only (no chunking, no graph ingestion).
+DEAD_ENDS: Graphiti (chosen in Sprint 1 spike): works, but over-engineered for this corpus
+           size. Extraction quality problems observed (staff-name fixation, missing
+           operational facts) would require significant prompt tuning that full-context
+           retrieval avoids entirely.
+           Pageindex (open-source): evaluated and rejected. The open-source version supports
+           single-document discovery only — cross-document retrieval requires the commercial
+           tier. This makes it unsuitable for a multi-document corpus where queries must
+           span all sources. Not a workaround-able limitation; it is a product boundary.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.

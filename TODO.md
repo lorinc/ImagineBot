@@ -80,6 +80,16 @@ responsibility, not a Graphiti configuration issue.
 
 ---
 
+## O5 — Capture and display corpus token count
+
+After cache creation, log `cached_content.usage_metadata.total_token_count` and store
+it alongside the cache metadata in Firestore (`config/context_cache`). Display the value
+on the admin page so operators can see how much of the 1M-token context window is in use.
+
+Acceptance: admin page shows corpus token count (e.g. "Corpus: 97,432 tokens / 1,048,576 max").
+
+---
+
 ## A1 — Google Drive auth: switch to Domain-Wide Delegation before production
 
 **Current (dev):** OAuth with personal `token.json` — acceptable locally.

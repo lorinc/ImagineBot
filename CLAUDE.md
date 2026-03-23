@@ -9,15 +9,13 @@ a knowledge layer serves answers to an LLM, and users interact through channels
 ## Stack
 - **Language/Runtime:** Python 3.12
 - **Framework:** FastAPI (all services)
-- **Database:** Firestore (primary), Neo4j Aura Free (knowledge graph — Graphiti)
-- **Knowledge graph:** Graphiti (`graphiti-core`) — temporal entity extraction + hybrid retrieval
-- **Embeddings:** Vertex AI `text-embedding-004`
-- **LLM (ingestion):** Gemini Flash via Vertex AI (entity extraction only, not query path)
+- **Database:** Firestore (primary)
+- **Knowledge retrieval:** Vertex AI Context Caching + Gemini 2.5 Flash (full-context, not RAG)
+- **LLM:** Gemini 2.5 Flash via Vertex AI (both knowledge retrieval and answer synthesis)
 - **Auth:** [TBD — see SPIKE: auth]
 - **Frontend:** Jinja2 SSR + [Tailwind or Bootstrap — decision pending]
 - **Infra:** GCP — 2 projects: `img-dev` (staging) and `img-prod` (production)
            Cloud Run per service, Firestore, Secret Manager, Artifact Registry, Vertex AI
-           Neo4j Aura Free: one instance per environment (external managed service)
 - **CI/CD:** GitHub Actions + Workload Identity Federation (one pool per project, no stored keys)
 
 ## Service map
@@ -91,7 +89,7 @@ PHASE_1.4_DONE:  Google Sign-In auth complete (2026-03-21)
   - Fixed CHAT-ERR: missing requests package — google.auth.transport.requests requires it
   - Tests: 9/9 passing
   - Auth acceptance: curl POST /chat (no token) → 401 ✅
-  - PENDING: browser UAT — sign in with permitted account, ask a question, see cited answer
+  - Browser UAT PASSED (2026-03-23) — sign in, ask question, cited answer returned ✅
 CLOUD_RUN_SECRET_MOUNT_RULE: Each secret needs a unique parent directory.
   /secrets/foo/BAR=BAR:latest → file at /secrets/foo/BAR. Never share parent dirs.
 CREDENTIALS_FILE_RULE: Always parse credentials file with _load_creds_file() from
@@ -106,24 +104,20 @@ SPIKES_PENDING:
   - auth design (auth service)
   - access control design (access service)
 SPIKES_COMPLETE:
-  - retrieval mechanism (knowledge service) — Graphiti + Neo4j Aura Free, see docs/spikes/retrieval.md
-  - local validation — validate.py passed against Neo4j Aura Free (corpus ingested, queries working)
-    OpenAI selected as LLM for Sprint 1 (replace with Vertex AI before production)
-    Stub saved: src/ingestion/validate_graphiti.py
+  - retrieval mechanism — Vertex AI Context Caching + Gemini 2.5 Flash (see ARCHITECTURE_PIVOT)
   - frontend CSS framework — hand-written CSS chosen (no framework, no build step, no CDN dependency)
 DECISIONS_COMPLETE:
   - GCP project structure — 2 projects (img-dev, img-prod), not per-service. See docs/ARCHITECTURE.md.
   - Sprint 1 architecture — knowledge (internal Cloud Run) + channel_web (*.run.app, no LB/IAP)
     No gateway, no auth service, no access control, no CI/CD in Sprint 1. See docs/PROJECT_PLAN.md.
   - Sprint 1 auth — Google Sign-In (frontend) + ID token validation (backend), allowed-email list
-SPRINT_1_TODO_BEFORE_SPRINT_2:
-  - E0: Browser UAT — open https://channel-web-jeyczovqfa-ew.a.run.app in incognito, sign in, ask a question
-  - E1: After UAT passes — restore knowledge service ingress to --ingress=internal
-CORPUS_STATE:
-  - 149 RELATES_TO edges across 6 documents (health-safety:40, family-manual:28, child-protection:23, technology-policy:22, trips-outings:21, code-of-conduct:15)
-  - family-manual has ONLY staff name/role facts — no hours, no contact, no policies
-  - Root cause: each doc ingested as single episode; Graphiti extraction fixated on staff directory
-  - Fix: re-ingest with section-level chunking (split by ## headers) + table-to-prose preprocessing
+SPRINT_1_COMPLETE (2026-03-23):
+  - E0: Browser UAT PASSED ✅
+  - E1: CANCELLED — internal ingress blocks Cloud Run-to-Cloud Run calls over the public URL.
+    knowledge must stay --ingress=all --no-allow-unauthenticated. Security is the auth token, not ingress.
+KNOWLEDGE_INGRESS_RULE: knowledge service must use --ingress=all --no-allow-unauthenticated.
+  --ingress=internal blocks channel_web (and any Cloud Run caller using the *.run.app URL).
+  Auth is enforced by --no-allow-unauthenticated + channel-web-sa run.invoker binding.
 PIPELINE_DECISIONS (2026-03-22):
   - Local DOCX files: data/docx/ (7 files, renamed to en_policy[N]_*, es_family_manual_*, en_family_manual_*)
   - Pipeline output: local filesystem, staged dirs data/pipeline/<YYYY-MM-DD_NNN>/ (gitignored)
@@ -142,13 +136,20 @@ ARCHITECTURE_PIVOT (2026-03-23):
   - See docs/ARCHITECTURE.md "Knowledge service: retrieval architecture" for full design
   - See docs/PROJECT_PLAN.md Sprint 2 Phase 2.1 for implementation spec
 
-NEXT_SESSION — KNOWLEDGE SERVICE REBUILD (Sprint 2 Phase 2.1):
-  - FIRST: browser UAT (Sprint 1 E0) — confirm current deployment works before touching anything
-  - THEN: restore knowledge service --ingress=internal (Sprint 1 E1)
-  - THEN: rebuild src/knowledge/ per docs/PROJECT_PLAN.md Sprint 2 Phase 2.1
-  - Canonical file set: en_/es_ prefixed files only from data/pipeline/latest/02_ai_cleaned/
-  - Cache ID persisted in Firestore config/context_cache
-  - IAM: add roles/aiplatform.user to knowledge-sa before deploy
+PHASE_2.1_DONE (2026-03-23): Knowledge service rebuilt — Vertex AI Context Caching + Gemini 2.5 Flash
+  - src/knowledge/main.py: rewrites search logic; Firestore-backed cache name lookup with 5-min TTL
+  - src/knowledge/requirements.txt: google-cloud-aiplatform + google-cloud-firestore (no Neo4j/OpenAI)
+  - tools/create_cache.py: loads en_*.md from data/pipeline/latest/02_ai_cleaned/, creates cache, writes to Firestore
+  - Cache name in Firestore: config/context_cache { cache_name, created_at, expires_at, source_ids }
+  - knowledge-sa IAM: roles/aiplatform.user + roles/datastore.user ✅
+  - Tests: 5/5 passing
+  - Spanish files: excluded from cache (en_*.md only); multilingual answer planned via system prompt
+LANGUAGE_DECISION: Cache contains English documents only. System prompt will instruct model
+  to answer in the language the question was asked. Implement before next corpus update.
+
+NEXT_SESSION — Sprint 2 continuation:
+  - Decide Phase 2.2: gateway service, auth service spike, or access control spike
+  - See docs/PROJECT_PLAN.md Sprint 2 for options
 ```
 
 Update this block at the end of every session.

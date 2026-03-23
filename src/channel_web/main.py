@@ -1,10 +1,11 @@
+import json
 import logging
 import os
 from pathlib import Path
 
 import httpx
 from fastapi import Depends, FastAPI, HTTPException, Request
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
@@ -84,27 +85,42 @@ async def chat(body: ChatRequest, _user: dict = Depends(_get_current_user)):
     if not body.message.strip():
         return JSONResponse(status_code=400, content={"error": "Message cannot be empty"})
 
-    try:
-        token = _get_identity_token(KNOWLEDGE_SERVICE_URL)
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{KNOWLEDGE_SERVICE_URL}/search",
-                json={"query": body.message, "group_ids": None},
-                headers={"Authorization": f"Bearer {token}"},
-                timeout=30.0,
+    async def generate():
+        yield 'event: progress\ndata: {"key": "received"}\n\n'
+
+        try:
+            token = _get_identity_token(KNOWLEDGE_SERVICE_URL)
+        except Exception as e:
+            logger.error("Identity token error: %s", e)
+            yield f'event: error\ndata: {json.dumps({"error": "Authentication error"})}\n\n'
+            return
+
+        yield 'event: progress\ndata: {"key": "contacting"}\n\n'
+
+        try:
+            async with httpx.AsyncClient() as client:
+                async with client.stream(
+                    "POST",
+                    f"{KNOWLEDGE_SERVICE_URL}/search/stream",
+                    json={"query": body.message, "group_ids": None},
+                    headers={"Authorization": f"Bearer {token}"},
+                    timeout=60.0,
+                ) as response:
+                    response.raise_for_status()
+                    async for line in response.aiter_lines():
+                        if line:
+                            yield line + "\n"
+                        else:
+                            yield "\n"
+        except httpx.HTTPStatusError as e:
+            logger.error(
+                "Knowledge service returned %s: %s",
+                e.response.status_code,
+                e.response.text,
             )
-            response.raise_for_status()
-            data = response.json()
-            return {"answer": data["answer"], "facts": data["facts"]}
-    except httpx.HTTPStatusError as e:
-        logger.error(
-            "Knowledge service returned %s: %s",
-            e.response.status_code,
-            e.response.text,
-        )
-        return JSONResponse(status_code=502, content={"error": "Knowledge service error"})
-    except Exception as e:
-        logger.error("Unexpected error calling knowledge service: %s", e)
-        return JSONResponse(
-            status_code=500, content={"error": "Service temporarily unavailable"}
-        )
+            yield f'event: error\ndata: {json.dumps({"error": "Knowledge service error"})}\n\n'
+        except Exception as e:
+            logger.error("Unexpected error calling knowledge service: %s", e)
+            yield f'event: error\ndata: {json.dumps({"error": "Service temporarily unavailable"})}\n\n'
+
+    return StreamingResponse(generate(), media_type="text/event-stream")

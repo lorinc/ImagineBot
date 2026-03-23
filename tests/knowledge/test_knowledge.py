@@ -129,6 +129,40 @@ def test_empty_citations_returns_i_dont_know(client, mock_model):
     assert body["facts"] == []
 
 
+def test_search_stream_emits_progress_then_answer(client):
+    resp = client.post("/search/stream", json={"query": "When does school start?", "group_ids": None})
+
+    assert resp.status_code == 200
+    assert "text/event-stream" in resp.headers["content-type"]
+
+    events = []
+    for block in resp.text.split('\n\n'):
+        if not block.strip():
+            continue
+        event_type = 'message'
+        data = None
+        for line in block.split('\n'):
+            if line.startswith('event: '):
+                event_type = line[7:].strip()
+            elif line.startswith('data: '):
+                import json as _json
+                try:
+                    data = _json.loads(line[6:])
+                except _json.JSONDecodeError:
+                    pass
+        if data is not None:
+            events.append({'type': event_type, 'data': data})
+
+    types = [e['type'] for e in events]
+    assert 'progress' in types
+    assert 'answer' in types
+    assert types.index('progress') < types.index('answer')
+
+    answer_event = next(e for e in events if e['type'] == 'answer')
+    assert answer_event['data']['answer'] == "School starts at 9:00."
+    assert answer_event['data']['facts'][0]['source_id'] == "en_family_manual_24_25"
+
+
 def test_search_returns_503_when_no_cache_in_firestore(patch_firestore, mock_cached_content, mock_model):
     patch_firestore.collection.return_value.document.return_value.get.return_value = MagicMock(
         exists=False

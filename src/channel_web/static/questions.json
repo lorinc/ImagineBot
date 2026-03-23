@@ -2,75 +2,105 @@
   "en": {
     "categories": [
       {
-        "id": "pickup",
-        "label": "Pick-up times",
-        "icon": "clock",
+        "id": "daily_logistics",
+        "label": "Daily Logistics",
+        "symbol": "⏰",
         "questions": [
-          "At what time can I pick up my kids from the elementary school?",
-          "What are the pick-up times for the preschool program?",
-          "Is there an extended care option after regular pick-up hours?",
-          "What is the early dismissal schedule on Wednesdays?",
-          "What is the procedure for early pick-up during the school day?"
+          "What are the specific school opening and reception hours?",
+          "Why is it essential for my child to arrive before 9:00 am?",
+          "What are the consequences or fees if I arrive late for drop-off?",
+          "Are there specific fees for late pick-ups after 4:55 pm?",
+          "What are the only permitted times for early pick-ups?",
+          "How should I notify the school of an absence or change in schedule?",
+          "How does the 'Early Bird' morning service work?",
+          "What is the 'Afternoon Club' and do I need to book it?",
+          "What is the special protocol for pick-ups on rainy days?",
+          "How do I authorize a third party to collect my child through Phidias?"
         ]
       },
       {
-        "id": "events",
-        "label": "Upcoming events",
-        "icon": "calendar-days",
+        "id": "montessori_hybrid",
+        "label": "Montessori Hybrid",
+        "symbol": "🌱",
         "questions": [
-          "Are there any upcoming events at the school?",
-          "When is the next parent-teacher conference?",
-          "What are the dates for the Spring Garden Festival?",
-          "Are there any volunteer opportunities coming up?",
-          "When is the next school holiday or break?"
+          "How does the school combine the British National Curriculum with Montessori?",
+          "Why does the school use mixed-age groups in the classrooms?",
+          "What is the 'Work Cycle' and how does it benefit my child?",
+          "What are the five 'Great Lessons' introduced in the Primary stage?",
+          "How is the Early Years curriculum structured for the youngest children?",
+          "How is my child's academic progress assessed in Primary?",
+          "How do Montessori materials facilitate the move from concrete to abstract learning?",
+          "What is the 'Creative Lab' workshop for STEM subjects?",
+          "How does the environment promote my child's autonomy and independence?",
+          "When and how can I review my child's pedagogical progress reports?"
         ]
       },
       {
-        "id": "enrollment",
-        "label": "Enrollment",
-        "icon": "graduation-cap",
+        "id": "health_nutrition",
+        "label": "Health & Nutrition",
+        "symbol": "🥗",
         "questions": [
-          "How do I enroll my child for the next school year?",
-          "What are the age requirements for each program level?",
-          "Is there a waitlist for enrollment, and how does it work?",
-          "What documents are required for the enrollment process?",
-          "Can I schedule a campus tour before enrolling?"
+          "When is a child considered too ill to attend school?",
+          "What is the '24-hour rule' regarding fever, vomiting, or diarrhea?",
+          "What is the procedure for staff to administer oral medication?",
+          "Are the school meals organic and sourced from local providers?",
+          "How does the school handle severe allergies and dietary restrictions?",
+          "Do students participate in growing and composting their own food?",
+          "How do I request a temporary soft diet for my child?",
+          "What items do I need to provide for my child's afternoon nap?",
+          "Is filtered water available in the classrooms daily?",
+          "What is the school's policy regarding food for birthday celebrations?"
         ]
       },
       {
-        "id": "lunch",
-        "label": "Lunch menu",
-        "icon": "utensils",
+        "id": "apps_technology",
+        "label": "Apps & Technology",
+        "symbol": "💻",
         "questions": [
-          "What is on the standard lunch menu this week?",
-          "What is on the vegan lunch menu this week?",
-          "What is on the gluten-free lunch menu this week?",
-          "Does the school offer menus for dietary restrictions?",
-          "Can my child bring their own lunch instead?"
+          "What is the difference between Phidias and Transparent Classroom?",
+          "What is the 'Technology Itinerary' regarding screen use by age?",
+          "When are students allowed to have their own laptops for class?",
+          "What are the rules for bringing a mobile phone to school?",
+          "What are the sanctions if a mobile device is misused at school?",
+          "How does the school domain prevent access to improper internet content?",
+          "Is my child taught about online safety and e-safety risks?",
+          "How is my family's personal data protected by the school?",
+          "Will the school share photos of my child's daily activities with me?",
+          "Why is explicit parental consent required for all photography?"
         ]
       },
       {
-        "id": "transport",
-        "label": "Transportation",
-        "icon": "bus",
+        "id": "behavior_values",
+        "label": "Behavior & Values",
+        "symbol": "🤝",
         "questions": [
-          "Does the school offer bus transportation?",
-          "How does the carpool matching program work?",
-          "Where is the designated drop-off and pick-up zone?",
-          "Are there safe biking or walking routes to the school?",
-          "Is there supervision at the drop-off area in the morning?"
+          "What is the 'Positive Behavior' approach used by the school?",
+          "What are 'Natural Consequences' and how are they applied?",
+          "How does the 'Peace Table' help children resolve their own conflicts?",
+          "What is the school's specific policy regarding bullying?",
+          "How does the school education program tackle racism and discrimination?",
+          "What are the dress code requirements for students?",
+          "What items of clothing or accessories are restricted for safety reasons?",
+          "What happens if a student has multiple behavioral incidents?",
+          "Are children allowed to bring their own toys to school?",
+          "How does the school promote values like grace and courtesy?"
         ]
       },
       {
-        "id": "contact",
-        "label": "Contact",
-        "icon": "phone",
+        "id": "fees_enrollment",
+        "label": "Fees & Enrollment",
+        "symbol": "💳",
         "questions": [
-          "How can I reach the school office?",
-          "What are the office hours for the front desk?",
-          "How do I contact my child's teacher directly?",
-          "Is there an emergency contact number for after hours?",
-          "How do I update my contact information on file?"
+          "On what dates are monthly proformas and direct debits issued?",
+          "What exactly is included in the flat monthly rate?",
+          "How is the enrollment fee for the next school year managed?",
+          "Is the enrollment fee refundable if we choose not to continue?",
+          "What financial aid is available from the local city councils?",
+          "Does the school accept Sodexo or other nursery vouchers?",
+          "Why is the 'Lunch Aid' from the Conselleria not applicable at this school?",
+          "What is the 'Tax Deduction for Working Mothers' (Form 233)?",
+          "How are excursions and extracurricular activities charged?",
+          "What are the penalties for returned bank receipts?"
         ]
       }
     ]
@@ -78,75 +108,105 @@
   "es": {
     "categories": [
       {
-        "id": "pickup",
-        "label": "Horarios de recogida",
-        "icon": "clock",
+        "id": "daily_logistics",
+        "label": "Logística Diaria",
+        "symbol": "⏰",
         "questions": [
-          "\u00bfA qu\u00e9 hora puedo recoger a mis hijos de la escuela primaria?",
-          "\u00bfCu\u00e1les son los horarios de recogida del programa preescolar?",
-          "\u00bfHay opci\u00f3n de cuidado extendido despu\u00e9s del horario regular?",
-          "\u00bfCu\u00e1l es el horario de salida anticipada los mi\u00e9rcoles?",
-          "\u00bfCu\u00e1l es el procedimiento para recoger a mi hijo antes de la hora?"
+          "¿Cuáles son los horarios de apertura y recepción del colegio?",
+          "¿Por qué es imprescindible que mi hijo llegue antes de las 9:00?",
+          "¿Cuáles son las consecuencias o cargos por llegar tarde a la entrada?",
+          "¿Hay cargos por recogidas tardías después de las 16:55?",
+          "¿Cuáles son los únicos horarios permitidos para recogidas anticipadas?",
+          "¿Cómo debo notificar al colegio una ausencia o cambio de horario?",
+          "¿Cómo funciona el servicio matinal 'Early Bird'?",
+          "¿Qué es el 'Afternoon Club' y hay que reservarlo?",
+          "¿Cuál es el protocolo especial para las recogidas en días de lluvia?",
+          "¿Cómo autorizo a una tercera persona para recoger a mi hijo a través de Phidias?"
         ]
       },
       {
-        "id": "events",
-        "label": "Pr\u00f3ximos eventos",
-        "icon": "calendar-days",
+        "id": "montessori_hybrid",
+        "label": "Híbrido Montessori",
+        "symbol": "🌱",
         "questions": [
-          "\u00bfHay alg\u00fan evento pr\u00f3ximo en la escuela?",
-          "\u00bfCu\u00e1ndo es la pr\u00f3xima conferencia de padres y maestros?",
-          "\u00bfCu\u00e1les son las fechas del Festival de Jard\u00edn de Primavera?",
-          "\u00bfHay oportunidades de voluntariado pr\u00f3ximamente?",
-          "\u00bfCu\u00e1ndo son las pr\u00f3ximas vacaciones o descanso escolar?"
+          "¿Cómo combina el colegio el Currículo Nacional Británico con Montessori?",
+          "¿Por qué el colegio usa grupos de edades mixtas en las aulas?",
+          "¿Qué es el 'Ciclo de Trabajo' y cómo beneficia a mi hijo?",
+          "¿Cuáles son las cinco 'Grandes Lecciones' del ciclo de Primaria?",
+          "¿Cómo está estructurado el currículo de Infantil para los más pequeños?",
+          "¿Cómo se evalúa el progreso académico de mi hijo en Primaria?",
+          "¿Cómo facilitan los materiales Montessori el paso del aprendizaje concreto al abstracto?",
+          "¿Qué es el taller 'Creative Lab' para materias STEM?",
+          "¿Cómo promueve el entorno la autonomía e independencia de mi hijo?",
+          "¿Cuándo y cómo puedo revisar los informes de progreso pedagógico de mi hijo?"
         ]
       },
       {
-        "id": "enrollment",
-        "label": "Inscripci\u00f3n",
-        "icon": "graduation-cap",
+        "id": "health_nutrition",
+        "label": "Salud y Nutrición",
+        "symbol": "🥗",
         "questions": [
-          "\u00bfC\u00f3mo puedo inscribir a mi hijo para el pr\u00f3ximo a\u00f1o escolar?",
-          "\u00bfCu\u00e1les son los requisitos de edad para cada nivel del programa?",
-          "\u00bfHay una lista de espera y c\u00f3mo funciona?",
-          "\u00bfQu\u00e9 documentos se necesitan para el proceso de inscripci\u00f3n?",
-          "\u00bfPuedo programar un recorrido por el campus antes de inscribirme?"
+          "¿Cuándo se considera que un niño está demasiado enfermo para ir al colegio?",
+          "¿En qué consiste la 'regla de las 24 horas' para fiebre, vómitos o diarrea?",
+          "¿Cuál es el procedimiento para que el personal administre medicación oral?",
+          "¿Son las comidas del colegio ecológicas y de proveedores locales?",
+          "¿Cómo gestiona el colegio las alergias graves y las restricciones alimentarias?",
+          "¿Participan los alumnos en cultivar y compostar su propia comida?",
+          "¿Cómo solicito una dieta blanda temporal para mi hijo?",
+          "¿Qué artículos debo aportar para la siesta de mi hijo?",
+          "¿Hay agua filtrada disponible en las aulas a diario?",
+          "¿Cuál es la política del colegio respecto a la comida en celebraciones de cumpleaños?"
         ]
       },
       {
-        "id": "lunch",
-        "label": "Men\u00fa del almuerzo",
-        "icon": "utensils",
+        "id": "apps_technology",
+        "label": "Apps y Tecnología",
+        "symbol": "💻",
         "questions": [
-          "\u00bfQu\u00e9 hay en el men\u00fa est\u00e1ndar del almuerzo esta semana?",
-          "\u00bfQu\u00e9 hay en el men\u00fa vegano del almuerzo esta semana?",
-          "\u00bfQu\u00e9 hay en el men\u00fa sin gluten del almuerzo esta semana?",
-          "\u00bfLa escuela ofrece men\u00fas para restricciones alimentarias?",
-          "\u00bfMi hijo puede traer su propio almuerzo?"
+          "¿Cuál es la diferencia entre Phidias y Transparent Classroom?",
+          "¿En qué consiste el 'Itinerario Tecnológico' sobre el uso de pantallas por edades?",
+          "¿A partir de qué edad pueden los alumnos traer su propio portátil a clase?",
+          "¿Cuáles son las normas para traer un teléfono móvil al colegio?",
+          "¿Cuáles son las sanciones por el mal uso de un dispositivo móvil en el colegio?",
+          "¿Cómo impide el dominio del colegio el acceso a contenidos inapropiados en internet?",
+          "¿Se enseña a mi hijo sobre seguridad en línea y riesgos de e-safety?",
+          "¿Cómo protege el colegio los datos personales de mi familia?",
+          "¿Compartirá el colegio fotos de las actividades diarias de mi hijo conmigo?",
+          "¿Por qué se requiere consentimiento parental explícito para todas las fotografías?"
         ]
       },
       {
-        "id": "transport",
-        "label": "Transporte",
-        "icon": "bus",
+        "id": "behavior_values",
+        "label": "Conducta y Valores",
+        "symbol": "🤝",
         "questions": [
-          "\u00bfLa escuela ofrece transporte en autob\u00fas?",
-          "\u00bfC\u00f3mo funciona el programa de viajes compartidos?",
-          "\u00bfD\u00f3nde est\u00e1 la zona designada para dejar y recoger a los ni\u00f1os?",
-          "\u00bfHay rutas seguras para ir en bicicleta o caminando a la escuela?",
-          "\u00bfHay supervisi\u00f3n en la zona de llegada por la ma\u00f1ana?"
+          "¿En qué consiste el enfoque de 'Conducta Positiva' del colegio?",
+          "¿Qué son las 'Consecuencias Naturales' y cómo se aplican?",
+          "¿Cómo ayuda la 'Mesa de la Paz' a los niños a resolver sus propios conflictos?",
+          "¿Cuál es la política específica del colegio sobre el acoso escolar?",
+          "¿Cómo aborda el programa educativo del colegio el racismo y la discriminación?",
+          "¿Cuáles son los requisitos del código de vestimenta para los alumnos?",
+          "¿Qué prendas o accesorios están restringidos por razones de seguridad?",
+          "¿Qué ocurre si un alumno tiene varios incidentes de conducta?",
+          "¿Pueden los niños traer sus propios juguetes al colegio?",
+          "¿Cómo fomenta el colegio valores como la gracia y la cortesía?"
         ]
       },
       {
-        "id": "contact",
-        "label": "Contacto",
-        "icon": "phone",
+        "id": "fees_enrollment",
+        "label": "Cuotas y Matrícula",
+        "symbol": "💳",
         "questions": [
-          "\u00bfC\u00f3mo puedo comunicarme con la oficina de la escuela?",
-          "\u00bfCu\u00e1l es el horario de atenci\u00f3n de la recepci\u00f3n?",
-          "\u00bfC\u00f3mo puedo contactar directamente al maestro de mi hijo?",
-          "\u00bfHay un n\u00famero de emergencia para fuera de horario?",
-          "\u00bfC\u00f3mo actualizo mi informaci\u00f3n de contacto en el archivo?"
+          "¿En qué fechas se emiten las proformas mensuales y las domiciliaciones bancarias?",
+          "¿Qué incluye exactamente la cuota mensual fija?",
+          "¿Cómo se gestiona la matrícula para el próximo curso escolar?",
+          "¿Es reembolsable la matrícula si decidimos no continuar?",
+          "¿Qué ayudas económicas ofrecen los ayuntamientos locales?",
+          "¿Acepta el colegio cheques Sodexo u otros vales de guardería?",
+          "¿Por qué no es aplicable en este colegio la 'Ayuda de Comedor' de la Conselleria?",
+          "¿En qué consiste la 'Deducción Fiscal por Maternidad' (Formulario 233)?",
+          "¿Cómo se cobran las excursiones y las actividades extraescolares?",
+          "¿Cuáles son los recargos por recibos bancarios devueltos?"
         ]
       }
     ]

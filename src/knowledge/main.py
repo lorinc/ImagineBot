@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 
 import vertexai
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from google.cloud import firestore
 from pydantic import BaseModel
 from vertexai.generative_models import GenerationConfig
@@ -154,3 +155,57 @@ async def search(req: SearchRequest):
     ]
 
     return SearchResponse(answer=data["answer"], facts=facts)
+
+
+@app.post("/search/stream")
+async def search_stream(req: SearchRequest):
+    async def generate():
+        yield 'event: progress\ndata: {"key": "cache_lookup"}\n\n'
+
+        try:
+            name = await _get_cache_name()
+            cached_content = await asyncio.to_thread(CachedContent.get, name)
+        except HTTPException as e:
+            yield f'event: error\ndata: {json.dumps({"error": e.detail})}\n\n'
+            return
+        except Exception as e:
+            yield f'event: error\ndata: {json.dumps({"error": f"Context cache unavailable: {e}"})}\n\n'
+            return
+
+        yield 'event: progress\ndata: {"key": "querying_ai"}\n\n'
+
+        model = GenerativeModel.from_cached_content(cached_content=cached_content)
+        query = req.query
+        if req.group_ids:
+            query += (
+                f"\n\n[Answer only from these documents: {', '.join(req.group_ids)}. "
+                "Ignore information from any other document.]"
+            )
+
+        try:
+            response = await model.generate_content_async(
+                query,
+                generation_config=GenerationConfig(
+                    response_mime_type="application/json",
+                    response_schema=_RESPONSE_SCHEMA,
+                ),
+            )
+        except Exception as e:
+            yield f'event: error\ndata: {json.dumps({"error": f"Generation failed: {e}"})}\n\n'
+            return
+
+        yield 'event: progress\ndata: {"key": "processing"}\n\n'
+
+        try:
+            data = json.loads(response.text)
+        except (json.JSONDecodeError, AttributeError) as e:
+            yield f'event: error\ndata: {json.dumps({"error": f"Malformed model response: {e}"})}\n\n'
+            return
+
+        facts = [
+            {"fact": c["excerpt"], "source_id": c["document"], "valid_at": None}
+            for c in data.get("citations", [])
+        ]
+        yield f'event: answer\ndata: {json.dumps({"answer": data["answer"], "facts": facts})}\n\n'
+
+    return StreamingResponse(generate(), media_type="text/event-stream")

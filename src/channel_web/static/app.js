@@ -31,6 +31,13 @@ const UI = {
     sourcesLabel:        (n) => `Sources\u00a0(${n})`,
     disclaimer:          'Disclaimer',
     disclaimerQuestion:  'What are the limitations of this chatbot?',
+    progress: {
+      received:     'Question received\u2026',
+      contacting:   'Contacting knowledge base\u2026',
+      cache_lookup: 'Loading knowledge cache\u2026',
+      querying_ai:  'Querying AI\u2026',
+      processing:   'Preparing answer\u2026',
+    },
   },
   es: {
     subtitle:            'Pregunte lo que quiera sobre la escuela',
@@ -46,6 +53,13 @@ const UI = {
     sourcesLabel:        (n) => `Fuentes\u00a0(${n})`,
     disclaimer:          'Aviso legal',
     disclaimerQuestion:  '\u00bfCu\u00e1les son las limitaciones de este chatbot?',
+    progress: {
+      received:     'Pregunta recibida\u2026',
+      contacting:   'Consultando la base de conocimiento\u2026',
+      cache_lookup: 'Cargando la cach\u00e9 de conocimiento\u2026',
+      querying_ai:  'Consultando la IA\u2026',
+      processing:   'Preparando la respuesta\u2026',
+    },
   },
 };
 
@@ -164,7 +178,7 @@ function renderPills() {
     </button>`;
     for (const cat of cats) {
       html += `<button class="pill-btn" onclick="handleCategoryClick('${esc(cat.id)}')" aria-expanded="false">
-        ${icon(cat.icon)}
+        <span class="pill-symbol" aria-hidden="true">${esc(cat.symbol)}</span>
         <span>${esc(cat.label)}</span>
       </button>`;
     }
@@ -185,7 +199,7 @@ function renderPills() {
         onclick="handleCategoryClick('${esc(cat.id)}')"
         aria-expanded="${active}"
         aria-label="${esc(cat.label)}">
-        ${icon(cat.icon)}
+        <span class="pill-symbol" aria-hidden="true">${esc(cat.symbol)}</span>
         <span class="pill-label">${esc(cat.label)}</span>
       </button>`;
     }
@@ -263,11 +277,13 @@ async function submitQuestion(question) {
   isLoading = true;
   const textarea = document.getElementById('chat-textarea');
   const sendBtn  = document.getElementById('send-btn');
-  textarea.value = '';
+  textarea.value        = t.progress.received;
   textarea.style.height = 'auto';
-  textarea.disabled      = true;
-  sendBtn.disabled       = true;
-  sendBtn.innerHTML      = icon('loader', 'spin');
+  textarea.disabled     = true;
+  sendBtn.disabled      = true;
+  sendBtn.innerHTML     = icon('loader', 'spin');
+
+  smoothScrollTo(document.getElementById('chat-input-box'));
 
   const id = ++answerIdCounter;
 
@@ -289,18 +305,53 @@ async function submitQuestion(question) {
       return;
     }
 
-    const data = await resp.json();
+    if (!resp.ok || !resp.body) {
+      addAnswer(id, question, null, null, 'HTTP ' + resp.status);
+      return;
+    }
 
-    if (!resp.ok || data.error) {
-      addAnswer(id, question, null, null, data.error || ('HTTP ' + resp.status));
-    } else {
-      addAnswer(id, question, data.answer, data.facts, null);
+    // Stream SSE events
+    const reader  = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      let boundary;
+      while ((boundary = buffer.indexOf('\n\n')) !== -1) {
+        const block = buffer.slice(0, boundary);
+        buffer = buffer.slice(boundary + 2);
+        if (!block.trim()) continue;
+
+        let type    = 'message';
+        let dataStr = '';
+        for (const line of block.split('\n')) {
+          if (line.startsWith('event: '))      type    = line.slice(7).trim();
+          else if (line.startsWith('data: '))  dataStr = line.slice(6);
+        }
+        if (!dataStr) continue;
+
+        let payload;
+        try { payload = JSON.parse(dataStr); } catch (_) { continue; }
+
+        if (type === 'progress') {
+          textarea.value = t.progress[payload.key] || '';
+        } else if (type === 'answer') {
+          addAnswer(id, question, payload.answer, payload.facts, null);
+        } else if (type === 'error') {
+          addAnswer(id, question, null, null, payload.error || 'Unknown error');
+        }
+      }
     }
   } catch (_) {
     addAnswer(id, question, null, null, 'Connection error. Please try again.');
   } finally {
-    isLoading        = false;
+    isLoading         = false;
     textarea.disabled = false;
+    textarea.value    = '';
     sendBtn.innerHTML = icon('arrow-up');
     handleTextareaInput();
     textarea.focus();
