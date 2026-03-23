@@ -1,0 +1,33 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      commit_sha:
+        description: 'Commit SHA to deploy (must already be deployed to staging)'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production  # Requires approval in GitHub environment settings
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.inputs.commit_sha }}
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Deploy gateway to Cloud Run (production)
+        run: |
+          gcloud run deploy gateway \
+            --image [REGION]-docker.pkg.dev/[PROJECT_ID]/[REPO]/gateway:${{ github.event.inputs.commit_sha }} \
+            --region [REGION] \
+            --project [PROD_PROJECT_ID] \
+            --no-allow-unauthenticated

@@ -1,0 +1,154 @@
+{
+  "en": {
+    "categories": [
+      {
+        "id": "pickup",
+        "label": "Pick-up times",
+        "icon": "clock",
+        "questions": [
+          "At what time can I pick up my kids from the elementary school?",
+          "What are the pick-up times for the preschool program?",
+          "Is there an extended care option after regular pick-up hours?",
+          "What is the early dismissal schedule on Wednesdays?",
+          "What is the procedure for early pick-up during the school day?"
+        ]
+      },
+      {
+        "id": "events",
+        "label": "Upcoming events",
+        "icon": "calendar-days",
+        "questions": [
+          "Are there any upcoming events at the school?",
+          "When is the next parent-teacher conference?",
+          "What are the dates for the Spring Garden Festival?",
+          "Are there any volunteer opportunities coming up?",
+          "When is the next school holiday or break?"
+        ]
+      },
+      {
+        "id": "enrollment",
+        "label": "Enrollment",
+        "icon": "graduation-cap",
+        "questions": [
+          "How do I enroll my child for the next school year?",
+          "What are the age requirements for each program level?",
+          "Is there a waitlist for enrollment, and how does it work?",
+          "What documents are required for the enrollment process?",
+          "Can I schedule a campus tour before enrolling?"
+        ]
+      },
+      {
+        "id": "lunch",
+        "label": "Lunch menu",
+        "icon": "utensils",
+        "questions": [
+          "What is on the standard lunch menu this week?",
+          "What is on the vegan lunch menu this week?",
+          "What is on the gluten-free lunch menu this week?",
+          "Does the school offer menus for dietary restrictions?",
+          "Can my child bring their own lunch instead?"
+        ]
+      },
+      {
+        "id": "transport",
+        "label": "Transportation",
+        "icon": "bus",
+        "questions": [
+          "Does the school offer bus transportation?",
+          "How does the carpool matching program work?",
+          "Where is the designated drop-off and pick-up zone?",
+          "Are there safe biking or walking routes to the school?",
+          "Is there supervision at the drop-off area in the morning?"
+        ]
+      },
+      {
+        "id": "contact",
+        "label": "Contact",
+        "icon": "phone",
+        "questions": [
+          "How can I reach the school office?",
+          "What are the office hours for the front desk?",
+          "How do I contact my child's teacher directly?",
+          "Is there an emergency contact number for after hours?",
+          "How do I update my contact information on file?"
+        ]
+      }
+    ]
+  },
+  "es": {
+    "categories": [
+      {
+        "id": "pickup",
+        "label": "Horarios de recogida",
+        "icon": "clock",
+        "questions": [
+          "\u00bfA qu\u00e9 hora puedo recoger a mis hijos de la escuela primaria?",
+          "\u00bfCu\u00e1les son los horarios de recogida del programa preescolar?",
+          "\u00bfHay opci\u00f3n de cuidado extendido despu\u00e9s del horario regular?",
+          "\u00bfCu\u00e1l es el horario de salida anticipada los mi\u00e9rcoles?",
+          "\u00bfCu\u00e1l es el procedimiento para recoger a mi hijo antes de la hora?"
+        ]
+      },
+      {
+        "id": "events",
+        "label": "Pr\u00f3ximos eventos",
+        "icon": "calendar-days",
+        "questions": [
+          "\u00bfHay alg\u00fan evento pr\u00f3ximo en la escuela?",
+          "\u00bfCu\u00e1ndo es la pr\u00f3xima conferencia de padres y maestros?",
+          "\u00bfCu\u00e1les son las fechas del Festival de Jard\u00edn de Primavera?",
+          "\u00bfHay oportunidades de voluntariado pr\u00f3ximamente?",
+          "\u00bfCu\u00e1ndo son las pr\u00f3ximas vacaciones o descanso escolar?"
+        ]
+      },
+      {
+        "id": "enrollment",
+        "label": "Inscripci\u00f3n",
+        "icon": "graduation-cap",
+        "questions": [
+          "\u00bfC\u00f3mo puedo inscribir a mi hijo para el pr\u00f3ximo a\u00f1o escolar?",
+          "\u00bfCu\u00e1les son los requisitos de edad para cada nivel del programa?",
+          "\u00bfHay una lista de espera y c\u00f3mo funciona?",
+          "\u00bfQu\u00e9 documentos se necesitan para el proceso de inscripci\u00f3n?",
+          "\u00bfPuedo programar un recorrido por el campus antes de inscribirme?"
+        ]
+      },
+      {
+        "id": "lunch",
+        "label": "Men\u00fa del almuerzo",
+        "icon": "utensils",
+        "questions": [
+          "\u00bfQu\u00e9 hay en el men\u00fa est\u00e1ndar del almuerzo esta semana?",
+          "\u00bfQu\u00e9 hay en el men\u00fa vegano del almuerzo esta semana?",
+          "\u00bfQu\u00e9 hay en el men\u00fa sin gluten del almuerzo esta semana?",
+          "\u00bfLa escuela ofrece men\u00fas para restricciones alimentarias?",
+          "\u00bfMi hijo puede traer su propio almuerzo?"
+        ]
+      },
+      {
+        "id": "transport",
+        "label": "Transporte",
+        "icon": "bus",
+        "questions": [
+          "\u00bfLa escuela ofrece transporte en autob\u00fas?",
+          "\u00bfC\u00f3mo funciona el programa de viajes compartidos?",
+          "\u00bfD\u00f3nde est\u00e1 la zona designada para dejar y recoger a los ni\u00f1os?",
+          "\u00bfHay rutas seguras para ir en bicicleta o caminando a la escuela?",
+          "\u00bfHay supervisi\u00f3n en la zona de llegada por la ma\u00f1ana?"
+        ]
+      },
+      {
+        "id": "contact",
+        "label": "Contacto",
+        "icon": "phone",
+        "questions": [
+          "\u00bfC\u00f3mo puedo comunicarme con la oficina de la escuela?",
+          "\u00bfCu\u00e1l es el horario de atenci\u00f3n de la recepci\u00f3n?",
+          "\u00bfC\u00f3mo puedo contactar directamente al maestro de mi hijo?",
+          "\u00bfHay un n\u00famero de emergencia para fuera de horario?",
+          "\u00bfC\u00f3mo actualizo mi informaci\u00f3n de contacto en el archivo?"
+        ]
+      }
+    ]
+  }
+}

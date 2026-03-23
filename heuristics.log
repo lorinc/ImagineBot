@@ -1,0 +1,294 @@
+# heuristics.log
+# Append only. Never edit past entries.
+# Format documented in root CLAUDE.md.
+# This file outlives every session. It is the institutional memory of the project.
+
+[project-start]
+CATEGORY: OTHER
+SERVICE: cross-cutting
+TASK: Initial scaffold setup
+SYMPTOM: n/a
+ROOT_CAUSE: n/a
+PREVENTED_BY: The entire scaffold — this log is the prevention system
+SOLUTION: n/a
+DEAD_ENDS: n/a — first entry, no dead ends yet
+
+[2026-03-21 00:00]
+CATEGORY: ACCESS_BUG
+SERVICE: knowledge
+TASK: Spike — retrieval mechanism
+SYMPTOM: n/a (spike, no production code yet)
+ROOT_CAUSE: Post-filtering on source_id after vector retrieval silently degrades recall — if top_k candidates are mostly from non-permitted sources, the caller receives fewer results than requested with no indication why.
+PREVENTED_BY: Enforce source_id as a Firestore pre-filter (where clause) before find_nearest(), never post-filter. Contract test should assert response chunks contain only permitted source_ids.
+SOLUTION: Always pre-filter. See docs/spikes/retrieval.md.
+DEAD_ENDS: pgvector (adds second DB), Vertex AI Vector Search (ops overhead at this scale), post-filter access control (recall degradation), hybrid dense+sparse in Sprint 0 (premature).
+
+LESSON — ENTRY ABOVE WAS PREMATURE AND WRONG:
+The above entry was written before the corpus characteristics, query patterns, and scale
+were known. The decision (Firestore vector search) was made without consulting the user
+and without asking the required questions. The spike was written start-to-finish before
+gathering inputs, producing a structurally incorrect answer (vector search cannot handle
+temporal entity resolution). The entry was not edited (append-only rule), but its
+conclusions should be treated as void. See the correct entry below.
+
+[2026-03-21]
+CATEGORY: OTHER
+SERVICE: knowledge
+TASK: Spike — retrieval mechanism (corrected after user input)
+SYMPTOM: n/a (spike, no production code yet)
+ROOT_CAUSE: Chunk-based retrieval (vector or BM25) cannot structurally represent "newsletter X overrides policy Y for date Z" — the LLM must infer the override from unstructured context, which is untestable and fragile for a citation-mandatory system. This root cause was only identifiable after understanding the corpus (school policies + newsletters with date-specific exceptions) and query pattern (multi-hop temporal reasoning).
+PREVENTED_BY: In a spike, gather corpus characteristics, query patterns, scale, and ops constraints BEFORE researching or evaluating any option. The spike questions in the service CLAUDE.md are a checklist, not optional. Do not write the spike document until those questions are answered by the user.
+SOLUTION: Graphiti with Neo4j Aura Free. See docs/spikes/retrieval.md.
+DEAD_ENDS: Pure vector search (structurally mismatched to temporal entity resolution); Pageindex (no access control, paid-only); R2R (collection permissioning unstable); Graphiti-as-MCP for access control (behavioral enforcement, not structural — deferred); post-filter on source_id (access control must be pre-filter).
+
+[2026-03-21]
+CATEGORY: CONFIG_BUG
+SERVICE: cross-cutting
+TASK: Add PreToolUse hook to enforce heuristics.log append-only rule
+SYMPTOM: Hook fired silently (no block, no error) when Edit was called on heuristics.log
+ROOT_CAUSE: Two compounding issues: (1) Claude Code hooks run with /bin/sh, not bash — <<< here-string syntax is bash-specific and fails silently in sh. (2) Tool input is NOT available as $TOOL_INPUT_* environment variables; it is passed as JSON via stdin to the hook process.
+PREVENTED_BY: When writing hooks, always parse stdin JSON with `python3 -c "import sys,json; d=json.load(sys.stdin); ..."` to access tool input. Never use <<< or bash-specific syntax. Test hooks by capturing stdin to a file first before adding logic.
+SOLUTION: Rewrote all hooks to use python3 JSON stdin parsing. All pre-existing hooks using <<< were also broken and were fixed in the same pass.
+DEAD_ENDS: $TOOL_INPUT_FILE_PATH env var (does not exist); <<< here-string (sh incompatible); grep on env vars (nothing to grep).
+
+[2026-03-21]
+CATEGORY: RETRIEVAL_BUG
+SERVICE: knowledge
+TASK: Local Graphiti validation — confirm retrieval against markdown corpus
+SYMPTOM: Query "What time does school start and end each day?" (group_id: family-manual)
+         returned staff names (Sandra, Louise, Jack) — no timetable facts in top 5.
+         Graph has 277 nodes but 0 facts mentioning school hours, start times, or pickup times.
+ROOT_CAUSE: Graphiti entity extraction (GPT-4o) does not produce RELATES_TO edges for
+            data presented in markdown table format. The timetable is a markdown table
+            (| Early Bird | 8h-9h | Morning | 9h-12h | Full Day | 9h-16:40h |).
+            Prose sections (staff bios, Phidias process, policies) were extracted correctly.
+PREVENTED_BY: Post-ingestion entity coverage assertion — after ingesting a document,
+              assert that facts containing expected keywords exist (e.g. "9h" for timetable).
+              See TODO.md section O2. Would catch this without a query round-trip.
+SOLUTION: Will be fixed in the corpus pre-processing phase (DOCX2MD pipeline).
+          Tables must be converted to prose before Graphiti ingestion.
+          This is a pre-processing responsibility, not a Graphiti configuration issue.
+DEAD_ENDS: n/a — root cause identified immediately from graph inspection.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+
+# Salvaged from REFERENCE_REPOS/weighin.link — lessons from a prior project on the same stack
+# (Firestore + Cloud Run + GitHub Actions). Not from ImagineBot code — pre-emptive.
+
+[2026-03-21]
+CATEGORY: TRANSACTION_BUG
+SERVICE: cross-cutting (any service using Firestore transactions)
+TASK: Any Firestore transaction involving multiple document reads and writes
+SYMPTOM: google.cloud.firestore_v1._helpers.ReadAfterWriteError — 500 on endpoints that use transactions
+ROOT_CAUSE: Firestore requires ALL reads to occur BEFORE ANY writes within a transaction.
+            Logically structured code (write A, read B to get count, write B) violates this.
+            Firestore uses optimistic concurrency — reads establish a snapshot; writes are buffered
+            and committed atomically. Reading after writing breaks snapshot isolation.
+PREVENTED_BY: Code review rule: every transaction function must have all get() calls before any
+              set()/update()/delete() calls. When fixing one transaction bug, grep for ALL
+              @firestore.transactional functions and audit each — the same pattern repeats.
+SOLUTION: Move all doc_ref.get() to the top of the transaction body before any
+          transaction.set() / transaction.update() / transaction.delete() calls.
+          Pattern: read → read → ... → write → write → ...
+DEAD_ENDS: "Fix" committed and deployed but code not actually changed — always verify the
+           deployed revision reflects the intended diff before closing the bug.
+
+[2026-03-21]
+CATEGORY: ENV_PARITY
+SERVICE: cross-cutting (any service with Firestore integration tests)
+TASK: Integration tests using the Firestore emulator
+SYMPTOM: Tests pass locally against the emulator; 500 errors appear in staging/production
+          for the same code paths (e.g., ReadAfterWriteError in transactions).
+ROOT_CAUSE: The Firestore emulator does not enforce all production constraints.
+            Read-after-write in transactions passes in the emulator but throws in production.
+PREVENTED_BY: Run at least a smoke suite against real Firestore (staging project) in CI,
+              separate from the emulator suite. Document which constraints the emulator skips
+              and audit those code paths manually before first production deploy.
+SOLUTION: Fix the code to comply with production constraints; emulator pass is not sufficient
+          evidence of production correctness for transaction ordering.
+DEAD_ENDS: n/a — identified by comparing emulator vs. staging behaviour.
+
+[2026-03-21]
+CATEGORY: PATH_BUG
+SERVICE: cross-cutting (any service with static files or templates)
+TASK: First Cloud Run deployment of a service that mounts static files / templates
+SYMPTOM: RuntimeError: Directory '../../public' does not exist — container fails to start;
+          or static files 404 in Cloud Run but work locally.
+ROOT_CAUSE: Relative paths resolve from the working directory at runtime. In Docker/Cloud Run,
+            the working directory is /app and the layout is flat (main.py and assets are
+            siblings under /app). Locally, the working directory may be a nested path, making
+            ../../assets resolve to a completely different location.
+PREVENTED_BY: Always anchor paths to Path(__file__).parent, never to relative strings.
+              Add a startup assertion that the resolved path exists — fail fast with a clear
+              message rather than serving 404s silently.
+SOLUTION: Path(__file__).parent / "templates" (or equivalent). Count directory levels by
+          inspecting the Dockerfile COPY targets, not by guessing from local layout.
+DEAD_ENDS: Path(__file__).parent.parent.parent resolves differently than expected depending
+           on where main.py sits in the Docker image.
+
+[2026-03-21]
+CATEGORY: CONTRACT_VIOLATION
+SERVICE: gateway (and any service boundary)
+TASK: Connecting a client (channel_web or external) to a service endpoint for the first time
+SYMPTOM: Silent failures or data not displaying — all 200s, but wrong data. OR server 422
+          Unprocessable Entity on a POST/PUT. OR "[object Object]" / None in response.
+ROOT_CAUSE: Field name mismatch between caller and callee — e.g., caller sends {text: "..."}
+            but endpoint expects {body: "..."}; or response returns {items: [...]} but caller
+            iterates the root object as if it were an array.
+PREVENTED_BY: Contract tests on every request and response shape at every service boundary,
+              written before wiring up the client. See /contract-test skill.
+              These are independent of business logic — they assert exact field names only.
+SOLUTION: Read the actual Pydantic model or OpenAPI schema before writing client code.
+          When debugging silent data failures, log the raw response before parsing.
+DEAD_ENDS: Fixing the rendering/display logic when the actual bug is the field name —
+           check the wire format first (curl or devtools network tab) before touching
+           display code.
+
+[2026-03-21 21:30]
+CATEGORY: CONFIG_BUG
+SERVICE: knowledge
+TASK: Phase 1.2 — deploy knowledge service to Cloud Run
+SYMPTOM: gcloud run deploy failed with "Cannot update secret at [/secrets/NEO4J_URI] because a different secret is already mounted in the same directory."
+ROOT_CAUSE: Cloud Run treats the parent directory of each volume-mounted secret path as a volume mount point. A volume can hold only one secret. Mounting three secrets under the same /secrets/ parent (e.g. /secrets/OPENAI_API_KEY, /secrets/NEO4J_URI) creates three volumes all trying to mount at /secrets/ — which Cloud Run rejects.
+PREVENTED_BY: A deploy-time validation rule or a note in the service CLAUDE.md. The correct pattern (one unique parent dir per secret) is not obvious from the gcloud docs.
+SOLUTION: Give each secret its own unique parent directory:
+  /secrets/openai/OPENAI_API_KEY=OPENAI_API_KEY:latest
+  /secrets/neo4j_uri/NEO4J_URI=NEO4J_URI:latest
+  /secrets/neo4j_pass/NEO4J_PASSWORD=NEO4J_PASSWORD:latest
+  Python reads Path("/secrets/openai/OPENAI_API_KEY").read_text().strip() etc.
+DEAD_ENDS: Tried --update-secrets with comma-separated paths sharing /secrets/ parent — rejected. Tried a single flat path per secret at /secrets/NAME — same conflict. Volume mounts with a shared parent are not supported.
+
+[2026-03-21 21:35]
+CATEGORY: CONTRACT_VIOLATION
+SERVICE: knowledge
+TASK: Phase 1.2 — store OPENAI_API_KEY in Secret Manager
+SYMPTOM: POST /search returned 401 from OpenAI: "Incorrect API key provided: sk-proj-...oiRM" — key truncated at 86 chars instead of 164.
+ROOT_CAUSE: The credentials file stores the OpenAI key split across two lines (a continuation-line format parsed by validate.py's _load_creds_file). The store command used `grep OPENAI_API_KEY credentials | cut -d= -f2-` which returns only the grep-matched line — the continuation line on the next row is silently dropped.
+PREVENTED_BY: Always use the project's own credential parser (_load_creds_file in validate.py) when reading from the credentials file. Never use grep/cut to extract multi-line values.
+SOLUTION: Replaced the secret version using a Python script that replicates _load_creds_file's continuation-line logic, piped to `gcloud secrets versions add`.
+DEAD_ENDS: Noticed the truncation only after the first live /search call returned a 401. The secret stored successfully with no error — Secret Manager has no notion of "valid API key".
+
+[2026-03-21 21:40]
+CATEGORY: ENV_PARITY
+SERVICE: knowledge
+TASK: Phase 1.2 — acceptance test of deployed knowledge service
+SYMPTOM: gcloud run services proxy started successfully but every curl to localhost returned a 404 HTML page from Cloud Run infrastructure. Background proxy process exited with code 144 when run inside the Claude Code bash environment.
+ROOT_CAUSE: Two separate issues: (1) Cloud Run --ingress=internal blocks all traffic that does not originate from within the GCP project VPC — including gcloud proxy tunnels from a developer laptop. (2) Background processes started with & inside Claude Code bash tool calls are killed when the tool call exits (no persistent shell), so `nohup` and subshell approaches also failed.
+PREVENTED_BY: Note in deploy.sh and/or service CLAUDE.md: internal-ingress services cannot be tested from a local machine via proxy. Testing options: (a) temporarily set --ingress=all (service still requires auth token), (b) use Cloud Shell, (c) test end-to-end after the calling service is deployed.
+SOLUTION: Temporarily changed knowledge service ingress to `all` for acceptance testing. Service still requires valid identity token (--no-allow-unauthenticated). Restore to internal after channel_web E2E is validated. Noted in TODO.md (E0) and PROJECT_PLAN.md cleanup table.
+DEAD_ENDS: gcloud run services proxy — unreliable in environments without a persistent shell. nohup did not prevent background process termination. Port conflict errors when retrying on the same port.
+
+[2026-03-21 23:30]
+CATEGORY: CONFIG_BUG
+SERVICE: channel_web
+TASK: Phase 1.3 — deploy channel_web to Cloud Run
+SYMPTOM: CSS and JS silently not applied on deployed page — page rendered as unstyled HTML despite assets returning 200 locally
+ROOT_CAUSE: Starlette's url_for() generates absolute URLs using the internal request scheme (http://), not the public scheme (https://). Cloud Run terminates TLS at the load balancer; the container receives plain HTTP on port 8080. url_for() produced http://...run.app/static/style.css — blocked by browser as mixed content on the HTTPS page.
+PREVENTED_BY: Never use url_for() for static file paths in templates. Use root-relative paths (/static/style.css) directly. url_for() is appropriate for dynamic routes (e.g. redirects in Python code), not for asset hrefs/srcs in HTML.
+SOLUTION: Replaced {{ url_for('static', path='style.css') }} with /static/style.css (and same for app.js and the logo img src) in index.html.
+DEAD_ENDS: Initially assumed CSS was loading but JS was broken (subtitle appeared brownish). Root cause was mixed content blocking, not a code error.
+
+[2026-03-21 23:00]
+CATEGORY: CONFIG_BUG
+SERVICE: channel_web
+TASK: Phase 1.3 / 1.4 — channel_web calling knowledge service with service-account identity token
+SYMPTOM: POST /chat returned 500 "Service temporarily unavailable" on every request. Logs: "The requests library is not installed from please install the requests package to use the requests transport."
+ROOT_CAUSE: google.auth.transport.requests.Request() requires the `requests` package as a separate install. google-auth==2.35.0 does NOT declare requests as a hard dependency — it is optional. requirements.txt included google-auth but not requests, so the transport was unavailable at runtime.
+PREVENTED_BY: A startup smoke test that calls _get_identity_token() against a test audience and fails fast if the transport is broken. Alternatively: always pin `requests` alongside `google-auth` in requirements.txt — they are always needed together when using the requests transport.
+SOLUTION: Added requests==2.32.3 to src/channel_web/requirements.txt and redeployed.
+DEAD_ENDS: n/a — root cause was immediately visible in Cloud Run logs once auth was live and /chat was reachable.
+
+[2026-03-22 00:10]
+CATEGORY: UI_BUG
+SERVICE: channel_web
+TASK: Phase 1.4 — login overlay logo
+SYMPTOM: Logo appeared squashed (width reduced, height unchanged) on the login overlay.
+ROOT_CAUSE: HTML img tag had both width="140" and height="140" set. The logo is not square, so forcing both dimensions distorts the aspect ratio.
+PREVENTED_BY: Never set both width and height on an img tag unless the image is known to be square. Set only the constraining dimension (width or height) and let the browser scale the other naturally. The chatbot logo in the main UI (width="180" only, no height) was correct — the login overlay copy introduced the regression.
+SOLUTION: Removed height="140", set width="180" to match the main UI logo.
+DEAD_ENDS: n/a — immediately visible on first browser check.
+
+[2026-03-22 00:30]
+CATEGORY: RETRIEVAL_BUG
+SERVICE: knowledge
+TASK: Sprint 1 E2E — chatbot returns answers to user questions
+SYMPTOM: Every question returns "I don't have that information in the school documents."
+         UI shows 5 facts from policy docs (child-protection, technology-policy, etc.)
+         regardless of question asked. Staff queries ("What is Sandra's role?") work.
+ROOT_CAUSE: Each document was ingested as a single large episode. GPT-4o entity
+            extraction on a long document fixates on the most prominent structured
+            content (staff directory — dense with named entities) and misses operational
+            content (school hours, uniform, attendance, contact info). Result: 149 total
+            edges across 6 documents, family-manual has only 28 edges, all staff names.
+            No facts about hours, holidays, or general school operations exist in the graph.
+            Retrieval is working correctly — the facts simply were not extracted.
+PREVENTED_BY: Post-ingestion coverage assertion per document. After ingesting a document,
+              assert that facts containing topic-representative keywords exist
+              (e.g. assert any "9h" or "hours" fact exists after ingesting family-manual).
+              This would have caught zero operational facts immediately and blocked the
+              ingestion from being marked as complete.
+SOLUTION: Re-ingest with section-level chunking — split each markdown by ## headers before
+          calling add_episode so each section is its own episode with focused context.
+          Also: DOCX2MD pipeline with table-to-prose preprocessing (Sprint 3).
+DEAD_ENDS: n/a — root cause identified by querying Neo4j directly for edge count per group_id.
+
+[2026-03-22 01:00]
+CATEGORY: OTHER
+SERVICE: knowledge
+TASK: Graphiti API audit — verifying correct usage of graphiti-core==0.28.2
+SYMPTOM: Chatbot returns "I don't have that information" for policy questions despite facts
+         being indexed. Investigation raised: are we calling Graphiti wrong?
+ROOT_CAUSE: Two separate issues found:
+  (1) WRONG ASSUMPTION IN DOCS: reference_time is NOT a parameter of graphiti.search().
+      It only exists on add_episode(). The spike doc and knowledge/CLAUDE.md both claimed
+      the knowledge service must inject reference_time=now() into every search call.
+      That API does not exist. Temporal filtering in search requires SearchFilters with
+      DateFilter objects passed via the search_filter parameter — not reference_time.
+      Current search() calls without temporal filters are correct for this corpus
+      (all facts have the same valid_at=2024-09-01, so temporal filtering adds nothing yet).
+  (2) EXTRACTION ARCHITECTURE MISMATCH: Graphiti's edge extraction requires BOTH a source
+      entity AND a target entity node. Facts like "school starts at 9:00 AM" may not be
+      extracted because "school" and "9:00 AM" don't form a clear named-entity pair.
+      The LLM extracts what fits the entity-relationship model (person→role, org→policy)
+      and silently skips operational attribute facts. This is why family-manual produced
+      only staff name/role edges despite containing school hours, uniform, and contact info.
+PREVENTED_BY: (1) API contract test against graphiti.search() signature before writing docs.
+              (2) Post-ingestion coverage assertion (see earlier entry) would have caught
+              missing operational facts immediately.
+SOLUTION: (1) Correct the spike doc and knowledge/CLAUDE.md — remove false reference_time claim.
+          (2) Use custom_extraction_instructions in add_episode() to guide the LLM toward
+          extracting implicit-entity facts. Example: "Extract temporal and operational
+          facts even when they involve abstract entities (e.g. 'School Day', 'Drop-off Time').
+          Do not skip facts that lack prominent named entities."
+          (3) Table-to-prose + section-level chunking (planned) remains necessary — this
+          finding is additive, not a replacement.
+DEAD_ENDS: n/a — audit of installed graphiti-core source + GitHub repo gave clear answers.
+
+[2026-03-22]
+CATEGORY: RETRIEVAL_BUG
+SERVICE: ingestion
+TASK: table_to_prose — convert markdown tables to prose for Graphiti ingestion
+SYMPTOM: Not a runtime bug — a design ambiguity caught at test-writing time.
+         Two table shapes look identical in markdown but mean opposite things:
+         (A) | Monday | Morning | Maths |     ← Monday is a new record
+             |        | Afternoon | PE |      ← empty Day = "same as Monday" (inherit)
+         (B) | Monday | 101 |           |     ← Monday is a new record, Teacher absent
+             | Tuesday |    | Smith |   |     ← Tuesday is a new record, Room absent (NOT inherit)
+         In both cases the empty cell is "| |" or "|  |". Syntactically identical.
+         Without an explicit rule, either "always inherit" or "never inherit" silently
+         corrupts one of the two cases. "Always inherit" assigns Room 101 to Tuesday
+         (wrong); "never inherit" drops Monday from the Afternoon/PE row (wrong).
+ROOT_CAUSE: Markdown table syntax has no representation for "merged cell" vs "absent value".
+            Both are rendered as empty cells. The distinction is semantic, not syntactic.
+PREVENTED_BY: The test suite covers both cases explicitly — tests would catch a regression
+              if the inheritance rule is changed. The rule itself must be documented in the
+              module docstring and CLAUDE.md so future developers don't re-litigate it.
+SOLUTION: Inheritance heuristic: inherit empty cells ONLY when the first column in the
+          current row is also empty. An empty first column signals a "continuation" row
+          (the timetable merged-cell pattern). A non-empty first column signals a new
+          record — empty subsequent cells are absent, not inherited.
+          Implemented in src/ingestion/table_to_prose.py. 19 tests, all passing.
+DEAD_ENDS: "Always inherit" — assigns Room 101 to Tuesday incorrectly (test catches it).
+           "Never inherit" — drops the Day value from continuation rows (test catches it).
+           "Inherit only column 0" — not quite right; continuation rows need ALL columns
+           inherited, not just the anchor column.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.

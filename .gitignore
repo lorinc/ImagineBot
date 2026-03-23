@@ -1,0 +1,47 @@
+# Session files — never commit
+SESSION.md
+.claude/settings.local.json
+
+# Credentials — never commit
+credentials
+oauth/
+
+# Reference repos — external code, not part of this project
+REFERENCE_REPOS/
+
+# Temporary/scratch files
+temp/
+
+# Validation output — contains debug info and sensitive paths
+validation.log
+
+# Pipeline data — gitignored; Drive is the authoritative source
+# See docs/ARCHITECTURE.md "Ingestion pipeline: local data layout"
+data/
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+dist/
+build/
+.pytest_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp

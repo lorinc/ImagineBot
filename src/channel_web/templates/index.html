@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f0e8">
+  <title>Montessori School Assistant</title>
+  <meta name="description" content="Ask us anything about our Montessori school programs, schedules, and events.">
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&family=DM+Serif+Display&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Login overlay — hidden after successful Google Sign-In -->
+  <div id="login-overlay">
+    <div class="login-card">
+      <img src="/static/images/logo-imagine-montessori-school.png"
+           alt="Imagine Montessori School"
+           width="180">
+      <p class="login-subtitle">Sign in to ask anything about the school</p>
+      <div id="google-signin-btn"></div>
+    </div>
+  </div>
+
+  <main id="page">
+    <div class="container">
+
+      <!-- School logo -->
+      <div class="school-logo">
+        <img src="/static/images/logo-imagine-montessori-school.png"
+             alt="Imagine Montessori School"
+             width="180" height="180">
+        <p class="subtitle" id="subtitle">Ask anything about the school</p>
+      </div>
+
+      <!-- Answer cards (populated by JS) -->
+      <div class="answers-list" id="answers-list"></div>
+
+      <!-- Input + suggestion pills -->
+      <div class="input-area">
+        <div class="chat-input-box" id="chat-input-box">
+          <textarea
+            id="chat-textarea"
+            class="chat-textarea"
+            placeholder="Ask anything or pick a question from the list…"
+            rows="1"
+            aria-label="Ask anything or pick a question from the list…"
+          ></textarea>
+          <button id="send-btn" class="send-btn" disabled aria-label="Send message">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
+                 viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                 stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m5 12 7-7 7 7"/>
+              <path d="M12 19V5"/>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Suggestion pills (rendered by JS) -->
+        <div id="pills-container"></div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="https://accounts.google.com/gsi/client"></script>
+  <script>const GOOGLE_CLIENT_ID = "{{ google_client_id }}";</script>
+  <script src="/static/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,55 @@
+name: Deploy to Staging
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
+
+      - uses: google-github-actions/setup-gcloud@v2
+
+      - name: Configure Docker for Artifact Registry
+        run: gcloud auth configure-docker [REGION]-docker.pkg.dev
+
+      # Build and deploy each service
+      # Duplicate this block per service, updating SERVICE_NAME and src/ path
+      - name: Build and push gateway
+        run: |
+          docker build -t [REGION]-docker.pkg.dev/[PROJECT_ID]/[REPO]/gateway:${{ github.sha }} src/gateway/
+          docker push [REGION]-docker.pkg.dev/[PROJECT_ID]/[REPO]/gateway:${{ github.sha }}
+
+      - name: Deploy gateway to Cloud Run (staging)
+        run: |
+          gcloud run deploy gateway-staging \
+            --image [REGION]-docker.pkg.dev/[PROJECT_ID]/[REPO]/gateway:${{ github.sha }} \
+            --region [REGION] \
+            --project [PROJECT_ID] \
+            --no-allow-unauthenticated
+
+      - name: Run smoke tests
+        env:
+          STAGING_URL: ${{ secrets.STAGING_URL }}
+          STAGING_TOKEN: ${{ secrets.STAGING_TOKEN }}
+        run: pytest tests/smoke/ -v
+
+      - name: Open issue on smoke test failure
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Smoke tests failed after deploy — ${context.sha.slice(0,7)}`,
+              body: `Staging deploy completed but smoke tests failed.\nCommit: ${context.sha}\nRun: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`
+            })

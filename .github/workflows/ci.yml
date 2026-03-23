@@ -1,0 +1,39 @@
+name: CI
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt -r requirements-dev.txt
+
+      # TODO: replace with actual emulator start command for your setup
+      - name: Start Firestore emulator
+        run: |
+          gcloud emulators firestore start --host-port=localhost:8080 &
+          sleep 3
+
+      - name: Lint
+        run: ruff check src/
+
+      - name: Contract tests
+        run: pytest tests/contracts/ -v
+
+      - name: Unit tests
+        run: pytest tests/unit/ -v
+
+      - name: Integration tests
+        env:
+          FIRESTORE_EMULATOR_HOST: localhost:8080
+          GCP_PROJECT_ID: test-project
+        run: pytest tests/integration/ -v
