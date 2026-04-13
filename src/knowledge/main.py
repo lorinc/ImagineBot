@@ -27,7 +27,8 @@ _SYSTEM_PROMPT_BASE = (
     "- Cite the exact document source_id for every claim you make. "
     "- If the documents do not contain enough information to answer, set answer to exactly: "
     '"I don\'t have that information in the school documents." and citations to []. '
-    "- Never invent, extrapolate, or guess."
+    "- Never invent, extrapolate, or guess. "
+    "- Answer in the same language the question was written in."
 )
 
 _RESPONSE_SCHEMA = {
@@ -132,6 +133,7 @@ async def search(req: SearchRequest):
             f"\n\n[Answer only from these documents: {', '.join(req.group_ids)}. "
             "Ignore information from any other document.]"
         )
+    query += "\n\nIMPORTANT: Write your answer in the same language as the question above."
 
     try:
         response = await model.generate_content_async(
@@ -181,6 +183,7 @@ async def search_stream(req: SearchRequest):
                 f"\n\n[Answer only from these documents: {', '.join(req.group_ids)}. "
                 "Ignore information from any other document.]"
             )
+        query += "\n\nIMPORTANT: Write your answer in the same language as the question above."
 
         try:
             response = await model.generate_content_async(

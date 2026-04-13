@@ -27,4 +27,4 @@ User → channel_web → gateway → auth → access → security → knowledge 
 ## Development
 
 See `CLAUDE.md` for session protocol, spike queue, and service-level context.
-See `heuristics.log` for recorded failure modes and their root causes.
+See `.claude/HEURISTICS.log` for recorded failure modes and their root causes.

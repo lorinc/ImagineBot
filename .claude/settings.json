@@ -2,12 +2,12 @@
   "hooks": {
     "PreToolUse": [
       {
-        "description": "Block Edit/Write on heuristics.log — append only via Bash echo >>",
+        "description": "Block Edit/Write on HEURISTICS.log — append only via Bash >>",
         "matcher": "Edit|Write",
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); (print('BLOCKED: heuristics.log is append-only. Use Bash: echo entry >> heuristics.log') or sys.exit(2)) if fp.endswith('heuristics.log') else sys.exit(0)\""
+            "command": "python3 -c \"import sys,json; d=json.load(sys.stdin); fp=d.get('tool_input',{}).get('file_path',''); (print('BLOCKED: HEURISTICS.log is append-only. Use Bash: cat >> .claude/HEURISTICS.log') or sys.exit(2)) if fp.endswith('HEURISTICS.log') else sys.exit(0)\""
           }
         ]
       },
@@ -17,7 +17,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); phase=open('SESSION.md').read() if os.path.exists('SESSION.md') else ''; (print('BLOCKED: cannot commit during EXPLORE phase. Change SESSION.md PHASE to IMPLEMENT first.') or sys.exit(2)) if 'git commit' in cmd and 'PHASE: EXPLORE' in phase else sys.exit(0)\""
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); phase=open('.claude/SESSION.md').read() if os.path.exists('.claude/SESSION.md') else ''; (print('BLOCKED: cannot commit during EXPLORE phase. Change .claude/SESSION.md PHASE to IMPLEMENT first.') or sys.exit(2)) if 'git commit' in cmd and 'PHASE: EXPLORE' in phase else sys.exit(0)\""
           }
         ]
       },
@@ -27,7 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); phase=open('SESSION.md').read() if os.path.exists('SESSION.md') else ''; (print('BLOCKED: SESSION.md shows TESTS_RUN: no. Run tests before pushing.') or sys.exit(1)) if 'git push' in cmd and 'TESTS_RUN: no' in phase else sys.exit(0)\""
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); cmd=d.get('tool_input',{}).get('command',''); phase=open('.claude/SESSION.md').read() if os.path.exists('.claude/SESSION.md') else ''; (print('BLOCKED: .claude/SESSION.md shows TESTS_RUN: no. Run tests before pushing.') or sys.exit(1)) if 'git push' in cmd and 'TESTS_RUN: no' in phase else sys.exit(0)\""
           }
         ]
       }
@@ -66,20 +66,20 @@
     ],
     "SessionEnd": [
       {
-        "description": "Warn if heuristics were not written",
+        "description": "Warn if heuristics were not written this session",
         "hooks": [
           {
             "type": "command",
-            "command": "[ -f SESSION.md ] && grep -q 'HEURISTICS_WRITTEN: no' SESSION.md && echo \"WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.\" >> heuristics.log || true"
+            "command": "python3 -c \"import os; s=open('.claude/SESSION.md').read() if os.path.exists('.claude/SESSION.md') else ''; open('.claude/HEURISTICS.log','a').write('WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.\\n') if 'HEURISTICS_WRITTEN: no' in s else None\""
           }
         ]
       },
       {
-        "description": "Warn if SESSION.md was not updated",
+        "description": "Warn if SESSION.md was not updated in 2+ hours",
         "hooks": [
           {
             "type": "command",
-            "command": "[ -f SESSION.md ] && [ $(find SESSION.md -mmin +120 2>/dev/null | wc -l) -gt 0 ] && echo 'WARNING: SESSION.md has not been updated in 2+ hours. Update before ending session.' || true"
+            "command": "python3 -c \"import os,time; f='.claude/SESSION.md'; print('WARNING: .claude/SESSION.md has not been updated in 2+ hours. Run /wrap before ending session.') if os.path.exists(f) and (time.time()-os.path.getmtime(f))>7200 else None\""
           }
         ]
       }

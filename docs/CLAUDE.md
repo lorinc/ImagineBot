@@ -52,7 +52,7 @@ Status: COMPLETE | IN_PROGRESS
 ...
 
 ## Dead ends
-[What was tried and ruled out, and why. This section feeds heuristics.log.]
+[What was tried and ruled out, and why. This section feeds .claude/HEURISTICS.log.]
 
 ## Decision
 [Which option, and why. Be direct.]

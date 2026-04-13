@@ -419,7 +419,7 @@ function buildAnswerCard(id, question, answer, facts, error) {
         <div class="answer-content">
           <p class="answer-question">${esc(question)}</p>
           <hr class="answer-divider">
-          <p class="answer-text${isError ? ' answer-text-error' : ''}">${esc(text)}</p>
+          <p class="answer-text${isError ? ' answer-text-error' : ''}">${isError ? esc(text) : md(text)}</p>
           ${sourcesHtml}
         </div>
         <button class="dismiss-btn"
@@ -525,6 +525,31 @@ function smoothScrollTo(el, onDone) {
   }
 
   requestAnimationFrame(step);
+}
+
+// ── Markdown → HTML (answer text only) ────────────────────────────────────────
+// Handles the subset Gemini 2.5 Flash produces: bold, italic, bullet lists, line breaks.
+// HTML-escapes first so LLM output can never inject arbitrary tags.
+function md(text) {
+  if (!text) return '';
+  let s = String(text)
+    .replace(/&/g,  '&amp;')
+    .replace(/</g,  '&lt;')
+    .replace(/>/g,  '&gt;')
+    .replace(/"/g,  '&quot;')
+    .replace(/'/g,  '&#039;');
+  // Bold before italic so **x* doesn't mis-match
+  s = s.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  s = s.replace(/\*(.+?)\*/g,     '<em>$1</em>');
+  // Consecutive bullet lines → <ul><li>…</li></ul>
+  s = s.replace(/((?:^|\n)[*\-] [^\n]+)+/g, match =>
+    '<ul>' + match.trim().split('\n').map(l =>
+      '<li>' + l.replace(/^[*\-] /, '') + '</li>'
+    ).join('') + '</ul>'
+  );
+  // Remaining newlines → line breaks
+  s = s.replace(/\n/g, '<br>');
+  return s;
 }
 
 // ── Escape util ───────────────────────────────────────────────────────────────

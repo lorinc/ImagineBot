@@ -1,8 +1,13 @@
-# [PROJECT NAME] — Claude Code root context
+# ImagineBot — Claude Code root context
+
+## Read first
+At the start of every session, before anything else:
+1. Read `.claude/SESSION.md`
+2. Run `tail -40 .claude/HEURISTICS.log`
+3. Output a session brief — 3–5 sentences max: what was done last session, what comes next. No headers, no bullet trees, no essay.
 
 ## What this is
-[2-3 sentences. What the product does, what problem it solves, who uses it.]
-This is a multi-service knowledge system: documents are ingested and kept current,
+A multi-service knowledge system: documents are ingested and kept current,
 a knowledge layer serves answers to an LLM, and users interact through channels
 (web UI first, WhatsApp later) with access controlled per user per data source.
 
@@ -13,10 +18,12 @@ a knowledge layer serves answers to an LLM, and users interact through channels
 - **Knowledge retrieval:** Vertex AI Context Caching + Gemini 2.5 Flash (full-context, not RAG)
 - **LLM:** Gemini 2.5 Flash via Vertex AI (both knowledge retrieval and answer synthesis)
 - **Auth:** [TBD — see SPIKE: auth]
-- **Frontend:** Jinja2 SSR + [Tailwind or Bootstrap — decision pending]
+- **Frontend:** Jinja2 SSR, hand-written CSS (no framework, no build step)
 - **Infra:** GCP — 2 projects: `img-dev` (staging) and `img-prod` (production)
            Cloud Run per service, Firestore, Secret Manager, Artifact Registry, Vertex AI
 - **CI/CD:** GitHub Actions + Workload Identity Federation (one pool per project, no stored keys)
+           Note: CI/CD workflows have placeholder values and are not yet wired up.
+           Deploy path is local Docker only — see .claude/HEURISTICS.log ARCHIVE block.
 
 ## Service map
 ```
@@ -31,8 +38,7 @@ src/
 
   knowledge/      Retrieval layer. Given a query + permitted source IDs,
                   returns relevant context for the LLM.
-                  Graphiti + Neo4j Aura Free. Spike complete — see docs/spikes/retrieval.md.
-                  Enforces group_id = source_id filtering in code before retrieval.
+                  Vertex AI Context Caching + Gemini 2.5 Flash (full-context, not RAG).
 
   security/       Rate limiting, abuse detection, malicious input screening.
                   Sits before the LLM call. Stateless where possible.
@@ -56,152 +62,17 @@ User → channel_web → gateway → [auth] → [access: get permitted sources]
 ```
 This flow is an assumption. Validate it in the architecture spike before building services.
 
-## Active work
-```
-CURRENT_SPRINT:  1 — Chatbot POC (2-day sprint)
-CURRENT_PHASE:   Sprint 1 COMPLETE — pending browser UAT
-LAST_STABLE:     [set after first commit]
-PHASE_1.1_DONE:  GCP Foundation complete (2026-03-21)
-  - img-dev-490919: APIs enabled, Artifact Registry, service accounts, IAM, secrets
-  - Secrets in Secret Manager: OPENAI_API_KEY (v2 full key), NEO4J_URI, NEO4J_PASSWORD, ALLOWED_EMAILS
-  - OAuth client ID: in credentials file (OAUTH_CLIENT_ID key)
-  - Test users: mariano@imaginemontessori.es, sandra@imaginemontessori.es, lorinc@gmail.com
-  - Docker installed (v29.3.0), docker group configured
-PHASE_1.2_DONE:  Knowledge Service complete (2026-03-21)
-  - Deployed: https://knowledge-jeyczovqfa-ew.a.run.app (revision knowledge-00002-cdt)
-  - Ingress: TEMPORARILY all — restore to internal after channel_web E2E (TODO E0)
-  - Auth: --no-allow-unauthenticated
-  - Secrets: volume-mounted, one unique parent dir per secret (Cloud Run constraint)
-  - Tests: 5/5 passing
-PHASE_1.3_DONE:  Channel Web complete (2026-03-21)
-  - Deployed: https://channel-web-jeyczovqfa-ew.a.run.app (revision channel-web-00004-6gz)
-  - UI: pixel-perfect Vercel demo replica (vanilla HTML/CSS/JS, hand-written CSS)
-  - Questions/categories: src/channel_web/static/questions.json — edit without code changes
-  - Source citations: <details> showing fact text + source_id per fact
-  - Language toggle: EN/ES, cookie-persisted
-  - Tests: 9/9 passing
-  - IAM: channel-web-sa granted run.invoker on knowledge service ✅
-PHASE_1.4_DONE:  Google Sign-In auth complete (2026-03-21)
-  - Google Sign-In (GIS) on frontend — login overlay until authenticated
-  - Backend: google.oauth2.id_token.verify_oauth2_token + ALLOWED_EMAILS gate on /chat
-  - ALLOWED_EMAILS from /secrets/allowed_emails/ALLOWED_EMAILS (Secret Manager volume mount)
-  - GOOGLE_CLIENT_ID passed as env var (from credentials file OAUTH_CLIENT_ID key)
-  - Fixed CHAT-ERR: missing requests package — google.auth.transport.requests requires it
-  - Tests: 9/9 passing
-  - Auth acceptance: curl POST /chat (no token) → 401 ✅
-  - Browser UAT PASSED (2026-03-23) — sign in, ask question, cited answer returned ✅
-CLOUD_RUN_SECRET_MOUNT_RULE: Each secret needs a unique parent directory.
-  /secrets/foo/BAR=BAR:latest → file at /secrets/foo/BAR. Never share parent dirs.
-CREDENTIALS_FILE_RULE: Always parse credentials file with _load_creds_file() from
-  validate.py. Never use grep/cut — the file uses continuation lines for long values.
-STATIC_ASSET_RULE: Never use url_for() in Jinja2 templates for static asset paths.
-  Use root-relative paths (/static/style.css). url_for() generates http:// absolute URLs
-  which are blocked as mixed content on HTTPS Cloud Run deployments.
-GOOGLE_AUTH_TRANSPORT_RULE: Always add `requests` to requirements.txt alongside `google-auth`.
-  google.auth.transport.requests.Request() is used by both fetch_id_token() and
-  verify_oauth2_token(). google-auth does NOT install requests automatically.
-SPIKES_PENDING:
-  - auth design (auth service)
-  - access control design (access service)
-SPIKES_COMPLETE:
-  - retrieval mechanism — Vertex AI Context Caching + Gemini 2.5 Flash (see ARCHITECTURE_PIVOT)
-  - frontend CSS framework — hand-written CSS chosen (no framework, no build step, no CDN dependency)
-DECISIONS_COMPLETE:
-  - GCP project structure — 2 projects (img-dev, img-prod), not per-service. See docs/ARCHITECTURE.md.
-  - Sprint 1 architecture — knowledge (internal Cloud Run) + channel_web (*.run.app, no LB/IAP)
-    No gateway, no auth service, no access control, no CI/CD in Sprint 1. See docs/PROJECT_PLAN.md.
-  - Sprint 1 auth — Google Sign-In (frontend) + ID token validation (backend), allowed-email list
-SPRINT_1_COMPLETE (2026-03-23):
-  - E0: Browser UAT PASSED ✅
-  - E1: CANCELLED — internal ingress blocks Cloud Run-to-Cloud Run calls over the public URL.
-    knowledge must stay --ingress=all --no-allow-unauthenticated. Security is the auth token, not ingress.
-KNOWLEDGE_INGRESS_RULE: knowledge service must use --ingress=all --no-allow-unauthenticated.
-  --ingress=internal blocks channel_web (and any Cloud Run caller using the *.run.app URL).
-  Auth is enforced by --no-allow-unauthenticated + channel-web-sa run.invoker binding.
-PIPELINE_DECISIONS (2026-03-22):
-  - Local DOCX files: data/docx/ (7 files, renamed to en_policy[N]_*, es_family_manual_*, en_family_manual_*)
-  - Pipeline output: local filesystem, staged dirs data/pipeline/<YYYY-MM-DD_NNN>/ (gitignored)
-    See docs/ARCHITECTURE.md "Ingestion pipeline: local data layout" for full layout + rationale
-  - table_to_prose: IMPLEMENTED — src/ingestion/table_to_prose.py, 19 tests passing
-    Inheritance rule: inherit empty cells only when first column is also empty (continuation row)
-    See heuristics.log 2026-03-22 for why this heuristic is non-obvious and what it prevents
-  - Professional Drive auth: service account + DWD (impersonate ingestion-bot@imaginemontessori.es)
-    Dev: OAuth token.json acceptable. Production: DWD required. See TODO.md A1.
-ARCHITECTURE_PIVOT (2026-03-23):
-  - Graphiti + Neo4j + OpenAI REPLACED by Vertex AI Context Caching + Gemini 2.5 Flash
-  - Rationale: ~100K token corpus fits in one cache; full-context > RAG for this corpus size;
-    500 queries/day max; citations returned as structured JSON via response_schema
-  - API contract unchanged: POST /search → { answer, facts: [{ fact, source_id, valid_at }] }
-  - Ingestion pipeline simplified: Steps 1–4 only (no chunking, no Graphiti)
-  - See docs/ARCHITECTURE.md "Knowledge service: retrieval architecture" for full design
-  - See docs/PROJECT_PLAN.md Sprint 2 Phase 2.1 for implementation spec
+## Operational files
 
-PHASE_2.1_DONE (2026-03-23): Knowledge service rebuilt — Vertex AI Context Caching + Gemini 2.5 Flash
-  - src/knowledge/main.py: rewrites search logic; Firestore-backed cache name lookup with 5-min TTL
-  - src/knowledge/requirements.txt: google-cloud-aiplatform + google-cloud-firestore (no Neo4j/OpenAI)
-  - tools/create_cache.py: loads en_*.md from data/pipeline/latest/02_ai_cleaned/, creates cache, writes to Firestore
-  - Cache name in Firestore: config/context_cache { cache_name, created_at, expires_at, source_ids }
-  - knowledge-sa IAM: roles/aiplatform.user + roles/datastore.user ✅
-  - Tests: 5/5 passing
-  - Spanish files: excluded from cache (en_*.md only); multilingual answer planned via system prompt
-LANGUAGE_DECISION: Cache contains English documents only. System prompt will instruct model
-  to answer in the language the question was asked. Implement before next corpus update.
+| File | Purpose | Key rule |
+|------|---------|----------|
+| `.claude/SESSION.md` | Per-session working state | Read at session start. Overwrite each new session. Gitignored. |
+| `.claude/HEURISTICS.log` | Append-only institutional memory | Never edit past entries. `tail -40` to review recent. |
+| `docs/PROJECT_PLAN.md` | Sprint breakdown and phase status | Update when phases complete or are added. |
 
-NEXT_SESSION — Sprint 2 continuation:
-  - Decide Phase 2.2: gateway service, auth service spike, or access control spike
-  - See docs/PROJECT_PLAN.md Sprint 2 for options
-```
+Each file has a purpose header with its own format rules. CLAUDE.md does not duplicate them.
 
-Update this block at the end of every session.
-
-## Session protocol
-Before starting work, create `SESSION.md` in repo root (gitignored).
-
-```
-PHASE: [PLAN|EXPLORE|IMPLEMENT|VERIFY|DOCUMENT]
-TASK: [one sentence — what specifically is being done this session]
-SERVICE: [which service directory, or "cross-cutting"]
-ROLLBACK_TO: [git commit hash or "clean — nothing committed yet"]
-ATTEMPT: [n] of 3
-ACCEPTANCE: [measurable, observable — not "implementation complete"]
-IN_SCOPE: [explicit file list — if it's not here, don't touch it]
-CONTEXT_PCT: [check /cost — note token usage at each SESSION.md update]
-HEURISTICS_WRITTEN: [yes|no]
-```
-
-Rules:
-- At attempt 3, or if task is not converging: STOP.
-  Write findings to heuristics.log. Declare "needs fresh session." No 4th attempt.
-- At attempt 2: run `/compact` before continuing. Note context % in SESSION.md.
-- ACCEPTANCE must be observable without trusting my own report.
-  "Staging URL returns correct JSON shape" beats "implementation complete."
-- If a file is not in IN_SCOPE, do not touch it. Ask first.
-- Spikes are EXPLORE phase only. No commits during EXPLORE.
-
-## Spike protocol
-For any SPIKE_PENDING item:
-1. Open SESSION.md with PHASE: EXPLORE
-2. Read existing code and docs. Do not write production code.
-3. Write findings to `docs/spikes/[topic].md` — options, tradeoffs, recommendation
-4. Write a heuristics.log entry for any dead ends discovered
-5. Declare spike complete. New session for implementation.
-
-## Heuristics log format
-File: `heuristics.log` — append only, never edit past entries.
-
-```
-[YYYY-MM-DD HH:MM]
-CATEGORY: CONTRACT_VIOLATION | ENV_PARITY | TRANSACTION_BUG | PATH_BUG | UI_BUG | AUTH_BUG | CONFIG_BUG | RETRIEVAL_BUG | ACCESS_BUG | OTHER
-SERVICE: [which service]
-TASK: [what was being built]
-SYMPTOM: [what the user or logs reported]
-ROOT_CAUSE: [actual cause]
-PREVENTED_BY: [structural change that would have caught this automatically]
-SOLUTION: [what fixed it]
-DEAD_ENDS: [what didn't work and why]
-```
-
-`PREVENTED_BY` is the most important field. It drives hook and contract additions.
+Use `/wrap` at the end of each session to update all three files consistently.
 
 ## Dependency policy
 This project is deliberately conservative on dependencies.
@@ -214,8 +85,6 @@ Never add a package to solve a problem that three lines of Python would solve.
 Never add a Node.js toolchain dependency. Frontend must be serveable without a build step.
 
 ## External enforcement checklist
-Must be complete before sprint 1 feature development begins.
-
 - [ ] CI runs on every push (lint → contracts → unit → integration)
 - [ ] CI blocks merge on failure (branch protection on main)
 - [ ] Integration tests run against Firestore emulator in CI
@@ -223,14 +92,9 @@ Must be complete before sprint 1 feature development begins.
 - [ ] Staging smoke tests run after deploy, open GitHub issue on failure
 - [ ] Production deploy is manual trigger only
 - [ ] Secrets in environment variables only — never in code
-- [ ] `SESSION.md` is in `.gitignore`
+- [ ] `.claude/SESSION.md` is in `.gitignore`
 - [ ] `.claude/settings.local.json` is in `.gitignore`
 - [ ] Contract tests exist for every field the gateway exposes
 
-## What I don't know yet (clear when read)
-- [ ] Full contents of each service directory (load per-service CLAUDE.md when working there)
-- [ ] Spike outcomes for: auth, access control, CSS framework
-- [x] Spike outcome: retrieval — Graphiti + Neo4j Aura Free (docs/spikes/retrieval.md)
-- [x] GCP project structure — 2 projects, service accounts for isolation (docs/ARCHITECTURE.md)
-
-Load the CLAUDE.md in the service directory you're working in before making changes.
+## Per-service context
+Load the CLAUDE.md in the service directory before making changes to that service.

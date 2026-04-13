@@ -1,6 +1,22 @@
-# heuristics.log
-# Append only. Never edit past entries.
-# Format documented in root CLAUDE.md.
+# HEURISTICS.log — append-only institutional memory for ImagineBot
+#
+# Rules:
+#   - NEVER edit past entries. Append new entries at the bottom only.
+#   - To review recent entries: tail -40 .claude/HEURISTICS.log
+#   - PREVENTED_BY is the most important field — make it structural, not "be careful"
+#
+# Entry format:
+#   [YYYY-MM-DD HH:MM]
+#   CATEGORY: CONTRACT_VIOLATION | ENV_PARITY | TRANSACTION_BUG | PATH_BUG |
+#             UI_BUG | AUTH_BUG | CONFIG_BUG | RETRIEVAL_BUG | ACCESS_BUG | OTHER
+#   SERVICE: [which service, or "cross-cutting"]
+#   TASK: [what was being built]
+#   SYMPTOM: [what the user or logs reported]
+#   ROOT_CAUSE: [actual cause]
+#   PREVENTED_BY: [structural change that would have caught this automatically]
+#   SOLUTION: [what fixed it]
+#   DEAD_ENDS: [what didn't work and why]
+#
 # This file outlives every session. It is the institutional memory of the project.
 
 [project-start]
@@ -326,3 +342,221 @@ DEAD_ENDS: Graphiti (chosen in Sprint 1 spike): works, but over-engineered for t
            span all sources. Not a workaround-able limitation; it is a product boundary.
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+
+[2026-03-25 10:15]
+CATEGORY: RETRIEVAL_BUG
+SERVICE: knowledge
+TASK: Make LLM answer in the same language as the question was asked.
+SYMPTOM: Spanish question received English answer even after adding "answer in the same language"
+         to the system prompt and recreating the Vertex AI context cache.
+ROOT_CAUSE: Vertex AI's constrained JSON decoding mode (response_mime_type="application/json"
+            + response_schema) overrides the language instruction in the system_instruction.
+            When generating tokens into a JSON structure, Gemini defaults to English for string
+            field values regardless of what the system prompt says. The same instruction in
+            free-text mode (no response_schema) works correctly — verified by testing both
+            modes locally against the live cache.
+PREVENTED_BY: A smoke test that POSTs a Spanish question and asserts the returned `answer`
+              field contains at least one Spanish word (e.g. matches
+              /\b(el|la|los|las|es|son|en|de|del|que|se|un|una)\b/i).
+              This would have caught the regression immediately after cache recreation and
+              before the question was put to the user.
+SOLUTION: Append the language instruction to the user query at request time:
+            query += "\n\nIMPORTANT: Write your answer in the same language as the question above."
+          This instruction in the user turn is respected by the constrained decoder.
+          System prompt update (create_cache.py) retained for correctness but is insufficient alone.
+DEAD_ENDS: Updating system_instruction in create_cache.py + recreating cache: the instruction
+           IS stored and IS followed in free-text mode, but is silently ignored by the
+           constrained JSON decoder. Constrained decoding is schema-guided, not semantics-guided.
+
+[2026-03-25 10:30]
+CATEGORY: CONFIG_BUG
+SERVICE: knowledge
+TASK: Deploy knowledge service after code change.
+SYMPTOM: gcloud builds submit failed — Cloud Build API not enabled on project img-dev-490919.
+ROOT_CAUSE: Cloud Build was never enabled. Previous deploys used local Docker build + push +
+            gcloud run deploy. The CI/CD workflow templates in .github/workflows/ still have
+            placeholder values ([PROJECT_ID], [REGION]) and have never been wired up.
+PREVENTED_BY: Nothing structural — CI/CD is in the external enforcement checklist (unchecked).
+              Add to CLAUDE.md: deploy path is local Docker, not gcloud builds submit.
+              Artifact Registry repo name is "services" (not "imaginebot") — only one repo exists.
+SOLUTION: docker build → docker tag europe-west1-docker.pkg.dev/img-dev-490919/services/<svc>:latest
+          → docker push → gcloud run deploy.
+DEAD_ENDS: gcloud builds submit: Cloud Build API not enabled; enabling adds delay and dependency
+           when local Docker already works.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to heuristics.log.
+
+[2026-04-12]
+CATEGORY: ENV_PARITY
+SERVICE: cross-cutting (local dev / poc)
+TASK: POC1 smoke test — verify parser imports work before running LLM build step
+SYMPTOM: `source .venv/bin/activate && python -c "import vertexai"` → ModuleNotFoundError.
+         `.venv/bin/python -c "import vertexai"` → same. `python3 -c "import vertexai"` → works.
+ROOT_CAUSE: google-cloud-aiplatform (and therefore vertexai) is installed at user level
+            (~/.local/lib/python3.12/site-packages) via a bare `pip install`, not into the
+            project's .venv. The venv is isolated — it does not inherit user site-packages.
+            Bare `python3` picks up ~/.local; venv python does not.
+PREVENTED_BY: Before writing run instructions for any script, run
+            `pip show <package> | grep Location`. If Location is ~/.local/..., the package
+            is user-level and venv python will not find it. Either install into the venv
+            or document that bare `python3` must be used. A startup assertion
+            (`python3 -c "import vertexai"`) in the POC README would surface this
+            immediately rather than mid-way through a smoke test.
+SOLUTION: Use bare `python3` (not `.venv/bin/python`) for all poc/ scripts.
+          Updated poc/README.md and SESSION.md next-session instructions accordingly.
+DEAD_ENDS: `source .venv/bin/activate && python` — venv isolation excludes user site-packages.
+           `.venv/bin/python` — same isolation, same failure.
+
+[2026-04-12 — ARCHIVE, NON-STANDARD FORMAT]
+# Project history migrated from CLAUDE.md active work block.
+# This is a one-time archive of sprint/phase state that lived in CLAUDE.md.
+# Future session state lives in .claude/SESSION.md and docs/PROJECT_PLAN.md.
+
+PHASE_1.1_DONE (2026-03-21): GCP Foundation
+  img-dev-490919: APIs enabled, Artifact Registry, service accounts, IAM, secrets
+  Secrets in Secret Manager: OPENAI_API_KEY (v2 full key), NEO4J_URI, NEO4J_PASSWORD, ALLOWED_EMAILS
+  OAuth client ID in credentials file (OAUTH_CLIENT_ID key)
+  Test users: mariano@imaginemontessori.es, sandra@imaginemontessori.es, lorinc@gmail.com
+  Docker v29.3.0 installed, docker group configured
+
+PHASE_1.2_DONE (2026-03-21): Knowledge Service (Graphiti/Neo4j — later replaced)
+  Deployed: https://knowledge-jeyczovqfa-ew.a.run.app (revision knowledge-00002-cdt)
+  Auth: --no-allow-unauthenticated. Secrets: volume-mounted, unique parent dir per secret.
+
+PHASE_1.3_DONE (2026-03-21): Channel Web
+  Deployed: https://channel-web-jeyczovqfa-ew.a.run.app (revision channel-web-00004-6gz)
+  UI: vanilla HTML/CSS/JS, pixel-perfect Vercel demo replica
+  Questions/categories: src/channel_web/static/questions.json
+  Language toggle: EN/ES, cookie-persisted. Tests: 9/9.
+
+PHASE_1.4_DONE (2026-03-21): Google Sign-In auth
+  Google Sign-In (GIS) frontend + ID token validation backend
+  ALLOWED_EMAILS from Secret Manager volume mount
+  GOOGLE_CLIENT_ID as env var. Tests: 9/9.
+  Browser UAT PASSED (2026-03-23).
+
+SPRINT_1_COMPLETE (2026-03-23):
+  E0: Browser UAT PASSED.
+  E1: CANCELLED — internal ingress blocks Cloud Run-to-Cloud Run over public URL.
+  knowledge must stay --ingress=all --no-allow-unauthenticated.
+
+ARCHITECTURE_PIVOT (2026-03-23): Graphiti + Neo4j + OpenAI → Vertex AI Context Caching + Gemini 2.5 Flash
+  Rationale: ~100K token corpus fits in one cache; full-context > RAG at this scale; 500 queries/day max.
+  API contract unchanged. Ingestion pipeline simplified to Steps 1–4 (no chunking, no Graphiti).
+
+PHASE_2.1_DONE (2026-03-23): Knowledge service rebuilt — Vertex AI Context Caching
+  src/knowledge/main.py rewrites search logic; Firestore-backed cache name lookup (5-min TTL)
+  tools/create_cache.py: loads en_*.md from data/pipeline/latest/02_ai_cleaned/, creates cache
+  Cache name in Firestore: config/context_cache { cache_name, created_at, expires_at, source_ids }
+  knowledge-sa IAM: roles/aiplatform.user + roles/datastore.user. Tests: 5/5.
+
+PHASE_2.2_DONE (2026-03-25): Language detection + markdown rendering
+  knowledge: query-time language instruction appended (bypasses constrained-decoder limitation)
+  channel_web: md() added to app.js — renders **bold**, *italic*, bullet lists
+  knowledge revision: knowledge-00006-kh7. channel_web revision: channel-web-00010-l2j.
+
+RULES (derived from bugs — full entries in earlier HEURISTICS entries above):
+  CLOUD_RUN_SECRET_MOUNT: Each secret needs a unique parent directory. /secrets/foo/BAR=BAR:latest
+  CREDENTIALS_FILE: Always use _load_creds_file() from validate.py. Never grep/cut (continuation lines).
+  STATIC_ASSET: Never use url_for() in Jinja2 templates. Use root-relative paths (/static/file.css).
+  GOOGLE_AUTH_TRANSPORT: Always add `requests` to requirements.txt alongside `google-auth`.
+  KNOWLEDGE_INGRESS: knowledge must use --ingress=all --no-allow-unauthenticated (not internal).
+  LOCAL_DEPLOY: CI/CD not wired up. Deploy path: docker build → docker push → gcloud run deploy.
+    Artifact Registry repo: "services" (not "imaginebot"). Cloud Build API not enabled.
+  LANGUAGE_FIX: Vertex AI constrained JSON decoding ignores system_instruction language.
+    Fix: append language instruction to user query at request time (not system prompt).
+
+SPIKES_PENDING: auth design, access control design
+SPIKES_COMPLETE: retrieval (Vertex AI Context Caching), frontend CSS (hand-written, no framework)
+ARCHIVE_END
+
+[2026-04-12]
+CATEGORY: CONFIG_BUG
+SERVICE: cross-cutting
+TASK: Migrate heuristics.log and SESSION.md to .claude/; recreate settings.json hooks
+SYMPTOM: settings.json was deleted (D in git status) — all hooks lost. Hooks referenced old
+         paths (heuristics.log, SESSION.md at repo root) which would have silently failed
+         after the file moves even if settings.json had been present.
+ROOT_CAUSE: settings.json was not committed (or was deleted without recreation). Hook paths
+            were hardcoded to root-level filenames and not updated when files moved.
+PREVENTED_BY: After any file rename/move that hooks reference, grep settings.json for the
+              old path immediately. Treat hook path updates as part of the rename checklist,
+              not a follow-up task.
+SOLUTION: Recreated settings.json with all hook paths updated to .claude/HEURISTICS.log
+          and .claude/SESSION.md. Updated /wrap skill to instruct Bash-append only.
+DEAD_ENDS: n/a — caught by reviewing git status before closing session.
+
+[2026-04-12]
+CATEGORY: CONFIG_BUG
+SERVICE: poc
+TASK: poc1 build pipeline design
+SYMPTOM: pageindex.py is in poc/poc1_single_doc/build/ — covered by the
+         .gitignore rule `build/`. The file is completely invisible to git.
+ROOT_CAUSE: The `build/` gitignore rule exists to exclude compiled artefacts.
+            It silently excludes any source directory named build/ as well.
+PREVENTED_BY: Before placing source files in any directory, check .gitignore
+              for name collisions: `git check-ignore -v <path>` is the exact
+              command. Add this to the checklist whenever creating a new dir.
+SOLUTION: Rename poc/poc1_single_doc/build/ to a non-gitignored name
+          (e.g. indexer/). Update the sys.path.insert line in run_eval.py.
+DEAD_ENDS: n/a — caught at wrap time before any work was lost.
+
+[2026-04-13]
+CATEGORY: EVAL_DESIGN
+SERVICE: poc
+TASK: poc1 iteration 2 — post-mortem analysis
+SYMPTOM: family_manual Q3 ("fasting for religious reasons adjustments") scored as a
+         retrieval failure. The eval query was attributed to en_family_manual_24_25.md
+         but the correct answer (§4.4 "Considerations for Fasting for Religious Reasons")
+         lives in en_policy3_health_safety_reporting.md. The retriever correctly returned
+         "The provided sections do not answer this question."
+ROOT_CAUSE: Query written without verifying which document actually contains the answer.
+            The family manual tree has no fasting section — §7 Nutrition covers general
+            eating guidance only.
+PREVENTED_BY: Before finalising a query JSON file, grep the target document for the
+              key terms in the expected answer. If grep returns nothing, the query
+              belongs to a different document or the answer doesn't exist.
+SOLUTION: Remove or reassign family_manual Q3. Either move it to policy3 queries
+          (fasting rules are there) or replace it with a cross-section query that
+          actually spans content within the family manual.
+DEAD_ENDS: n/a
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-13]
+CATEGORY: BUILD_BUG
+SERVICE: poc
+TASK: poc1 iter3 — split boundary detection
+SYMPTOM: _split_text_by_starts returned [] despite LLM correctly identifying section
+         boundaries. "split FAILED (boundary detection: got 0 slices for N sections)"
+ROOT_CAUSE: Two independent LLM copy-paste failure modes for "start" strings:
+         1. Whitespace normalisation: source has '1.  **text' (two spaces), LLM
+            returns '1. **text' (one space). str.find() is exact-byte — no match.
+         2. Markdown stripping: source has '**c. Procedures**', LLM returns
+            'c. Procedures' (bold markers dropped). Still no match after whitespace fix.
+         Both occur even at temperature=0 and with explicit "copy verbatim" instructions.
+PREVENTED_BY: Any verbatim-text boundary matching against LLM output must normalise
+              both needle and haystack: strip inline markdown markers (*_`#) AND
+              collapse whitespace runs before str.find(). _norm_map() in pageindex.py
+              is the reference implementation.
+SOLUTION: Updated _norm_map to strip _MARKDOWN_INLINE chars in addition to collapsing
+          whitespace; updated _find_norm needle path identically. Both failure modes
+          resolved in one pass.
+DEAD_ENDS: Whitespace-only fix caught case 1 but not case 2. Needed a second diagnostic
+           run (with failure detail logging) to surface the markdown stripping mode.
+
+[2026-04-13]
+CATEGORY: INFRA
+SERVICE: poc
+TASK: poc1 iter3 — build pipeline
+SYMPTOM: Build crashes mid-run on large documents (107KB) with ResourceExhausted 429.
+         Happens consistently at step 6 or 7.
+ROOT_CAUSE: asyncio.gather fires all concurrent LLM calls simultaneously. No backoff.
+            Small documents complete before quota window resets; large ones exceed it.
+PREVENTED_BY: Any asyncio.gather over LLM calls needs retry+backoff on 429.
+              Five attempts at 5s/10s/20s/40s covers typical Vertex quota reset windows.
+SOLUTION: Added try/except ResourceExhausted with exponential backoff in _llm_call.
+DEAD_ENDS: Manual retries (running build again) failed repeatedly before backoff was added.

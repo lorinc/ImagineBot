@@ -92,7 +92,8 @@ def main() -> None:
         "- Cite the exact document source_id for every claim you make. "
         "- If the documents do not contain enough information to answer, set answer to exactly: "
         '"I don\'t have that information in the school documents." and citations to []. '
-        "- Never invent, extrapolate, or guess."
+        "- Never invent, extrapolate, or guess. "
+        "- Answer in the same language the question was written in."
     )
 
     print(f"Creating context cache (TTL: {args.ttl_hours}h)...", file=sys.stderr)

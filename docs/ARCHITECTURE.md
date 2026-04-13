@@ -220,7 +220,7 @@ Before provisioning any GCP resources, validate Graphiti works against the actua
 - Whether temporal edges are created for date-bounded facts in newsletter-style text
 - Any ingestion cost surprises
 
-**If validation fails:** Write findings to `heuristics.log`, reassess retrieval mechanism in a new spike.
+**If validation fails:** Write findings to `.claude/HEURISTICS.log`, reassess retrieval mechanism in a new spike.
 
 ---
 

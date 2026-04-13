@@ -1,4 +1,7 @@
 # Project Plan
+# Update when: a phase completes or is added, a sprint boundary is crossed, a spike resolves.
+# Does not record bug fixes or session details — those go in .claude/HEURISTICS.log.
+# Current session state lives in .claude/SESSION.md, not here.
 
 ## Sprint Overview
 
@@ -324,6 +327,44 @@ curl -X POST https://[knowledge-url]/search \
 | Item | Action | When |
 |------|--------|------|
 | knowledge service ingress | Restore `--ingress=internal` (changed to `all` for local testing) | After channel_web E2E validated |
+
+---
+
+---
+
+## POC Track — Retrieval Architecture Validation
+
+**Goal:** Empirically answer the open questions in `docs/design/RAG -- System Design.md`
+before committing to a retrieval architecture for Sprint 3+.
+These run in parallel with Sprint 2 — they are exploratory only, no production commits.
+
+### POC1 — Single-document PageIndex
+
+#### Iteration 3 — DONE 2026-04-13
+**Params:** MAX=5000, MIN=1500 (unchanged)
+**Files:** `poc/poc1_single_doc/` — see `post_mortem/iter3_design.md` for protocol
+
+**Architecture under test:**
+- Parse → hoist preamble (step 2) → split oversized leaves on full_text_chars (steps 3–5) →
+  thin small nodes, at least one < MIN, preamble force-merged (step 7) →
+  summarise unprocessed leaves (step 6) → rewrite intermediates bottom-up from children only (step 8) → validate
+- Topics: semicolon-separated 1–5 word phrases per node; titles rewritten to index anchors
+- Query: LLM sees outline of titles + topics → selects node IDs → full text → synthesis
+- Models: gemini-2.5-flash-lite (structural), gemini-2.5-flash (quality)
+- Build emits `<index>.build.log`; eval emits `<results>.log` (build + query pipeline combined)
+
+**Eval results (4 docs, 16 queries):**
+- avg chars→synth: ~10,000
+- policy3 + family_manual: clean — all queries under 8K, 0 parent selections
+- policy5 Q7: EXPLOSION 59,569c — cross-section query selects parent nodes
+- policy1 Q2/Q3: over target 22,893c / 18,820c
+
+#### Iteration 4 — IN PROGRESS
+**Target:** avg chars→synth ≤ 5K; eliminate cross-section explosions
+**Approach:** TBD — start with root-cause analysis of remaining over-target queries
+
+### POC2 — Multi-document routing
+**Status:** BLOCKED on POC1 post-mortem — design TBD
 
 ---
 

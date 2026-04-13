@@ -1,5 +1,5 @@
 # Session files — never commit
-SESSION.md
+.claude/SESSION.md
 .claude/settings.local.json
 
 # Credentials — never commit
