@@ -925,7 +925,9 @@ def _render_outline(root: Node) -> str:
     lines = []
     for n in root.all_nodes():
         indent = "  " * (n.level - 1)
-        lines.append(f"{indent}[{n.id}] {n.title}: {n.topics}")
+        suffix = (f"  [+{len(n.children)} children — do not select]"
+                  if not n.is_leaf() else "")
+        lines.append(f"{indent}[{n.id}] {n.title}: {n.topics}{suffix}")
     return "\n".join(lines)
 
 
@@ -955,6 +957,9 @@ async def query_index(question: str, index: dict, model: GenerativeModel) -> dic
         f"OUTLINE:\n{outline}\n\n"
         f"QUESTION: {question}\n\n"
         "Select the section IDs whose full text must be read to answer the question. "
+        "IMPORTANT: Only select LEAF nodes — those WITHOUT a '[+N children — do not select]' "
+        "annotation. Selecting a parent node delivers its entire subtree and wastes budget. "
+        "If a whole section is relevant, select the specific child nodes you need instead. "
         "Be selective — only include sections directly relevant. "
         "Return JSON with:\n"
         "  selected_ids: array of section IDs (exactly as shown in the outline)\n"
@@ -983,6 +988,28 @@ async def query_index(question: str, index: dict, model: GenerativeModel) -> dic
 
     selected_depth = {n.id: ("leaf" if n.is_leaf() else "parent") for n in selected_nodes}
     parent_selections = [nid for nid, depth in selected_depth.items() if depth == "parent"]
+
+    # ── Lever 2: expand parent selections to direct children ─────────────────
+    # Any parent the LLM selected is replaced by its direct children.
+    # This preserves intent ("I need §4") while avoiding full-subtree delivery.
+    expanded_ids: list[str] = []
+    if parent_selections:
+        expanded_nodes: list[Node] = []
+        seen_ids: set[str] = set()
+        for n in selected_nodes:
+            if n.is_leaf():
+                if n.id not in seen_ids:
+                    expanded_nodes.append(n)
+                    seen_ids.add(n.id)
+            else:
+                for child in n.children:
+                    if child.id not in seen_ids:
+                        expanded_nodes.append(child)
+                        seen_ids.add(child.id)
+                        expanded_ids.append(child.id)
+        selected_nodes = expanded_nodes
+        # Refresh depth map for the expanded set
+        selected_depth = {n.id: ("leaf" if n.is_leaf() else "parent") for n in selected_nodes}
 
     # ── Step 2: Synthesis ────────────────────────────────────────────────────
 
@@ -1030,6 +1057,7 @@ async def query_index(question: str, index: dict, model: GenerativeModel) -> dic
             "unresolved_ids": unresolved_ids,
             "selected_depth": selected_depth,
             "parent_selections": parent_selections,
+            "expanded_ids": expanded_ids,
             "input_tokens": step1_usage.get("input_tokens", 0),
             "output_tokens": step1_usage.get("output_tokens", 0),
             "latency_ms": step1_ms,

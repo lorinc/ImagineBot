@@ -61,7 +61,9 @@ def _write_query_log(f: TextIO, idx: int, total: int, result: dict) -> None:
     f.write(f"\n\nSelected IDs: {s1['selected_ids']}\n")
     f.write(f"Reasoning   : {s1['selection_reasoning']}\n")
     if s1.get("parent_selections"):
-        f.write(f"⚠ Parent selections (over-fetch risk): {s1['parent_selections']}\n")
+        f.write(f"⚠ Parent selections (expanded to children): {s1['parent_selections']}\n")
+    if s1.get("expanded_ids"):
+        f.write(f"  → Expanded to: {s1['expanded_ids']}\n")
     if s1["unresolved_ids"]:
         f.write(f"⚠ Unresolved IDs: {s1['unresolved_ids']}\n")
 
@@ -109,7 +111,9 @@ def _print_result(idx: int, total: int, result: dict) -> None:
     print(f"Selected IDs : {s1['selected_ids']}")
     print(f"Reasoning    : {s1['selection_reasoning']}")
     if s1.get("parent_selections"):
-        print(f"⚠ Parents    : {s1['parent_selections']}  (over-fetch risk)")
+        print(f"⚠ Parents    : {s1['parent_selections']}  (expanded to children)")
+    if s1.get("expanded_ids"):
+        print(f"  → Expanded : {s1['expanded_ids']}")
     if s1["unresolved_ids"]:
         print(f"⚠ Unresolved : {s1['unresolved_ids']}")
 

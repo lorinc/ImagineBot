@@ -1,0 +1,47 @@
+{
+  "document": "en_policy5_code_of_conduct.md",
+  "queries": [
+    {
+      "id": 1,
+      "type": "lookup",
+      "question": "What attendance percentage is required for secondary students?",
+      "note": "Exact fact in §3.4 — tests numeric lookup"
+    },
+    {
+      "id": 2,
+      "type": "procedure",
+      "question": "What happens step-by-step when a bullying incident is reported to the school?",
+      "note": "Multi-step process spread across §6.10–6.12"
+    },
+    {
+      "id": 3,
+      "type": "procedure",
+      "question": "Can teachers physically restrain students, and under what conditions is this allowed?",
+      "note": "Policy nuance with conditions — §4.9 and §4.17"
+    },
+    {
+      "id": 4,
+      "type": "lookup",
+      "question": "What items are classified as weapons under school policy?",
+      "note": "Enumeration — §8 Weapons"
+    },
+    {
+      "id": 5,
+      "type": "lookup",
+      "question": "What are the specific dress code rules for PE days?",
+      "note": "Specific sub-rule — §2.4"
+    },
+    {
+      "id": 6,
+      "type": "procedure",
+      "question": "How does the school handle a situation where a student is found with drugs on school premises?",
+      "note": "Complex multi-section process — §7 Drugs + §4.9 consequences"
+    },
+    {
+      "id": 7,
+      "type": "cross_section",
+      "question": "Is racist language treated differently from other forms of misconduct?",
+      "note": "Vocabulary mismatch probe: query uses 'racist language', relevant sections are §4 Behaviour AND §5 Anti-Racism. 'racist language' does not appear verbatim in §4 headings."
+    }
+  ]
+}

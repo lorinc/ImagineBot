@@ -1,0 +1,23 @@
+{
+  "document": "en_family_manual_24_25.md",
+  "queries": [
+    {
+      "id": 1,
+      "type": "lookup",
+      "question": "What time does the Early Bird programme start?",
+      "note": "Exact fact in §2.1 Timetables — '8h'"
+    },
+    {
+      "id": 2,
+      "type": "procedure",
+      "question": "What is the process for authorising a new person to collect my child from school?",
+      "note": "Procedure in §2.7 Authorisation for Students to Leave or Be Picked Up Alone"
+    },
+    {
+      "id": 3,
+      "type": "cross_section",
+      "question": "Who is allowed to collect my child from school if they fall ill and I cannot be reached?",
+      "note": "Cross-section: §9.1 (illness → contact family ASAP; if unreachable, contact emergency person on file) + §2.7 (Phidias pick-up authorisation — only registered parents/guardians or explicitly authorised persons). Answer requires combining illness-response procedure with pick-up authorisation rules."
+    }
+  ]
+}

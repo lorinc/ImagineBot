@@ -359,9 +359,16 @@ These run in parallel with Sprint 2 — they are exploratory only, no production
 - policy5 Q7: EXPLOSION 59,569c — cross-section query selects parent nodes
 - policy1 Q2/Q3: over target 22,893c / 18,820c
 
-#### Iteration 4 — IN PROGRESS
+#### Iteration 4 — DONE 2026-04-13
 **Target:** avg chars→synth ≤ 5K; eliminate cross-section explosions
-**Approach:** TBD — start with root-cause analysis of remaining over-target queries
+**Approach:** (1) outline annotates parents `[+N children — do not select]`; prompt instructs leaf-only selection. (2) post-selection fallback: expand any parent to direct children.
+
+**Eval results (4 docs, 16 queries):**
+- avg chars→synth: 5,518 (target: ≤5K)
+- max chars→synth: 17,563 (policy1 Q2 — multi-section disclosure query, not explosion)
+- parent selections: 0/16 — lever 1 fully effective
+- avg query cost: ~$0.0015 (~660 queries/$)
+- 0 explosions (>40K) across all queries
 
 ### POC2 — Multi-document routing
 **Status:** BLOCKED on POC1 post-mortem — design TBD

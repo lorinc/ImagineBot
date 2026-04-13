@@ -1,0 +1,469 @@
+PageIndex Eval Log
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Document : en_family_manual_24_25.md
+Source   : /home/lorinc/ClaudeCode/ImagineBot/data/pipeline/2026-03-22_001/02_ai_cleaned/en_family_manual_24_25.md
+Nodes    : 49
+Built    : 2026-04-13T11:30:05Z  (59.6s)
+Queries  : 3
+Eval run : 2026-04-13T18:25:00Z
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+BUILD PIPELINE LOG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Build: en_family_manual_24_25.md  (57KB)
+Started: 2026-04-13T11:29:05Z
+MAX_NODE_CHARS=5000  MIN_NODE_CHARS=1500
+MODEL_STRUCTURAL=gemini-2.5-flash-lite  MODEL_QUALITY=gemini-2.5-flash
+
+── Step 1 — Parse ────────────────────────────────────────────────────
+  49 nodes (leaves=43)  #=29  ##=20  ###=0  synthetic=0  chars min=98 max=8937 avg=1826
+
+── Step 2 — Preamble hoisting ────────────────────────────────────────
+  Hoisted preamble [5] '5. Our Curriculum' (1899c) → [5.p]
+  50 nodes (leaves=44)  #=29  ##=21  ###=0  synthetic=0  chars min=98 max=8959 avg=1828
+
+── Steps 3–5 — Split oversized leaves ────────────────────────────────
+  50 nodes (leaves=44)  #=29  ##=21  ###=0  synthetic=0  chars min=98 max=8959 avg=1828
+
+── Step 7 — Thin small nodes ─────────────────────────────────────────
+  Check [2.1] (1007c) + [2.2] (3041c) → skip
+  Check [9.1] (3168c) + [9.2] (533c) → skip
+  Check [7.1] (506c) + [7.2] (794c) → MERGE
+  Check [1.1] (1396c) + [1.2] (3019c) → skip
+  Check [2.2] (3041c) + [2.3] (330c) → skip
+  Check [1.2] (3019c) + [1.3] (1301c) → skip
+  Check [2.3] (330c) + [2.4] (695c) → skip
+  Check [2.4] (695c) + [2.5] (624c) → skip
+  Check [2.5] (624c) + [2.6] (1135c) → skip
+  Check [2.6] (1135c) + [2.7] (547c) → skip
+    → [7.1] 'Encouraging Healthy Eating Habits' (1252c, 18 phrases)
+  Check [7.1] (1252c) + [7.3] (1019c) → skip
+  Check [7.3] (1019c) + [7.4] (716c) → skip
+  Check [7.1] (1252c) + [7.3] (1019c) → skip
+  Check [7.3] (1019c) + [7.4] (716c) → skip
+  Check [welcome-to-the-school-ye] (545c) + [index] (2960c) → skip
+  Check [3] (2823c) + [4] (1204c) → skip
+  Check [10] (802c) + [11] (788c) → skip
+  Check [11] (788c) + [12] (1237c) → skip
+  Check [12] (1237c) + [13] (1407c) → skip
+  Check [13] (1407c) + [14] (835c) → skip
+  Check [14] (835c) + [15] (1113c) → skip
+  Check [15] (1113c) + [16] (577c) → skip
+  Check [16] (577c) + [17] (286c) → skip
+  Check [17] (286c) + [18] (263c) → skip
+  Check [18] (263c) + [19] (462c) → skip
+  Check [19] (462c) + [20] (578c) → skip
+  Check [20] (578c) + [21] (1762c) → skip
+  Check [21] (1762c) + [22] (1422c) → skip
+  Check [22] (1422c) + [23] (587c) → skip
+  Check [23] (587c) + [24] (1548c) → skip
+  Check [26] (1392c) + [27] (98c) → skip
+  49 nodes (leaves=43)  #=29  ##=20  ###=0  synthetic=0  chars min=98 max=8959 avg=1863
+
+── Step 6 — Summarise unprocessed leaves ─────────────────────────────
+  [welcome-to-the-school-ye] 'Executive Director Welcome Message' (553c) → 5 phrases
+  [8] 'Nap time provisions and costs' (536c) → 9 phrases
+  [13] 'Required Clothing and Equipment' (1397c) → 14 phrases
+  [3] 'School-Family Communication Channels' (2811c) → 15 phrases
+  [14] 'Nappy and Accident Policy' (835c) → 9 phrases
+  [4] 'Family-School Pedagogical Meetings' (1215c) → 19 phrases
+  [10] 'Student Behavior Incident Reporting' (825c) → 9 phrases
+  [15] 'Birthday Celebrations Early Years, Children's House' (1094c) → 13 phrases
+  [12] 'Imagine School Dress Code Policy' (1255c) → 13 phrases
+  [11] 'Commitment to English Language Instruction' (788c) → 8 phrases
+  [17] 'Returning Accidentally Taken School Materials' (309c) → 5 phrases
+  [16] 'Children's Enrichment Programme and Enrollment' (599c) → 11 phrases
+  [19] 'Student balls: use, storage, and school responsibility' (507c) → 6 phrases
+  [27] 'School Policies Overview for Families' (116c) → 3 phrases
+  [26] 'Education System Comparison: British, Spanish, Montessori' (1367c) → 6 phrases
+  [6] 'Psycho Pedagogical and Career Guidance' (2186c) → 24 phrases
+  [18] 'School Toy and Pacifier Policy' (285c) → 6 phrases
+  [20] 'Lost and Found Item Recovery Policy' (595c) → 7 phrases
+  [24] 'Student Photos and Media Policy' (1543c) → 9 phrases
+  [21] 'School Excursions: Participation and Consent' (1795c) → 15 phrases
+  [2.3] 'Rainy Day Student Logistics' (343c) → 3 phrases
+  [2.1] 'Timetable options and change process' (1029c) → 8 phrases
+  [22] 'School Bus Routes and Policies' (1438c) → 13 phrases
+  [23] 'Updating Contact and Family Information' (573c) → 7 phrases
+  [1.3] 'School Leadership and Administrative Contacts' (1313c) → 24 phrases
+  [2.4] 'Student Arrival, Parking, Infant Community Entrance' (725c) → 7 phrases
+  [2.2] 'School Hours, Punctuality, Drop-off, Pick-up' (3020c) → 12 phrases
+  [1.2] 'School Pedagogical Team Structure' (3032c) → 15 phrases
+  [2.6] 'Early Bird Afternoon Club Services' (1136c) → 11 phrases
+  [1.1] 'Imagine Montessori School Valencia Overview' (1401c) → 23 phrases
+  [index] 'Imagine Montessori School Valencia Overview' (2998c) → 4 phrases
+  [2.5] 'Student Pick-up by Age Group' (631c) → 6 phrases
+  [2.7] 'Student pick-up/departure authorization' (496c) → 6 phrases
+  [7.3] 'Montessori food and waste education' (1030c) → 16 phrases
+  [7.4] 'Mealtime Logistics and Dietary Needs' (731c) → 8 phrases
+  [9.2] 'Valencian Community Vaccination Adherence' (552c) → 10 phrases
+  [25.2] 'Available Financial Aid Programs' (2002c) → 8 phrases
+  [5.2] 'Primary (6-12) Curriculum Overview' (2857c) → 29 phrases
+  [25.1] 'Payment Policy and Fee Structure' (2169c) → 21 phrases
+  [9.1] 'Student Illness and Medication Policy' (3176c) → 27 phrases
+  [5.1] 'Early Years Foundation Stage Curriculum' (4182c) → 93 phrases
+  [5.p] 'British Curriculum and Montessori Philosophy' (1948c) → 27 phrases
+
+── Step 8 — Rewrite intermediates (bottom-up) ────────────────────────
+  [25] 'Payment Policy and Financial Aid Programs' ← 2 children → 29 phrases
+  [7] 'Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs' ← 3 children → 42 phrases
+  [9] 'Health Standards, Illness, and Vaccination' ← 2 children → 37 phrases
+  [2] 'School Timetables and Logistical Procedures' ← 7 children → 53 phrases
+  [1] 'School Overview, Staff, and Administration' ← 3 children → 60 phrases
+  [5] 'Curriculum Overview: British, Montessori, EYFS, Primary' ← 3 children → 86 phrases
+
+── Step 9 — Validate ─────────────────────────────────────────────────
+  All checks passed.
+  phrase_count  min=3 max=93 avg=18
+  node_chars    min=116 max=9050 avg=1877
+
+── Cost Estimate ─────────────────────────────────────────────────────
+  gemini-2.5-flash
+    calls=49  in=19,724 tok  out=4,546 tok  ≈$0.0057
+  gemini-2.5-flash-lite
+    calls=31  in=7,714 tok  out=341 tok  ≈$0.0007
+  ────────────────────────────────────────────────
+  Total build cost: ≈$0.0064
+  (Prices: gemini-2.5-flash-lite in=$0.075/out=$0.3, gemini-2.5-flash in=$0.15/out=$0.6 per 1M tokens)
+
+Build time: 59.6s
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUERY PIPELINE LOG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 1/3  [lookup]
+What time does the Early Bird programme start?
+Note: Exact fact in §2.1 Timetables — '8h'
+
+── Step 1: Node Selection (1916ms) ──────────────────────────────
+Tokens: in=4,276  out=50
+Outline: 49 nodes, 21280 chars
+
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; School authorization; Integrated curriculum; Creative learning; Hands-on learning; Teaching staff; International teachers; Cultural perspective; Student development; Prepared environment; Student curiosity; Student autonomy; Creativity; Love of nature; Community belonging; Family guide; School organisation; School operation; Contact child's Guide; Pedagogical queries; Personal matters; Teaching team structure; Classroom staff roles; Montessori Guide roles; Assistant roles; Support team roles; Specialist teacher roles; School visitors; University collaborations; Montessori observers; Secondary staff; Secondary tutor roles; Secondary subject teachers; Contacting non-teaching staff; Phidias contact method; School satisfaction; School policies; Family queries; Educational psychologist; Administration inquiries; Enrichment Program; Payments; Tutor appointments; Medication administration; Absences; Diet requirements; Bus service; Imagine Shop; Arrival/dismissal changes; Child collection authorization; Lost and found; Admissions; Bus changes; Phidias process use; Avoid direct administration messages  [+3 children — do not select]
+  [1.1] Imagine Montessori School Valencia Overview: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; School authorization; Integrated curriculum; Creative learning; Hands-on learning; Teaching staff; International teachers; Cultural perspective; Student development; Prepared environment; Student curiosity; Student autonomy; Creativity; Love of nature; Community belonging; Family guide; School organisation; School operation
+  [1.2] School Pedagogical Team Structure: Contact child's Guide; Pedagogical queries; Personal matters; Teaching team structure; Classroom staff roles; Montessori Guide roles; Assistant roles; Support team roles; Specialist teacher roles; School visitors; University collaborations; Montessori observers; Secondary staff; Secondary tutor roles; Secondary subject teachers
+  [1.3] School Leadership and Administrative Contacts: Contacting non-teaching staff; Phidias contact method; School satisfaction; School policies; Family queries; Pedagogical queries; Educational psychologist; Administration inquiries; School operations; Enrichment Program; Payments; Tutor appointments; Medication administration; Absences; Diet requirements; Bus service; Imagine Shop; Arrival/dismissal changes; Child collection authorization; Lost and found; Admissions; Bus changes; Phidias process use; Avoid direct administration messages
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; Phidias message; Confirm change; School operating hours; Reception hours; Student arrival; Student departure; Punctuality importance; Late arrival impact; Early pick-up procedure; Early pick-up times; Absence notification; Schedule change reporting; Late arrival fees; Late pick-up fees; Rain gear; Umbrella use; Rain pick-up notice; Main entrance; Student entry; Staff welcome; School parking; Parking restrictions; Parking fine; Infant Community entrance; Infant Community pick-up; Children's House pick-up; Primary Secondary pick-up; Pick-up order; Sibling pick-up policy; Sibling pick-up exceptions; Early Bird service; Early Bird hours; Early Bird usage; Early Bird booking; Early Bird charges; Afternoon Club service; Afternoon Club hours; Afternoon Club activities; Afternoon Club purpose; Afternoon Club usage; Afternoon Club charges; Authorized pick-up; Phidias records; Third-party pick-up; Solo departure; Phidias Tracking; Phidias authorization video  [+7 children — do not select]
+  [2.1] Timetable options and change process: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; Send Phidias message; Confirm change
+  [2.2] School Hours, Punctuality, Drop-off, Pick-up: School operating hours; Reception hours; Student arrival times; Student departure times; Punctuality importance; Late arrival impact; Early pick-up procedure; Early pick-up times; Absence notification; Schedule change reporting; Late arrival fees; Late pick-up fees
+  [2.3] Rainy Day Student Logistics: Rain gear recommendation; Umbrella use discouraged; Rain pick-up notice
+  [2.4] Student Arrival, Parking, Infant Community Entrance: Main entrance; Student/parent entry; Staff welcome; School parking; Parking restrictions; Health Centre parking fine; Infant Community entrance
+  [2.5] Student Pick-up by Age Group: Infant Community pick-up; Children's House pick-up; Primary Secondary pick-up; Pick-up order; Sibling pick-up policy; Sibling pick-up exceptions
+  [2.6] Early Bird Afternoon Club Services: Early Bird service; Early Bird hours; Early Bird usage; Early Bird booking; Early Bird charges; Afternoon Club service; Afternoon Club hours; Afternoon Club activities; Afternoon Club purpose; Afternoon Club usage; Afternoon Club charges
+  [2.7] Student pick-up/departure authorization: Authorized pick-up; Phidias records; Third-party pick-up; Solo departure; Phidias Tracking section; Phidias authorization video
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; Phidias secondary; Transparent Classroom; One-way communication; Individual meetings; Progress reports; School newsletter; Daily communication; Tutorial hours; Administrative contact
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; Ask questions; Share experiences; Make suggestions; Student development involvement; Advance notice; In-person sessions; Online sessions; Work-life balance; Enriching in-person benefits; Group dynamics; Family interaction; Bilingual sessions; Family inclusion
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; Material presentation; Montessori Work Cycle; Sensory learning; Hands-on learning; Concrete to abstract; Qualified teachers; Staff development; DfES guidelines; Curriculum alignment; Shared goals; Student curiosity; Holistic education; Personal development; Social development; Emotional development; Self-confidence; Independent learning; Infant Community; Core learning areas; PSED; Physical development; Communication skills; Language development; Specific learning areas; Literacy skills; Mathematics skills; Understanding world; Expressive arts; Design; EYFS learning areas; Integrated themes; Extracurricular activities; Individualized learning; Student pace; Mixed-age classrooms; Cooperation; EYFS assessment; Montessori learning areas; Senses refinement; Language preparation; Mathematics preparation; Classifying, sorting objects; Environmental perception; Cultural studies; Practical life skills; Behavior guidelines; Courtesy; Auditory discrimination; Phonetic sounds; Montessori language materials; Reading; Writing; Grammar; Circle Time; Show and Tell; Verbal communication; Self-expression; Montessori math materials; Number concepts; Primary assessment; National Curriculum subjects; Primary development; Conscious mind; Student interests; Concept formation; Group work; Work organization; Guide supervision; Five Great Lessons; Curricular structure; Traditional subjects; Montessori curriculum content; Skill development; Material sequences; Abstraction; Paper work; Curriculum goals; STEM enhancement; Creative Lab; Integrated projects  [+3 children — do not select]
+  [5.p] British Curriculum and Montessori Philosophy: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Accessible classroom materials; Child-sized furniture; Independent concept practice; Material presentation method; Guided material work; Independent material use; Practice and repetition; Independent skill acquisition; New material introduction; Work Cycle variety; Sensory materials; Hands-on learning; Concrete to abstract concepts; Qualified Montessori teachers; British curriculum environment; Staff professional development; DfES guidelines; British school in Spain; Montessori-UK curriculum alignment; Shared curricular goals; Reinforcing curiosity; Inquisitive thinkers; Considering others' opinions
+  [5.1] Early Years Foundation Stage Curriculum: Holistic education; Self-confidence; Emotional development; Personal development; Social development; Independent learning; Enjoyment; Infant Community focus; Core learning areas; PSED; Physical development; Communication; Language; Specific learning areas; Literacy; Mathematics; Understanding world; Expressive arts; Design; EYFS learning areas; Montessori Work Cycle; Integrated themes; Clubs; Yoga; Gardening; Sensory play; Crafts; Music; Drama; Storytelling; Individualized learning; Student pace; Mixed-age classrooms; Cooperation; Competition reduction; EYFS assessment; Montessori learning areas; Sensory area; Sensory activities; Senses refinement; Language preparation; Mathematics preparation; Classifying objects; Sorting objects; Environmental perception; Cultural area; Botany; Science; Geography; Zoology; History; Art; Hands-on experiences; Practical life; Daily tasks; Serving lunch; Cutting food; Dressing independently; Behavior guidelines; Courtesy; Social interaction; Language development; Auditory discrimination; Phonetic sounds; Sandpaper letters; Reading; Montessori reading materials; Grammar; Writing; Movable alphabet; Letter formation; Free composition; Circle Time; Show and Tell; Verbal communication; Self-expression; Mathematics; Sandpaper numbers; Number rods; Quantities; Addition; Subtraction; Abstract materials; Concrete materials; Number system; Montessori math materials; Rods; Beads; Spindles; Cubes; Counters; Place value; Visualization
+  [5.2] Primary (6-12) Curriculum Overview: Primary assessment standards; Montessori work cycle; National Curriculum subjects; Primary development stage; Conscious mind; Student interests; Idea, concept formation; Group work; Work organization; Social development; Mixed-age groups; Montessori guide supervision; Cooperative learning; Five Great Lessons; Great Lessons framework; Great Lessons topics; Curricular structure; Traditional subjects; Montessori curriculum content; Natural curiosity; Skill development; Material sequences; Abstraction; Paper work; Curriculum goals; STEM enhancement; Creative Lab workshop; Integrated projects; Hands-on learning
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; Daily routine adjustments; Collaborative action plans; School-home coordination; Individualized support; Support service fees; No direct diagnoses; No direct therapy; Vocational counseling; Academic, professional decisions; Educational, career options; Employability skills; CV writing; Interview preparation; Job search strategies; Decision-making guidance; Business, professional liaison; Career guidance experiences; Internship programs
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; Organic seasonal; Locally sourced; No processed foods; No added fats/sugars; No artificial additives; Low salt meals; Filtered water; No bottled water; Medical needs; Varied menus; On-site chef; Nourishing students/staff; Classroom meals; Mealtime help; Table setting; Food origin; Food preparation; Waste use; Garden care; Compost management; Recycling; Seasonal produce; Lunch incorporation; Gardening program; Montessori philosophy; Growing food; Food-land link; Seasonal cycles; Tooth brushing; Toothbrush/toothpaste; Monthly menu; Meal attendance; Soft diets; Late arrival diets; Late arrival menu; Afternoon snack  [+3 children — do not select]
+  [7.1] Encouraging Healthy Eating Habits: Student nutrition importance; Curricular links; High-quality ingredients; Varied diet exposure; Nutritionally balanced meals; Daily scratch cooking; Organic seasonal ingredients; Locally-sourced ingredients; No processed foods; No added fats sugars; No artificial additives; Low salt meals; Filtered water provision; No bottled water plastic; Medical needs adaptation; Variety of menus; On-site chef preparation; Nourishing students staff
+  [7.3] Montessori food and waste education: Classroom meals; Mealtime help; Table setting; Food origin; Food preparation; Waste use; Garden care; Compost management; Recycling collection; Seasonal produce; Lunch incorporation; Gardening program; Montessori philosophy; Growing food; Food-land link; Seasonal cycles
+  [7.4] Mealtime Logistics and Dietary Needs: Tooth brushing routine; Toothbrush/toothpaste requirement; Monthly menu sharing; Meal attendance notification; Occasional soft diets; Late arrival special diets; Late arrival menu guarantee; Afternoon snack recommendation
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; Nap costs; Fee document; Phidias documents
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; Vomiting attendance; Diarrhea attendance; Strep throat return; Cold flu attendance; Head lice attendance; Intestinal worms return; Rash attendance; Conjunctivitis return; Medication policy; Phidias authorization; Medication drop-off; Home medication schedule; Oral medication only; Prescription required; Family authorization; Student home illness; Treatment completion; Student ill at school; Urgent family collection; Emergency contact protocol; Ambulance call; Community health priority; Herd immunity; Vulnerable protection; Medical certificate; Valencian vaccination schedule; Admission vaccination check; Four-year vaccination; Six-year vaccination; Twelve-year vaccination; Fourteen-year vaccination  [+2 children — do not select]
+  [9.1] Student Illness and Medication Policy: Do not attend school ill; Contagion risk; Isolate unwell students; Family collection unwell; Return after 24 hours; Fever attendance rule; Vomiting attendance rule; Diarrhea attendance rule; Strep throat return; Cold/flu attendance; Head lice attendance; Intestinal worms return; Rash attendance; Conjunctivitis return; Medication administration policy; Phidias authorization form; Medication drop-off; Home medication schedule; Oral medication only; Medical prescription required; Written family authorization; Keep student home; Treatment completion; Student ill at school; Family collection urgent; Emergency contact protocol; Call ambulance
+  [9.2] Valencian Community Vaccination Adherence: Community health priority; Herd immunity principle; Vulnerable protection; Medical certificate requirement; Valencian vaccination schedule; Admission vaccination check; Four-year-old vaccination; Six-year-old vaccination; Twelve-year-old vaccination; Fourteen-year-old vaccination
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; Educational psychology team; Safe environment goal; Early intervention aim
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; Watch English films; Demonstrate English interest
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; Student name label; Long label for hanging; Early years clothing; Comfortable practical clothing; Easy removal clothing; Early years shoes; Self-dressing shoes
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; Sun hat; Sun protection; Morning sun protection; School sun protection; Self-application sun protection; Soft-soled shoes; Indoor slippers; Classroom/patio footwear
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; Soiled clothing return; Spare clothes replenishment; Emergency clothes provision
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; No food policy; Allergy prevention; School provides food; No party favours; No invitations; Primary, Secondary modifications; Age-appropriate celebrations
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; Overall development; Meaningful experiences; Trained professionals; Online enrollment; Enrollment video
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; Labeling personal items
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; Start day at school; School pick-up; Bus transport rules; No external restraints; Consent form required; Phidias acceptance; Authorization guide; Non-participation attendance; Signed consent mandatory
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; Late enrollment; Contract changes; Communication deadline; Absence reporting; Stop changes; Late pickup; Bus departure time
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; Child impact monitoring
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; Photo session notification; Digital photo provision; Sustainability
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; Additional services; Proforma schedule; Direct debit schedule; Payment questions contact; Schedule variations; Outings charge; Outing authorization; Outing refund; Enrichment charge; Enrichment timing; Enrollment fee; Enrollment refund; Refund conditions; Returned receipt fee; Bank commission; Valencia aid; Paterna aid; Sodexo vouchers; Working mothers deduction; Lunch aid exclusion; Childcare voucher exclusion; Schooling aid exclusion; Financial aid contact  [+2 children — do not select]
+  [25.1] Payment Policy and Fee Structure: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; Additional services; Proforma schedule; Direct debit schedule; Questions contact; Schedule variations; Outings charge; Outing authorization; Outing refund; Enrichment charge; Enrichment timing; Enrollment fee; Enrollment refund; Refund conditions; Returned receipt fee; Bank commission
+  [25.2] Available Financial Aid Programs: Valencia City Council aid; Paterna City Council aid; Sodexo nursery vouchers; Working mothers tax deduction; Lunch aid exclusion; Childcare voucher exclusion; 0-3 schooling aid exclusion; Financial aid contact
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected IDs: ['2.6']
+Reasoning   : This section directly addresses the Early Bird service and its associated hours, which is necessary to determine its start time.
+
+── Step 2: Synthesis (1317ms) ─────────────────────────────────
+Tokens: in=321  out=19
+  [2.6] Early Bird Afternoon Club Services  (leaf, direct=1097c, with-children=1136c)
+
+Total chars sent to synthesis LLM: 1147
+
+Full text sent:
+········································
+[Section 2.6: Early Bird Afternoon Club Services]
+Our **Early-Bird** service is available from **8:00 am to 8:45 am**. This service is available on all school days throughout the term and can be used either regularly or on a one-off basis. No prior notice or booking is required; attendance will be confirmed with the responsible person. The charge for this service will be included with the next monthly invoice and will not exceed the cost of the monthly service.
+
+We are also introducing a new service to support families with work-life balance: the **Afternoon Club**, available from **4:40 pm to 6:00 pm**. This is a relaxed and creative space for children to stay at school after the regular day, engaging in playful and calm activities in a safe, familiar environment. This allows families who need extra time to pick up their children later, knowing they are well cared for.
+
+Like Early-Bird, this service can be used either on a **regular basis** or **occasionally as needed**. Attendance will be recorded, and charges will appear on the monthly invoice. If the accumulated daily rate exceeds the monthly fee, the monthly rate will apply.
+········································
+
+Answer:
+The Early-Bird service is available from 8:00 am [2.6].
+
+Total latency: 3233ms  |  chars→synthesis: 1147  |  tokens: 4,597 in + 69 out  |  ≈$0.00073
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 2/3  [procedure]
+What is the process for authorising a new person to collect my child from school?
+Note: Procedure in §2.7 Authorisation for Students to Leave or Be Picked Up Alone
+
+── Step 1: Node Selection (2369ms) ──────────────────────────────
+Tokens: in=4,284  out=74
+Outline: 49 nodes, 21280 chars
+
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; School authorization; Integrated curriculum; Creative learning; Hands-on learning; Teaching staff; International teachers; Cultural perspective; Student development; Prepared environment; Student curiosity; Student autonomy; Creativity; Love of nature; Community belonging; Family guide; School organisation; School operation; Contact child's Guide; Pedagogical queries; Personal matters; Teaching team structure; Classroom staff roles; Montessori Guide roles; Assistant roles; Support team roles; Specialist teacher roles; School visitors; University collaborations; Montessori observers; Secondary staff; Secondary tutor roles; Secondary subject teachers; Contacting non-teaching staff; Phidias contact method; School satisfaction; School policies; Family queries; Educational psychologist; Administration inquiries; Enrichment Program; Payments; Tutor appointments; Medication administration; Absences; Diet requirements; Bus service; Imagine Shop; Arrival/dismissal changes; Child collection authorization; Lost and found; Admissions; Bus changes; Phidias process use; Avoid direct administration messages  [+3 children — do not select]
+  [1.1] Imagine Montessori School Valencia Overview: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; School authorization; Integrated curriculum; Creative learning; Hands-on learning; Teaching staff; International teachers; Cultural perspective; Student development; Prepared environment; Student curiosity; Student autonomy; Creativity; Love of nature; Community belonging; Family guide; School organisation; School operation
+  [1.2] School Pedagogical Team Structure: Contact child's Guide; Pedagogical queries; Personal matters; Teaching team structure; Classroom staff roles; Montessori Guide roles; Assistant roles; Support team roles; Specialist teacher roles; School visitors; University collaborations; Montessori observers; Secondary staff; Secondary tutor roles; Secondary subject teachers
+  [1.3] School Leadership and Administrative Contacts: Contacting non-teaching staff; Phidias contact method; School satisfaction; School policies; Family queries; Pedagogical queries; Educational psychologist; Administration inquiries; School operations; Enrichment Program; Payments; Tutor appointments; Medication administration; Absences; Diet requirements; Bus service; Imagine Shop; Arrival/dismissal changes; Child collection authorization; Lost and found; Admissions; Bus changes; Phidias process use; Avoid direct administration messages
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; Phidias message; Confirm change; School operating hours; Reception hours; Student arrival; Student departure; Punctuality importance; Late arrival impact; Early pick-up procedure; Early pick-up times; Absence notification; Schedule change reporting; Late arrival fees; Late pick-up fees; Rain gear; Umbrella use; Rain pick-up notice; Main entrance; Student entry; Staff welcome; School parking; Parking restrictions; Parking fine; Infant Community entrance; Infant Community pick-up; Children's House pick-up; Primary Secondary pick-up; Pick-up order; Sibling pick-up policy; Sibling pick-up exceptions; Early Bird service; Early Bird hours; Early Bird usage; Early Bird booking; Early Bird charges; Afternoon Club service; Afternoon Club hours; Afternoon Club activities; Afternoon Club purpose; Afternoon Club usage; Afternoon Club charges; Authorized pick-up; Phidias records; Third-party pick-up; Solo departure; Phidias Tracking; Phidias authorization video  [+7 children — do not select]
+  [2.1] Timetable options and change process: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; Send Phidias message; Confirm change
+  [2.2] School Hours, Punctuality, Drop-off, Pick-up: School operating hours; Reception hours; Student arrival times; Student departure times; Punctuality importance; Late arrival impact; Early pick-up procedure; Early pick-up times; Absence notification; Schedule change reporting; Late arrival fees; Late pick-up fees
+  [2.3] Rainy Day Student Logistics: Rain gear recommendation; Umbrella use discouraged; Rain pick-up notice
+  [2.4] Student Arrival, Parking, Infant Community Entrance: Main entrance; Student/parent entry; Staff welcome; School parking; Parking restrictions; Health Centre parking fine; Infant Community entrance
+  [2.5] Student Pick-up by Age Group: Infant Community pick-up; Children's House pick-up; Primary Secondary pick-up; Pick-up order; Sibling pick-up policy; Sibling pick-up exceptions
+  [2.6] Early Bird Afternoon Club Services: Early Bird service; Early Bird hours; Early Bird usage; Early Bird booking; Early Bird charges; Afternoon Club service; Afternoon Club hours; Afternoon Club activities; Afternoon Club purpose; Afternoon Club usage; Afternoon Club charges
+  [2.7] Student pick-up/departure authorization: Authorized pick-up; Phidias records; Third-party pick-up; Solo departure; Phidias Tracking section; Phidias authorization video
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; Phidias secondary; Transparent Classroom; One-way communication; Individual meetings; Progress reports; School newsletter; Daily communication; Tutorial hours; Administrative contact
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; Ask questions; Share experiences; Make suggestions; Student development involvement; Advance notice; In-person sessions; Online sessions; Work-life balance; Enriching in-person benefits; Group dynamics; Family interaction; Bilingual sessions; Family inclusion
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; Material presentation; Montessori Work Cycle; Sensory learning; Hands-on learning; Concrete to abstract; Qualified teachers; Staff development; DfES guidelines; Curriculum alignment; Shared goals; Student curiosity; Holistic education; Personal development; Social development; Emotional development; Self-confidence; Independent learning; Infant Community; Core learning areas; PSED; Physical development; Communication skills; Language development; Specific learning areas; Literacy skills; Mathematics skills; Understanding world; Expressive arts; Design; EYFS learning areas; Integrated themes; Extracurricular activities; Individualized learning; Student pace; Mixed-age classrooms; Cooperation; EYFS assessment; Montessori learning areas; Senses refinement; Language preparation; Mathematics preparation; Classifying, sorting objects; Environmental perception; Cultural studies; Practical life skills; Behavior guidelines; Courtesy; Auditory discrimination; Phonetic sounds; Montessori language materials; Reading; Writing; Grammar; Circle Time; Show and Tell; Verbal communication; Self-expression; Montessori math materials; Number concepts; Primary assessment; National Curriculum subjects; Primary development; Conscious mind; Student interests; Concept formation; Group work; Work organization; Guide supervision; Five Great Lessons; Curricular structure; Traditional subjects; Montessori curriculum content; Skill development; Material sequences; Abstraction; Paper work; Curriculum goals; STEM enhancement; Creative Lab; Integrated projects  [+3 children — do not select]
+  [5.p] British Curriculum and Montessori Philosophy: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Accessible classroom materials; Child-sized furniture; Independent concept practice; Material presentation method; Guided material work; Independent material use; Practice and repetition; Independent skill acquisition; New material introduction; Work Cycle variety; Sensory materials; Hands-on learning; Concrete to abstract concepts; Qualified Montessori teachers; British curriculum environment; Staff professional development; DfES guidelines; British school in Spain; Montessori-UK curriculum alignment; Shared curricular goals; Reinforcing curiosity; Inquisitive thinkers; Considering others' opinions
+  [5.1] Early Years Foundation Stage Curriculum: Holistic education; Self-confidence; Emotional development; Personal development; Social development; Independent learning; Enjoyment; Infant Community focus; Core learning areas; PSED; Physical development; Communication; Language; Specific learning areas; Literacy; Mathematics; Understanding world; Expressive arts; Design; EYFS learning areas; Montessori Work Cycle; Integrated themes; Clubs; Yoga; Gardening; Sensory play; Crafts; Music; Drama; Storytelling; Individualized learning; Student pace; Mixed-age classrooms; Cooperation; Competition reduction; EYFS assessment; Montessori learning areas; Sensory area; Sensory activities; Senses refinement; Language preparation; Mathematics preparation; Classifying objects; Sorting objects; Environmental perception; Cultural area; Botany; Science; Geography; Zoology; History; Art; Hands-on experiences; Practical life; Daily tasks; Serving lunch; Cutting food; Dressing independently; Behavior guidelines; Courtesy; Social interaction; Language development; Auditory discrimination; Phonetic sounds; Sandpaper letters; Reading; Montessori reading materials; Grammar; Writing; Movable alphabet; Letter formation; Free composition; Circle Time; Show and Tell; Verbal communication; Self-expression; Mathematics; Sandpaper numbers; Number rods; Quantities; Addition; Subtraction; Abstract materials; Concrete materials; Number system; Montessori math materials; Rods; Beads; Spindles; Cubes; Counters; Place value; Visualization
+  [5.2] Primary (6-12) Curriculum Overview: Primary assessment standards; Montessori work cycle; National Curriculum subjects; Primary development stage; Conscious mind; Student interests; Idea, concept formation; Group work; Work organization; Social development; Mixed-age groups; Montessori guide supervision; Cooperative learning; Five Great Lessons; Great Lessons framework; Great Lessons topics; Curricular structure; Traditional subjects; Montessori curriculum content; Natural curiosity; Skill development; Material sequences; Abstraction; Paper work; Curriculum goals; STEM enhancement; Creative Lab workshop; Integrated projects; Hands-on learning
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; Daily routine adjustments; Collaborative action plans; School-home coordination; Individualized support; Support service fees; No direct diagnoses; No direct therapy; Vocational counseling; Academic, professional decisions; Educational, career options; Employability skills; CV writing; Interview preparation; Job search strategies; Decision-making guidance; Business, professional liaison; Career guidance experiences; Internship programs
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; Organic seasonal; Locally sourced; No processed foods; No added fats/sugars; No artificial additives; Low salt meals; Filtered water; No bottled water; Medical needs; Varied menus; On-site chef; Nourishing students/staff; Classroom meals; Mealtime help; Table setting; Food origin; Food preparation; Waste use; Garden care; Compost management; Recycling; Seasonal produce; Lunch incorporation; Gardening program; Montessori philosophy; Growing food; Food-land link; Seasonal cycles; Tooth brushing; Toothbrush/toothpaste; Monthly menu; Meal attendance; Soft diets; Late arrival diets; Late arrival menu; Afternoon snack  [+3 children — do not select]
+  [7.1] Encouraging Healthy Eating Habits: Student nutrition importance; Curricular links; High-quality ingredients; Varied diet exposure; Nutritionally balanced meals; Daily scratch cooking; Organic seasonal ingredients; Locally-sourced ingredients; No processed foods; No added fats sugars; No artificial additives; Low salt meals; Filtered water provision; No bottled water plastic; Medical needs adaptation; Variety of menus; On-site chef preparation; Nourishing students staff
+  [7.3] Montessori food and waste education: Classroom meals; Mealtime help; Table setting; Food origin; Food preparation; Waste use; Garden care; Compost management; Recycling collection; Seasonal produce; Lunch incorporation; Gardening program; Montessori philosophy; Growing food; Food-land link; Seasonal cycles
+  [7.4] Mealtime Logistics and Dietary Needs: Tooth brushing routine; Toothbrush/toothpaste requirement; Monthly menu sharing; Meal attendance notification; Occasional soft diets; Late arrival special diets; Late arrival menu guarantee; Afternoon snack recommendation
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; Nap costs; Fee document; Phidias documents
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; Vomiting attendance; Diarrhea attendance; Strep throat return; Cold flu attendance; Head lice attendance; Intestinal worms return; Rash attendance; Conjunctivitis return; Medication policy; Phidias authorization; Medication drop-off; Home medication schedule; Oral medication only; Prescription required; Family authorization; Student home illness; Treatment completion; Student ill at school; Urgent family collection; Emergency contact protocol; Ambulance call; Community health priority; Herd immunity; Vulnerable protection; Medical certificate; Valencian vaccination schedule; Admission vaccination check; Four-year vaccination; Six-year vaccination; Twelve-year vaccination; Fourteen-year vaccination  [+2 children — do not select]
+  [9.1] Student Illness and Medication Policy: Do not attend school ill; Contagion risk; Isolate unwell students; Family collection unwell; Return after 24 hours; Fever attendance rule; Vomiting attendance rule; Diarrhea attendance rule; Strep throat return; Cold/flu attendance; Head lice attendance; Intestinal worms return; Rash attendance; Conjunctivitis return; Medication administration policy; Phidias authorization form; Medication drop-off; Home medication schedule; Oral medication only; Medical prescription required; Written family authorization; Keep student home; Treatment completion; Student ill at school; Family collection urgent; Emergency contact protocol; Call ambulance
+  [9.2] Valencian Community Vaccination Adherence: Community health priority; Herd immunity principle; Vulnerable protection; Medical certificate requirement; Valencian vaccination schedule; Admission vaccination check; Four-year-old vaccination; Six-year-old vaccination; Twelve-year-old vaccination; Fourteen-year-old vaccination
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; Educational psychology team; Safe environment goal; Early intervention aim
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; Watch English films; Demonstrate English interest
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; Student name label; Long label for hanging; Early years clothing; Comfortable practical clothing; Easy removal clothing; Early years shoes; Self-dressing shoes
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; Sun hat; Sun protection; Morning sun protection; School sun protection; Self-application sun protection; Soft-soled shoes; Indoor slippers; Classroom/patio footwear
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; Soiled clothing return; Spare clothes replenishment; Emergency clothes provision
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; No food policy; Allergy prevention; School provides food; No party favours; No invitations; Primary, Secondary modifications; Age-appropriate celebrations
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; Overall development; Meaningful experiences; Trained professionals; Online enrollment; Enrollment video
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; Labeling personal items
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; Start day at school; School pick-up; Bus transport rules; No external restraints; Consent form required; Phidias acceptance; Authorization guide; Non-participation attendance; Signed consent mandatory
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; Late enrollment; Contract changes; Communication deadline; Absence reporting; Stop changes; Late pickup; Bus departure time
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; Child impact monitoring
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; Photo session notification; Digital photo provision; Sustainability
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; Additional services; Proforma schedule; Direct debit schedule; Payment questions contact; Schedule variations; Outings charge; Outing authorization; Outing refund; Enrichment charge; Enrichment timing; Enrollment fee; Enrollment refund; Refund conditions; Returned receipt fee; Bank commission; Valencia aid; Paterna aid; Sodexo vouchers; Working mothers deduction; Lunch aid exclusion; Childcare voucher exclusion; Schooling aid exclusion; Financial aid contact  [+2 children — do not select]
+  [25.1] Payment Policy and Fee Structure: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; Additional services; Proforma schedule; Direct debit schedule; Questions contact; Schedule variations; Outings charge; Outing authorization; Outing refund; Enrichment charge; Enrichment timing; Enrollment fee; Enrollment refund; Refund conditions; Returned receipt fee; Bank commission
+  [25.2] Available Financial Aid Programs: Valencia City Council aid; Paterna City Council aid; Sodexo nursery vouchers; Working mothers tax deduction; Lunch aid exclusion; Childcare voucher exclusion; 0-3 schooling aid exclusion; Financial aid contact
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected IDs: ['1.3', '2.7', '23']
+Reasoning   : These sections cover child collection authorization, third-party pick-up procedures, and how to update family and contact information, including authorization records, via Phidias.
+
+── Step 2: Synthesis (5669ms) ─────────────────────────────────
+Tokens: in=644  out=87
+  [1.3] School Leadership and Administrative Contacts  (leaf, direct=1263c, with-children=1313c)
+  [2.7] Student pick-up/departure authorization  (leaf, direct=452c, with-children=496c)
+  [23] Updating Contact and Family Information  (leaf, direct=530c, with-children=573c)
+
+Total chars sent to synthesis LLM: 2429
+
+Full text sent:
+········································
+[Section 1.3: School Leadership and Administrative Contacts]
+We encourage you to refer to this list whenever you need to contact a non-teaching member of our team for the topics listed below. You can use Phidias to get in touch with any of them.
+
+| SUBJECT | CONTACT PERSON |  |
+| :---- | :---- | :---- |
+| School satisfaction, School Policies and Individual families’ queries. | **Mariano** Executive Director |  |
+| Queries related to pedagogical topics, including the educational psychologist department. | **Sheila** Head Teacher Early Years and Primary | **Lindsay** Head Teacher Secondary |
+| Inquiries about administration, school operations and the Enrichment Program. | **Sandra** Head of School Operations and Enrichment Program |  |
+| Payments | **María Luisa** Administration |  |
+| Tutor appointments, medication administration, absences, diet requirements, bus service, Imagine Shop, changes to the arrival/dismissal time, new or exceptional authorized persons to collect children, lost & found. | **María Luisa** / **Madhu** Secretaries |  |
+| Admissions, bus service | **Hernan** |  |
+| Medication administration Authorizations Bus changes (Google Form) Imagine Shop   \*It is important to use the established processes and avoid    sending direct messages to the administration. | **Phidias Process\*** |  |
+
+---
+
+[Section 2.7: Student pick-up/departure authorization]
+Parents, guardians, and legal representatives who have properly completed their information in our Phidias records will be authorised to pick up the students.
+
+If someone other than those listed will be picking up the students, or if you wish to authorise the students to leave on their own, you must complete the “Tracking” section in Phidias, as explained below:
+
+[How to Authorise Student Pick-Up in Phidias](https://vimeo.com/1003094042/7c8aaad568)
+
+---
+
+[Section 23: Updating Contact and Family Information]
+If your contact information or any other important records change during the school year, please update the new information in Phidias. It is important for the team to have the most current information available in case of an emergency.
+
+[How to edit your profile on Phidias](https://vimeo.com/1002778715/473248fe55?share=copy)
+
+On the other hand, if **your family situation** changes at home due to separation or divorce, we ask that you inform your guide as soon as possible so they can monitor any changes affecting your child.
+········································
+
+Answer:
+To authorise a new person to collect your child from school, you must complete the “Tracking” section in Phidias [2.7]. The specific steps for this process are explained in the "How to Authorise Student Pick-Up in Phidias" resource [2.7]. Inquiries about new or exceptional authorized persons to collect children can be directed to María Luisa or Madhu, the Secretaries [1.3].
+
+Total latency: 8038ms  |  chars→synthesis: 2429  |  tokens: 4,928 in + 161 out  |  ≈$0.00084
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 3/3  [cross_section]
+Who is allowed to collect my child from school if they fall ill and I cannot be reached?
+Note: Cross-section: §9.1 (illness → contact family ASAP; if unreachable, contact emergency person on file) + §2.7 (Phidias pick-up authorisation — only registered parents/guardians or explicitly authorised persons). Answer requires combining illness-response procedure with pick-up authorisation rules.
+
+── Step 1: Node Selection (2914ms) ──────────────────────────────
+Tokens: in=4,286  out=74
+Outline: 49 nodes, 21280 chars
+
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; School authorization; Integrated curriculum; Creative learning; Hands-on learning; Teaching staff; International teachers; Cultural perspective; Student development; Prepared environment; Student curiosity; Student autonomy; Creativity; Love of nature; Community belonging; Family guide; School organisation; School operation; Contact child's Guide; Pedagogical queries; Personal matters; Teaching team structure; Classroom staff roles; Montessori Guide roles; Assistant roles; Support team roles; Specialist teacher roles; School visitors; University collaborations; Montessori observers; Secondary staff; Secondary tutor roles; Secondary subject teachers; Contacting non-teaching staff; Phidias contact method; School satisfaction; School policies; Family queries; Educational psychologist; Administration inquiries; Enrichment Program; Payments; Tutor appointments; Medication administration; Absences; Diet requirements; Bus service; Imagine Shop; Arrival/dismissal changes; Child collection authorization; Lost and found; Admissions; Bus changes; Phidias process use; Avoid direct administration messages  [+3 children — do not select]
+  [1.1] Imagine Montessori School Valencia Overview: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; School authorization; Integrated curriculum; Creative learning; Hands-on learning; Teaching staff; International teachers; Cultural perspective; Student development; Prepared environment; Student curiosity; Student autonomy; Creativity; Love of nature; Community belonging; Family guide; School organisation; School operation
+  [1.2] School Pedagogical Team Structure: Contact child's Guide; Pedagogical queries; Personal matters; Teaching team structure; Classroom staff roles; Montessori Guide roles; Assistant roles; Support team roles; Specialist teacher roles; School visitors; University collaborations; Montessori observers; Secondary staff; Secondary tutor roles; Secondary subject teachers
+  [1.3] School Leadership and Administrative Contacts: Contacting non-teaching staff; Phidias contact method; School satisfaction; School policies; Family queries; Pedagogical queries; Educational psychologist; Administration inquiries; School operations; Enrichment Program; Payments; Tutor appointments; Medication administration; Absences; Diet requirements; Bus service; Imagine Shop; Arrival/dismissal changes; Child collection authorization; Lost and found; Admissions; Bus changes; Phidias process use; Avoid direct administration messages
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; Phidias message; Confirm change; School operating hours; Reception hours; Student arrival; Student departure; Punctuality importance; Late arrival impact; Early pick-up procedure; Early pick-up times; Absence notification; Schedule change reporting; Late arrival fees; Late pick-up fees; Rain gear; Umbrella use; Rain pick-up notice; Main entrance; Student entry; Staff welcome; School parking; Parking restrictions; Parking fine; Infant Community entrance; Infant Community pick-up; Children's House pick-up; Primary Secondary pick-up; Pick-up order; Sibling pick-up policy; Sibling pick-up exceptions; Early Bird service; Early Bird hours; Early Bird usage; Early Bird booking; Early Bird charges; Afternoon Club service; Afternoon Club hours; Afternoon Club activities; Afternoon Club purpose; Afternoon Club usage; Afternoon Club charges; Authorized pick-up; Phidias records; Third-party pick-up; Solo departure; Phidias Tracking; Phidias authorization video  [+7 children — do not select]
+  [2.1] Timetable options and change process: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; Send Phidias message; Confirm change
+  [2.2] School Hours, Punctuality, Drop-off, Pick-up: School operating hours; Reception hours; Student arrival times; Student departure times; Punctuality importance; Late arrival impact; Early pick-up procedure; Early pick-up times; Absence notification; Schedule change reporting; Late arrival fees; Late pick-up fees
+  [2.3] Rainy Day Student Logistics: Rain gear recommendation; Umbrella use discouraged; Rain pick-up notice
+  [2.4] Student Arrival, Parking, Infant Community Entrance: Main entrance; Student/parent entry; Staff welcome; School parking; Parking restrictions; Health Centre parking fine; Infant Community entrance
+  [2.5] Student Pick-up by Age Group: Infant Community pick-up; Children's House pick-up; Primary Secondary pick-up; Pick-up order; Sibling pick-up policy; Sibling pick-up exceptions
+  [2.6] Early Bird Afternoon Club Services: Early Bird service; Early Bird hours; Early Bird usage; Early Bird booking; Early Bird charges; Afternoon Club service; Afternoon Club hours; Afternoon Club activities; Afternoon Club purpose; Afternoon Club usage; Afternoon Club charges
+  [2.7] Student pick-up/departure authorization: Authorized pick-up; Phidias records; Third-party pick-up; Solo departure; Phidias Tracking section; Phidias authorization video
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; Phidias secondary; Transparent Classroom; One-way communication; Individual meetings; Progress reports; School newsletter; Daily communication; Tutorial hours; Administrative contact
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; Ask questions; Share experiences; Make suggestions; Student development involvement; Advance notice; In-person sessions; Online sessions; Work-life balance; Enriching in-person benefits; Group dynamics; Family interaction; Bilingual sessions; Family inclusion
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; Material presentation; Montessori Work Cycle; Sensory learning; Hands-on learning; Concrete to abstract; Qualified teachers; Staff development; DfES guidelines; Curriculum alignment; Shared goals; Student curiosity; Holistic education; Personal development; Social development; Emotional development; Self-confidence; Independent learning; Infant Community; Core learning areas; PSED; Physical development; Communication skills; Language development; Specific learning areas; Literacy skills; Mathematics skills; Understanding world; Expressive arts; Design; EYFS learning areas; Integrated themes; Extracurricular activities; Individualized learning; Student pace; Mixed-age classrooms; Cooperation; EYFS assessment; Montessori learning areas; Senses refinement; Language preparation; Mathematics preparation; Classifying, sorting objects; Environmental perception; Cultural studies; Practical life skills; Behavior guidelines; Courtesy; Auditory discrimination; Phonetic sounds; Montessori language materials; Reading; Writing; Grammar; Circle Time; Show and Tell; Verbal communication; Self-expression; Montessori math materials; Number concepts; Primary assessment; National Curriculum subjects; Primary development; Conscious mind; Student interests; Concept formation; Group work; Work organization; Guide supervision; Five Great Lessons; Curricular structure; Traditional subjects; Montessori curriculum content; Skill development; Material sequences; Abstraction; Paper work; Curriculum goals; STEM enhancement; Creative Lab; Integrated projects  [+3 children — do not select]
+  [5.p] British Curriculum and Montessori Philosophy: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Accessible classroom materials; Child-sized furniture; Independent concept practice; Material presentation method; Guided material work; Independent material use; Practice and repetition; Independent skill acquisition; New material introduction; Work Cycle variety; Sensory materials; Hands-on learning; Concrete to abstract concepts; Qualified Montessori teachers; British curriculum environment; Staff professional development; DfES guidelines; British school in Spain; Montessori-UK curriculum alignment; Shared curricular goals; Reinforcing curiosity; Inquisitive thinkers; Considering others' opinions
+  [5.1] Early Years Foundation Stage Curriculum: Holistic education; Self-confidence; Emotional development; Personal development; Social development; Independent learning; Enjoyment; Infant Community focus; Core learning areas; PSED; Physical development; Communication; Language; Specific learning areas; Literacy; Mathematics; Understanding world; Expressive arts; Design; EYFS learning areas; Montessori Work Cycle; Integrated themes; Clubs; Yoga; Gardening; Sensory play; Crafts; Music; Drama; Storytelling; Individualized learning; Student pace; Mixed-age classrooms; Cooperation; Competition reduction; EYFS assessment; Montessori learning areas; Sensory area; Sensory activities; Senses refinement; Language preparation; Mathematics preparation; Classifying objects; Sorting objects; Environmental perception; Cultural area; Botany; Science; Geography; Zoology; History; Art; Hands-on experiences; Practical life; Daily tasks; Serving lunch; Cutting food; Dressing independently; Behavior guidelines; Courtesy; Social interaction; Language development; Auditory discrimination; Phonetic sounds; Sandpaper letters; Reading; Montessori reading materials; Grammar; Writing; Movable alphabet; Letter formation; Free composition; Circle Time; Show and Tell; Verbal communication; Self-expression; Mathematics; Sandpaper numbers; Number rods; Quantities; Addition; Subtraction; Abstract materials; Concrete materials; Number system; Montessori math materials; Rods; Beads; Spindles; Cubes; Counters; Place value; Visualization
+  [5.2] Primary (6-12) Curriculum Overview: Primary assessment standards; Montessori work cycle; National Curriculum subjects; Primary development stage; Conscious mind; Student interests; Idea, concept formation; Group work; Work organization; Social development; Mixed-age groups; Montessori guide supervision; Cooperative learning; Five Great Lessons; Great Lessons framework; Great Lessons topics; Curricular structure; Traditional subjects; Montessori curriculum content; Natural curiosity; Skill development; Material sequences; Abstraction; Paper work; Curriculum goals; STEM enhancement; Creative Lab workshop; Integrated projects; Hands-on learning
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; Daily routine adjustments; Collaborative action plans; School-home coordination; Individualized support; Support service fees; No direct diagnoses; No direct therapy; Vocational counseling; Academic, professional decisions; Educational, career options; Employability skills; CV writing; Interview preparation; Job search strategies; Decision-making guidance; Business, professional liaison; Career guidance experiences; Internship programs
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; Organic seasonal; Locally sourced; No processed foods; No added fats/sugars; No artificial additives; Low salt meals; Filtered water; No bottled water; Medical needs; Varied menus; On-site chef; Nourishing students/staff; Classroom meals; Mealtime help; Table setting; Food origin; Food preparation; Waste use; Garden care; Compost management; Recycling; Seasonal produce; Lunch incorporation; Gardening program; Montessori philosophy; Growing food; Food-land link; Seasonal cycles; Tooth brushing; Toothbrush/toothpaste; Monthly menu; Meal attendance; Soft diets; Late arrival diets; Late arrival menu; Afternoon snack  [+3 children — do not select]
+  [7.1] Encouraging Healthy Eating Habits: Student nutrition importance; Curricular links; High-quality ingredients; Varied diet exposure; Nutritionally balanced meals; Daily scratch cooking; Organic seasonal ingredients; Locally-sourced ingredients; No processed foods; No added fats sugars; No artificial additives; Low salt meals; Filtered water provision; No bottled water plastic; Medical needs adaptation; Variety of menus; On-site chef preparation; Nourishing students staff
+  [7.3] Montessori food and waste education: Classroom meals; Mealtime help; Table setting; Food origin; Food preparation; Waste use; Garden care; Compost management; Recycling collection; Seasonal produce; Lunch incorporation; Gardening program; Montessori philosophy; Growing food; Food-land link; Seasonal cycles
+  [7.4] Mealtime Logistics and Dietary Needs: Tooth brushing routine; Toothbrush/toothpaste requirement; Monthly menu sharing; Meal attendance notification; Occasional soft diets; Late arrival special diets; Late arrival menu guarantee; Afternoon snack recommendation
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; Nap costs; Fee document; Phidias documents
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; Vomiting attendance; Diarrhea attendance; Strep throat return; Cold flu attendance; Head lice attendance; Intestinal worms return; Rash attendance; Conjunctivitis return; Medication policy; Phidias authorization; Medication drop-off; Home medication schedule; Oral medication only; Prescription required; Family authorization; Student home illness; Treatment completion; Student ill at school; Urgent family collection; Emergency contact protocol; Ambulance call; Community health priority; Herd immunity; Vulnerable protection; Medical certificate; Valencian vaccination schedule; Admission vaccination check; Four-year vaccination; Six-year vaccination; Twelve-year vaccination; Fourteen-year vaccination  [+2 children — do not select]
+  [9.1] Student Illness and Medication Policy: Do not attend school ill; Contagion risk; Isolate unwell students; Family collection unwell; Return after 24 hours; Fever attendance rule; Vomiting attendance rule; Diarrhea attendance rule; Strep throat return; Cold/flu attendance; Head lice attendance; Intestinal worms return; Rash attendance; Conjunctivitis return; Medication administration policy; Phidias authorization form; Medication drop-off; Home medication schedule; Oral medication only; Medical prescription required; Written family authorization; Keep student home; Treatment completion; Student ill at school; Family collection urgent; Emergency contact protocol; Call ambulance
+  [9.2] Valencian Community Vaccination Adherence: Community health priority; Herd immunity principle; Vulnerable protection; Medical certificate requirement; Valencian vaccination schedule; Admission vaccination check; Four-year-old vaccination; Six-year-old vaccination; Twelve-year-old vaccination; Fourteen-year-old vaccination
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; Educational psychology team; Safe environment goal; Early intervention aim
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; Watch English films; Demonstrate English interest
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; Student name label; Long label for hanging; Early years clothing; Comfortable practical clothing; Easy removal clothing; Early years shoes; Self-dressing shoes
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; Sun hat; Sun protection; Morning sun protection; School sun protection; Self-application sun protection; Soft-soled shoes; Indoor slippers; Classroom/patio footwear
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; Soiled clothing return; Spare clothes replenishment; Emergency clothes provision
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; No food policy; Allergy prevention; School provides food; No party favours; No invitations; Primary, Secondary modifications; Age-appropriate celebrations
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; Overall development; Meaningful experiences; Trained professionals; Online enrollment; Enrollment video
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; Labeling personal items
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; Start day at school; School pick-up; Bus transport rules; No external restraints; Consent form required; Phidias acceptance; Authorization guide; Non-participation attendance; Signed consent mandatory
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; Late enrollment; Contract changes; Communication deadline; Absence reporting; Stop changes; Late pickup; Bus departure time
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; Child impact monitoring
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; Photo session notification; Digital photo provision; Sustainability
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; Additional services; Proforma schedule; Direct debit schedule; Payment questions contact; Schedule variations; Outings charge; Outing authorization; Outing refund; Enrichment charge; Enrichment timing; Enrollment fee; Enrollment refund; Refund conditions; Returned receipt fee; Bank commission; Valencia aid; Paterna aid; Sodexo vouchers; Working mothers deduction; Lunch aid exclusion; Childcare voucher exclusion; Schooling aid exclusion; Financial aid contact  [+2 children — do not select]
+  [25.1] Payment Policy and Fee Structure: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; Additional services; Proforma schedule; Direct debit schedule; Questions contact; Schedule variations; Outings charge; Outing authorization; Outing refund; Enrichment charge; Enrichment timing; Enrollment fee; Enrollment refund; Refund conditions; Returned receipt fee; Bank commission
+  [25.2] Available Financial Aid Programs: Valencia City Council aid; Paterna City Council aid; Sodexo nursery vouchers; Working mothers tax deduction; Lunch aid exclusion; Childcare voucher exclusion; 0-3 schooling aid exclusion; Financial aid contact
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected IDs: ['2.7', '9.1', '23']
+Reasoning   : These sections cover student pick-up authorization, specific procedures for when a student falls ill at school and requires urgent collection, and the importance of updating emergency contact information.
+
+── Step 2: Synthesis (9318ms) ─────────────────────────────────
+Tokens: in=1,066  out=33
+  [2.7] Student pick-up/departure authorization  (leaf, direct=452c, with-children=496c)
+  [9.1] Student Illness and Medication Policy  (leaf, direct=3134c, with-children=3176c)
+  [23] Updating Contact and Family Information  (leaf, direct=530c, with-children=573c)
+
+Total chars sent to synthesis LLM: 4292
+
+Full text sent:
+········································
+[Section 2.7: Student pick-up/departure authorization]
+Parents, guardians, and legal representatives who have properly completed their information in our Phidias records will be authorised to pick up the students.
+
+If someone other than those listed will be picking up the students, or if you wish to authorise the students to leave on their own, you must complete the “Tracking” section in Phidias, as explained below:
+
+[How to Authorise Student Pick-Up in Phidias](https://vimeo.com/1003094042/7c8aaad568)
+
+---
+
+[Section 9.1: Student Illness and Medication Policy]
+It is essential that students do NOT attend school if they are ill or in the incubation period of an illness, as this poses a risk of contagion to both staff and classmates. When students are unwell and therefore unable to participate in class activities, they need to be isolated from the group while waiting for their family members to collect them.
+
+In line with the recommendations of the Spanish Association of Paediatrics, students may only return to class after a **minimum of 24 hours** have passed since the last episode of fever, vomiting, or diarrhea. This allows time for recovery and helps prevent the spread of illness to teachers and classmates.
+
+Below are some cases where a child should not be brought to school (this is not an exhaustive list):
+
+*   Fever: If the child has had a fever, even if it has decreased after taking an antipyretic, or if they have had a fever in the last 24 hours (37.5ºC/99.5ºF or higher).
+*   Vomiting: If the child has vomited in the last 24 hours.
+*   Diarrhea: If the child has had diarrhea in the last 24 hours.
+*   Streptococcal Pharyngitis: The child must be on antibiotic treatment for at least 24 hours before returning to school.
+*   Cold or Flu: If the child has a runny nose and/or cough, especially if these symptoms have caused them to wake up during the night.
+*   Head Lice or Nits: The child should stay home until treatment is completed.
+*   Intestinal Worms: If the condition is not contagious, the child may return to school after the first cycle of treatment, provided a medical note confirms that the type of parasite is not contagious.
+*   Rash: If the child has a rash.
+*   Conjunctivitis: The child must be on antibiotic treatment for at least 24 hours before returning to school.
+
+Imagine staff will not administer medications unless the Phidias tracking form specifically for this case is completed:
+
+[How to authorize the administration of medication through Phidias](https://vimeo.com/1003109908/a6c73524dc)
+
+Medications should not be given to students or placed in their bags but should be handed directly to the school office or the bus monitor, along with the properly completed and signed authorisation form.
+
+If medication is required every 8 hours or more, families should adjust the schedule to administer it at home. For safety reasons and according to the guidelines from the Legal Service of the Ministry of Education, **our school will only administer oral medications, always with a medical prescription and written authorisation from the families.**
+
+If a student shows symptoms of incubation or illness, or has head lice or intestinal parasites, parents will be asked to keep the student at home until the prescribed treatment is completed.
+
+If a student becomes ill at school and the staff deems that they cannot participate in scheduled activities or may be contagious, the family will be contacted to collect the student **as soon as possible**. If we are unable to reach the family, we will contact the emergency person listed on the student's file.
+
+If no contact can be located and an emergency arises, we will proceed to call an ambulance.
+
+---
+
+[Section 23: Updating Contact and Family Information]
+If your contact information or any other important records change during the school year, please update the new information in Phidias. It is important for the team to have the most current information available in case of an emergency.
+
+[How to edit your profile on Phidias](https://vimeo.com/1002778715/473248fe55?share=copy)
+
+On the other hand, if **your family situation** changes at home due to separation or divorce, we ask that you inform your guide as soon as possible so they can monitor any changes affecting your child.
+········································
+
+Answer:
+If the family cannot be reached when a student falls ill at school, the school will contact the emergency person listed on the student's file [9.1].
+
+Total latency: 12232ms  |  chars→synthesis: 4292  |  tokens: 5,352 in + 107 out  |  ≈$0.00087
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COST SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Build pipeline:  ≈$0.0064
+  gemini-2.5-flash: 49 calls, 19,724 in + 4,546 out tokens
+  gemini-2.5-flash-lite: 31 calls, 7,714 in + 341 out tokens
+
+Query pipeline (3 queries):  ≈$0.0024
+  gemini-2.5-flash: 14,877 in + 337 out tokens
+  Q1: 4,597 in + 69 out  ≈$0.00073
+  Q2: 4,928 in + 161 out  ≈$0.00084
+  Q3: 5,352 in + 107 out  ≈$0.00087
+
+Total estimated cost:  ≈$0.0088
+Pricing used: flash-lite in=$0.075/out=$0.3  flash in=$0.15/out=$0.6 per 1M tokens
+Verify against current Vertex AI pricing before using for budgeting.

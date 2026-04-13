@@ -1,0 +1,193 @@
+Build: en_policy3_health_safety_reporting.md  (89KB)
+Started: 2026-04-13T11:27:18Z
+MAX_NODE_CHARS=5000  MIN_NODE_CHARS=1500
+MODEL_STRUCTURAL=gemini-2.5-flash-lite  MODEL_QUALITY=gemini-2.5-flash
+
+── Step 1 — Parse ────────────────────────────────────────────────────
+  71 nodes (leaves=65)  #=6  ##=65  ###=0  synthetic=0  chars min=83 max=35431 avg=2586
+
+── Step 2 — Preamble hoisting ────────────────────────────────────────
+  71 nodes (leaves=65)  #=6  ##=65  ###=0  synthetic=0  chars min=83 max=35431 avg=2586
+
+── Steps 3–5 — Split oversized leaves ────────────────────────────────
+  [2.3] '2.3. Policy Statement and Principles' full_text=5696c > MAX=5000c → splitting
+  [6.13] '6.13. Annex' full_text=14306c > MAX=5000c → splitting
+  [6.13] → 9 children: 'Types of cases' (1996c), 'Corruption, Bribery, Coercion' (934c), 'Financial crimes' (820c), 'Information security' (967c), 'Cybersecurity risks' (939c), 'Discrimination and harassment' (1931c), 'Workplace conduct' (972c), 'Financial and regulatory compliance' (4769c), 'Other reportable issues' (954c)
+  [2.3] → 6 children: 'General Policy Statement and Duties' (1093c), 'Monitoring, Review, and Training' (1543c), 'Off-site, Contractors, and Security' (951c), 'Occupational Health and Stress' (245c), 'Consultation, Workplace Safety, Violence, Slips' (897c), 'Vehicle Movements, Maintenance, Accidents, Emergencies' (926c)
+  86 nodes (leaves=78)  #=6  ##=65  ###=15  synthetic=0  chars min=83 max=35695 avg=2385
+
+── Step 7 — Thin small nodes ─────────────────────────────────────────
+  Check [1.1] (1073c) + [1.2] (936c) → skip
+  Check [4.1] (404c) + [4.2] (769c) → skip
+  Check [5.1] (957c) + [5.2] (3150c) → skip
+  Check [6.13.s1] (2016c) + [6.13.s2] (969c) → skip
+  Check [2.3.s1] (1134c) + [2.3.s2] (1581c) → skip
+  Check [3.1] (275c) + [3.2] (3050c) → MERGE
+  Check [1.2] (936c) + [1.3] (785c) → skip
+  Check [4.2] (769c) + [4.3] (1977c) → skip
+  Check [6.13.s2] (969c) + [6.13.s3] (842c) → skip
+  Check [5.4] (1504c) + [5.5] (415c) → skip
+  Check [2.3.s2] (1581c) + [2.3.s3] (992c) → skip
+  Check [1.3] (785c) + [1.4] (256c) → skip
+  Check [4.4] (3688c) + [4.5] (365c) → skip
+  Check [6.13.s3] (842c) + [6.13.s4] (993c) → skip
+  Check [5.5] (415c) + [5.6] (654c) → skip
+  Check [1.4] (256c) + [1.5] (313c) → skip
+  Check [6.13.s4] (993c) + [6.13.s5] (964c) → skip
+  Check [4.5] (365c) + [4.6] (957c) → skip
+  Check [2.3.s3] (992c) + [2.3.s4] (281c) → skip
+  Check [5.6] (654c) + [5.7] (349c) → skip
+  Check [6.13.s5] (964c) + [6.13.s6] (1966c) → skip
+  Check [1.5] (313c) + [1.6] (1573c) → skip
+  Check [2.3.s4] (281c) + [2.3.s5] (950c) → skip
+  Check [5.7] (349c) + [5.8] (1372c) → skip
+  Check [1.6] (1573c) + [1.7] (114c) → skip
+  Check [5.8] (1372c) + [5.9] (555c) → skip
+  Check [6.13.s6] (1966c) + [6.13.s7] (995c) → skip
+  Check [2.3.s5] (950c) + [2.3.s6] (986c) → skip
+  Check [1.7] (114c) + [1.8] (83c) → skip
+  Check [5.9] (555c) + [5.10] (834c) → skip
+  Check [2.1] (2400c) + [2.2] (226c) → skip
+  Check [6.1] (823c) + [6.2] (1471c) → skip
+  Check [2.5] (2894c) + [2.6] (239c) → skip
+  Check [5.10] (834c) + [5.11] (580c) → skip
+  Check [1.8] (83c) + [1.9] (137c) → MERGE
+  Check [6.2] (1471c) + [6.3] (1571c) → skip
+  Check [2.6] (239c) + [2.7] (1536c) → skip
+  Check [5.11] (580c) + [5.12] (1830c) → skip
+  Check [6.3] (1571c) + [6.4] (1450c) → skip
+  Check [5.12] (1830c) + [5.13] (240c) → skip
+  Check [6.4] (1450c) + [6.5] (257c) → skip
+  Check [5.13] (240c) + [5.14] (1401c) → skip
+  Check [6.5] (257c) + [6.6] (1827c) → MERGE
+  Check [5.14] (1401c) + [5.15] (425c) → skip
+  Check [5.15] (425c) + [5.16] (149c) → skip
+  Check [5.16] (149c) + [5.17] (1103c) → skip
+    → [1.8] 'Fire alarm and firefighting equipment tests' (212c, 5 phrases)
+  Check [1.8] (212c) + [1.10] (126c) → skip
+  Check [1.10] (126c) + [1.11] (360c) → skip
+  Check [1.1] (1073c) + [1.2] (936c) → skip
+  Check [1.2] (936c) + [1.3] (785c) → skip
+  Check [1.3] (785c) + [1.4] (256c) → skip
+    → [3.1] 'Weather Alert Safety Protocol' (3300c, 25 phrases)
+  Check [1.4] (256c) + [1.5] (313c) → skip
+  Check [3.1] (3300c) + [3.3] (588c) → skip
+    → [6.5] 'Whistleblower Channel Communication Guidelines' (2074c, 13 phrases)
+  Check [1.5] (313c) + [1.6] (1573c) → skip
+  Check [3.3] (588c) + [3.4] (992c) → skip
+  Check [6.5] (2074c) + [6.7] (1280c) → skip
+  Check [1.6] (1573c) + [1.7] (114c) → skip
+  Check [3.4] (992c) + [3.5] (398c) → skip
+  Check [6.7] (1280c) + [6.8] (2385c) → skip
+  Check [1.7] (114c) + [1.8] (212c) → skip
+  Check [6.10] (2650c) + [6.11] (1064c) → skip
+  Check [3.5] (398c) + [3.6] (237c) → skip
+  Check [1.8] (212c) + [1.10] (126c) → skip
+  Check [6.11] (1064c) + [6.12] (1626c) → skip
+  Check [3.6] (237c) + [3.7] (439c) → skip
+  Check [1.10] (126c) + [1.11] (360c) → skip
+  Check [3.7] (439c) + [3.8] (2196c) → skip
+  Check [6.14] (149c) + [6.15] (2665c) → skip
+  Check [6.1] (823c) + [6.2] (1471c) → skip
+  Check [3.8] (2196c) + [3.9] (548c) → skip
+  Check [6.2] (1471c) + [6.3] (1571c) → skip
+  Check [3.1] (3300c) + [3.3] (588c) → skip
+  Check [6.3] (1571c) + [6.4] (1450c) → skip
+  Check [3.3] (588c) + [3.4] (992c) → skip
+  Check [3.4] (992c) + [3.5] (398c) → skip
+  Check [6.4] (1450c) + [6.5] (2074c) → skip
+  Check [6.5] (2074c) + [6.7] (1280c) → skip
+  Check [3.5] (398c) + [3.6] (237c) → skip
+  Check [6.7] (1280c) + [6.8] (2385c) → skip
+  Check [3.6] (237c) + [3.7] (439c) → skip
+  Check [3.7] (439c) + [3.8] (2196c) → skip
+  Check [6.10] (2650c) + [6.11] (1064c) → skip
+  Check [6.11] (1064c) + [6.12] (1626c) → skip
+  Check [3.8] (2196c) + [3.9] (548c) → skip
+  Check [6.14] (149c) + [6.15] (2665c) → skip
+  83 nodes (leaves=75)  #=6  ##=62  ###=15  synthetic=0  chars min=114 max=35683 avg=2470
+
+── Step 6 — Summarise unprocessed leaves ─────────────────────────────
+  [2.2] 'Health Safety Terminology Definitions' (247c) → 2 phrases
+  [1.4] 'Evacuation procedures for families, visitors, volunteers' (237c) → 4 phrases
+  [1.7] 'Evacuation routes: obstruction, marking' (131c) → 3 phrases
+  [1.10] 'Biennial Policy Monitoring and Review' (136c) → 4 phrases
+  [1.2] 'Fire Emergency Policy Key Terms' (951c) → 7 phrases
+  [1.5] 'Staff absences evacuation duties' (326c) → 4 phrases
+  [1.11] 'Fire Emergency Policy Reference Documents' (376c) → 8 phrases
+  [1.3] 'Policy statement and safety principles' (787c) → 12 phrases
+  [1.6] 'Visitor Contractor Safety Procedures' (1562c) → 13 phrases
+  [2.1] 'Health and Safety Scope and Responsibilities' (2434c) → 22 phrases
+  [1.1] 'Safety, Risk Assessment, Emergency Procedures Scope' (1114c) → 17 phrases
+  [3.5] 'Adverse weather preventive measures' (401c) → 4 phrases
+  [3.3] 'Emergency coordination with GVA, local authorities' (567c) → 6 phrases
+  [2.6] 'Policy Monitoring and Biennial Review by Leadership' (264c) → 4 phrases
+  [3.6] 'Monitoring Emergency Alerts and Sources' (241c) → 4 phrases
+  [2.7] 'Valencian Community Health Safety Reference Documents' (1565c) → 16 phrases
+  [3.4] 'Emergency class suspension and continuity' (980c) → 12 phrases
+  [2.4] 'First Aid, Accidents, Medical, Hygiene' (3272c) → 36 phrases
+  [3.9] 'DANA event safety recommendations' (534c) → 3 phrases
+  [3.7] 'Emergency Plan Supervision and Coordination' (446c) → 9 phrases
+  [3.8] 'Emergency Level Measures Correspondence Table' (2216c) → 17 phrases
+  [4.2] 'Food Policy Terminology Definitions' (788c) → 5 phrases
+  [2.5] 'Wasp Sting Protocol for Students' (2867c) → 33 phrases
+  [4.1] 'School food policy scope and values' (429c) → 9 phrases
+  [4.6] 'Key Policy Reference Documents' (963c) → 6 phrases
+  [4.5] 'Food policy monitoring and review' (372c) → 9 phrases
+  [5.6] 'Personal Data Processed Categories' (640c) → 8 phrases
+  [4.3] 'Comprehensive Food Policy Principles' (1977c) → 21 phrases
+  [5.5] 'Data Controller Identification Details' (433c) → 3 phrases
+  [5.2] 'Key Data Protection Terminology' (3165c) → 13 phrases
+  [5.4] 'Data Ownership and Processing Purpose' (1478c) → 10 phrases
+  [5.7] 'Personal Data Collection Purposes' (320c) → 7 phrases
+  [5.10] 'EEA data transfers to non-EU states' (833c) → 8 phrases
+  [5.3] 'Data Protection Policy Principles' (1874c) → 17 phrases
+  [5.8] 'Data collection methods and sources' (1372c) → 18 phrases
+  [5.1] 'Data Protection Policy Scope Statement' (985c) → 12 phrases
+  [4.4] 'Religious Fasting: School Policy and Support' (3679c) → 13 phrases
+  [5.11] 'Personal Data Retention Period' (561c) → 8 phrases
+  [5.13] 'Privacy policy personal data contact' (257c) → 4 phrases
+  [5.14] 'Data Security Measures and Risk Analysis' (1418c) → 10 phrases
+  [6.2] 'Whistleblowing Policy Key Terminology' (1492c) → 8 phrases
+  [5.17] 'Data Protection Reference Documents' (1113c) → 8 phrases
+  [5.16] 'Policy Monitoring and Review' (150c) → 4 phrases
+  [5.15] 'Policy legal context and updates' (434c) → 6 phrases
+  [5.12] 'Exercising your data protection rights' (1811c) → 13 phrases
+  [6.4] 'Whistleblowing Channel General Responsibilities' (1468c) → 13 phrases
+  [6.14] 'Policy Monitoring and Review' (150c) → 4 phrases
+  [6.1] 'Whistleblowing Channel Policy Scope' (848c) → 7 phrases
+  [6.7] 'Report Receipt and Registration Process' (1276c) → 13 phrases
+  [6.3] 'Whistleblowing Channel Policy Principles' (1574c) → 21 phrases
+  [6.12] 'Whistleblowing Report Personal Data Protection' (1642c) → 8 phrases
+  [6.11] 'False or Malicious Claims Reporting Policy' (1062c) → 8 phrases
+  [6.9] 'Whistleblowing Investigation Process and Rights' (1872c) → 22 phrases
+  [6.10] 'Proceedings Conclusion Decisions and Data Retention' (2670c) → 11 phrases
+  [6.8] 'Whistleblowing Report Admission Procedure' (2404c) → 21 phrases
+  [5.9] 'Personal data disclosure recipients' (544c) → 9 phrases
+  [6.15] 'Whistleblowing Legal Framework References' (2681c) → 20 phrases
+
+── Step 8 — Rewrite intermediates (bottom-up) ────────────────────────
+  [6.13] 'Whistleblowing Reportable Issues and Case Types Annex' ← 9 children → 34 phrases
+  [2.3] 'Health Safety Policy Statement Principles' ← 6 children → 48 phrases
+  [3] 'Weather alerts, emergencies action policy' ← 8 children → 46 phrases
+  [5] 'Data Protection Privacy Policy Overview' ← 17 children → 61 phrases
+  [4] 'School Food Policy and Guidelines' ← 6 children → 63 phrases
+  [1] 'Fire Emergency Policy and Procedures' ← 10 children → 62 phrases
+  [6] 'Whistleblowing Channel Policy and Procedures' ← 14 children → 194 phrases
+  [2] 'Comprehensive School Health Safety Policy' ← 7 children → 161 phrases
+
+── Step 9 — Validate ─────────────────────────────────────────────────
+  All checks passed.
+  phrase_count  min=2 max=194 avg=16
+  node_chars    min=131 max=35899 avg=2481
+
+── Cost Estimate ─────────────────────────────────────────────────────
+  gemini-2.5-flash
+    calls=68  in=25,669 tok  out=6,541 tok  ≈$0.0078
+  gemini-2.5-flash-lite
+    calls=87  in=20,353 tok  out=1,902 tok  ≈$0.0021
+  ────────────────────────────────────────────────
+  Total build cost: ≈$0.0099
+  (Prices: gemini-2.5-flash-lite in=$0.075/out=$0.3, gemini-2.5-flash in=$0.15/out=$0.6 per 1M tokens)
+
+Build time: 57.6s
