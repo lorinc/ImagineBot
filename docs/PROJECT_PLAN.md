@@ -370,6 +370,11 @@ These run in parallel with Sprint 2 — they are exploratory only, no production
 - avg query cost: ~$0.0015 (~660 queries/$)
 - 0 explosions (>40K) across all queries
 
+#### Indexer hardened — DONE 2026-04-13
+Single-file pageindex.py split into 7-module package: config, node, parser, llm, prompts,
+observability, pageindex (orchestrator). Eval confirmed identical behaviour post-refactor.
+Known gap: module-level globals in observability.py — ContextVar migration pending.
+
 ### POC2 — Multi-document routing
 **Status:** BLOCKED on POC1 post-mortem — design TBD
 

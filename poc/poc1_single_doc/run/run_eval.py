@@ -20,8 +20,9 @@ import time
 from pathlib import Path
 from typing import TextIO
 
-sys.path.insert(0, str(Path(__file__).parent.parent / "indexer"))
-from pageindex import MODEL_QUALITY, PRICING_PER_1M_USD, get_model, query_index  # noqa: E402
+sys.path.insert(0, str(Path(__file__).parent.parent))
+from indexer import MODEL_QUALITY, PRICING_PER_1M_USD, get_model  # noqa: E402
+from indexer.pageindex import query_index  # noqa: E402
 
 # ── Printing ──────────────────────────────────────────────────────────────────
 

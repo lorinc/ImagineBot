@@ -24,6 +24,14 @@ security      Rate limiting and input screening. Sits before the LLM call.
 User → channel_web → gateway → auth → access → security → knowledge → LLM → response
 ```
 
+## Research
+
+### PageIndex — single-document retrieval
+
+[`poc/poc1_single_doc/`](poc/poc1_single_doc/) — an LLM-indexed retrieval pipeline over markdown documents. No vector database, no embeddings. Build once; the index is a JSON file. Queries run in two LLM round trips: outline-based node selection, then synthesis over the selected sections.
+
+[Technical specification & usage guide →](poc/poc1_single_doc/SPEC.md)
+
 ## Development
 
 See `CLAUDE.md` for session protocol, spike queue, and service-level context.
