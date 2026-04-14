@@ -1,0 +1,73 @@
+Build: en_policy2_technology.md  (15KB)
+Started: 2026-04-14T20:56:28Z
+MAX_NODE_CHARS=5000  MIN_NODE_CHARS=1500
+MODEL_STRUCTURAL=gemini-2.5-flash-lite  MODEL_QUALITY=gemini-2.5-flash
+
+── Step 1 — Parse ────────────────────────────────────────────────────
+  23 nodes (leaves=18)  #=15  ##=8  ###=0  synthetic=0  chars min=201 max=2080 avg=931
+
+── Step 2 — Preamble hoisting ────────────────────────────────────────
+  Hoisted preamble [9] '9. Online Safety and E-Safety' (195c) → [9.p]
+  24 nodes (leaves=19)  #=15  ##=9  ###=0  synthetic=0  chars min=201 max=2080 avg=904
+
+── Steps 3–5 — Split oversized leaves ────────────────────────────────
+  24 nodes (leaves=19)  #=15  ##=9  ###=0  synthetic=0  chars min=201 max=2080 avg=904
+
+── Step 7 — Thin small nodes ─────────────────────────────────────────
+  Force-merge (preamble): [9.p] (229c) + [scope-and-responsibiliti] (597c)
+  Check [general-policy-for-mobil] (630c) + [sanctions-for-non-compli] (201c) → skip
+  Check [use-policy-and-exception] (694c) + [sanctions-for-misuse] (1353c) → skip
+    → [9.p] 'Online Safety & E-Safety Policy' (799c, 8 phrases)
+  Check [9.p] (799c) + [educating-pupils-on-e-sa] (253c) → skip
+  Check [9.p] (799c) + [educating-pupils-on-e-sa] (253c) → skip
+  Check [1] (1253c) + [2] (885c) → skip
+  Check [2] (885c) + [3] (1682c) → skip
+  Check [3] (1682c) + [4] (656c) → skip
+  Check [4] (656c) + [5] (1034c) → skip
+  Check [10] (587c) + [11] (411c) → skip
+  Check [11] (411c) + [12] (315c) → skip
+  Check [12] (315c) + [13] (241c) → skip
+  Check [13] (241c) + [14] (1001c) → skip
+  23 nodes (leaves=18)  #=15  ##=8  ###=0  synthetic=0  chars min=201 max=2080 avg=940
+
+── Step 6 — Summarise unprocessed leaves ─────────────────────────────
+  [2] 'Key Technology Policy Terminology' (904c) → 6 phrases
+  [10] 'School Camera Mobile Device Policy' (584c) → 6 phrases
+  [11] 'Device Loss, Theft, Damage Policy' (407c) → 7 phrases
+  [index] 'Montessori Mobile Device Online Safety Policy' (840c) → 23 phrases
+  [14] 'Policy and Legal Reference Documents' (1014c) → 12 phrases
+  [13] 'Policy Monitoring and Review' (244c) → 6 phrases
+  [4] 'Technology Policy Stakeholder Roles Responsibilities' (679c) → 12 phrases
+  [12] 'Complaints, Policy Violations, Staff Breaches' (324c) → 6 phrases
+  [staff-mobile-phone-use] 'Staff Mobile Phone Policy' (1960c) → 17 phrases
+  [5] 'Technology use guidelines by age' (1043c) → 18 phrases
+  [3] 'Technology Use Policy and Principles' (1684c) → 21 phrases
+  [educating-pupils-on-e-sa] 'Pupil E-Safety Curriculum Education' (260c) → 5 phrases
+  [use-policy-and-exception] 'Pupil Mobile Phone Use Policy Exceptions' (709c) → 9 phrases
+  [sanctions-for-non-compli] 'Visitor/Volunteer Non-Compliance Sanctions' (215c) → 6 phrases
+  [sanctions-for-misuse] 'Mobile Phone Misuse Sanctions and Procedures' (1377c) → 17 phrases
+  [1] 'Technology Policy Scope and Application' (1284c) → 25 phrases
+  [general-policy-for-mobil] 'Mobile Use Policy: Parents, Visitors, Volunteers' (649c) → 8 phrases
+
+── Step 8 — Rewrite intermediates (bottom-up) ────────────────────────
+  [9] 'Online Safety Policy and Education' ← 2 children → 13 phrases
+  [6] 'Staff Mobile Phone Policy' ← 1 children → 17 phrases
+  [imagine-montessori-schoo] 'Montessori Mobile Device Online Safety Policy' ← 1 children → 23 phrases
+  [8] 'Parents, Volunteers, Visitors Policy' ← 2 children → 16 phrases
+  [7] 'Pupils' mobile phone use policy' ← 2 children → 26 phrases
+
+── Step 9 — Validate ─────────────────────────────────────────────────
+  All checks passed.
+  phrase_count  min=5 max=26 avg=13
+  node_chars    min=215 max=2123 avg=955
+
+── Cost Estimate ─────────────────────────────────────────────────────
+  gemini-2.5-flash
+    calls=23  in=5,824 tok  out=1,719 tok  ≈$0.0019
+  gemini-2.5-flash-lite
+    calls=12  in=2,532 tok  out=132 tok  ≈$0.0002
+  ────────────────────────────────────────────────
+  Total build cost: ≈$0.0021
+  (Prices: gemini-2.5-flash-lite in=$0.075/out=$0.3, gemini-2.5-flash in=$0.15/out=$0.6 per 1M tokens)
+
+Build time: 18.2s

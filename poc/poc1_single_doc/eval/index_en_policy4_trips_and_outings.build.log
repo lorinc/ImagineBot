@@ -1,0 +1,70 @@
+Build: en_policy4_trips_and_outings.md  (13KB)
+Started: 2026-04-14T20:56:52Z
+MAX_NODE_CHARS=5000  MIN_NODE_CHARS=1500
+MODEL_STRUCTURAL=gemini-2.5-flash-lite  MODEL_QUALITY=gemini-2.5-flash
+
+── Step 1 — Parse ────────────────────────────────────────────────────
+  14 nodes (leaves=13)  #=1  ##=13  ###=0  synthetic=0  chars min=386 max=13967 avg=1991
+
+── Step 2 — Preamble hoisting ────────────────────────────────────────
+  14 nodes (leaves=13)  #=1  ##=13  ###=0  synthetic=0  chars min=386 max=13967 avg=1991
+
+── Steps 3–5 — Split oversized leaves ────────────────────────────────
+  14 nodes (leaves=13)  #=1  ##=13  ###=0  synthetic=0  chars min=386 max=13967 avg=1991
+
+── Step 7 — Thin small nodes ─────────────────────────────────────────
+  Check [1] (386c) + [2] (865c) → skip
+  Check [2] (865c) + [3] (704c) → skip
+  Check [3] (704c) + [4] (712c) → MERGE
+    → [3] 'Outings policy statement principles' (1383c, 7 phrases)
+  Check [3] (1383c) + [5] (794c) → skip
+  Check [5] (794c) + [6] (579c) → skip
+  Check [6] (579c) + [7] (1720c) → skip
+  Check [8] (3121c) + [9] (851c) → skip
+  Check [9] (851c) + [10] (679c) → skip
+  Check [10] (679c) + [11] (629c) → skip
+  Check [11] (629c) + [12] (607c) → skip
+  Check [12] (607c) + [13] (2271c) → skip
+  Check [1] (386c) + [2] (865c) → skip
+  Check [2] (865c) + [3] (1383c) → skip
+  Check [3] (1383c) + [5] (794c) → skip
+  Check [5] (794c) + [6] (579c) → skip
+  Check [6] (579c) + [7] (1720c) → skip
+  Check [8] (3121c) + [9] (851c) → skip
+  Check [9] (851c) + [10] (679c) → skip
+  Check [10] (679c) + [11] (629c) → skip
+  Check [11] (629c) + [12] (607c) → skip
+  Check [12] (607c) + [13] (2271c) → skip
+  13 nodes (leaves=12)  #=1  ##=12  ###=0  synthetic=0  chars min=386 max=13932 avg=2139
+
+── Step 6 — Summarise unprocessed leaves ─────────────────────────────
+  [2] 'Key Terms and Definitions for School Outings' (895c) → 5 phrases
+  [1] 'School Outings Purpose and Benefits' (413c) → 9 phrases
+  [13] 'Referenced Legal Frameworks and Policies' (2288c) → 10 phrases
+  [11] 'Inclusive and Accessible School Experiences' (641c) → 7 phrases
+  [10] 'School trip parent communication' (681c) → 6 phrases
+  [8] 'Accident and Emergency Procedures' (3106c) → 23 phrases
+  [9] 'Student Conduct, Dress, Digital Devices Policy' (879c) → 10 phrases
+  [7] 'Outing Safety and Emergency Procedures' (1724c) → 24 phrases
+  [6] 'Outing Supervision and Staff Roles' (572c) → 6 phrases
+  [12] 'Outing Monitoring and Policy Review' (617c) → 10 phrases
+  [5] 'Outing Planning and Preparation' (798c) → 12 phrases
+
+── Step 8 — Rewrite intermediates (bottom-up) ────────────────────────
+  [school-outings-policy] 'School Outings: Policy, Planning, Safety, Conduct' ← 12 children → 131 phrases
+
+── Step 9 — Validate ─────────────────────────────────────────────────
+  All checks passed.
+  phrase_count  min=5 max=131 avg=20
+  node_chars    min=413 max=14072 avg=2159
+
+── Cost Estimate ─────────────────────────────────────────────────────
+  gemini-2.5-flash
+    calls=13  in=4,779 tok  out=1,197 tok  ≈$0.0014
+  gemini-2.5-flash-lite
+    calls=21  in=4,679 tok  out=231 tok  ≈$0.0004
+  ────────────────────────────────────────────────
+  Total build cost: ≈$0.0019
+  (Prices: gemini-2.5-flash-lite in=$0.075/out=$0.3, gemini-2.5-flash in=$0.15/out=$0.6 per 1M tokens)
+
+Build time: 25.8s

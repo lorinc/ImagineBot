@@ -1,0 +1,47 @@
+{
+  "document": "multi-document corpus (6 en_* school policy documents)",
+  "queries": [
+    {
+      "id": "M1",
+      "type": "cross-doc",
+      "note": "Football/equipment during breaks — spans code-of-conduct and family manual",
+      "question": "Can my son bring a football to the school and play during breaks?"
+    },
+    {
+      "id": "M2",
+      "type": "cross-doc",
+      "note": "Photography on trips — spans technology policy and trips/outings policy",
+      "question": "What are the rules about taking photos of students during school trips?"
+    },
+    {
+      "id": "M3",
+      "type": "cross-doc",
+      "note": "Injury on a trip — spans trips/outings and health & safety",
+      "question": "What should happen if a student is injured during a school trip?"
+    },
+    {
+      "id": "M4",
+      "type": "cross-doc",
+      "note": "Mobile phones during sport — spans technology and code of conduct",
+      "question": "Are students allowed to use mobile phones during PE lessons?"
+    },
+    {
+      "id": "M5",
+      "type": "single-doc",
+      "note": "Abuse disclosure — should route to child protection only",
+      "question": "What is the correct procedure when a student discloses abuse to a teacher?"
+    },
+    {
+      "id": "M6",
+      "type": "single-doc",
+      "note": "Fire drill — should route to health & safety only",
+      "question": "What should happen after a fire drill and who is responsible?"
+    },
+    {
+      "id": "M7",
+      "type": "cross-doc",
+      "note": "Social media and school — spans technology policy and code of conduct",
+      "question": "What is the school's position on students posting about school on social media?"
+    }
+  ]
+}

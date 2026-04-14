@@ -1,0 +1,501 @@
+{
+  "source": "/home/lorinc/ClaudeCode/ImagineBot/data/pipeline/2026-03-22_001/02_ai_cleaned/en_policy2_technology.md",
+  "built_at": "2026-04-14T20:56:46Z",
+  "node_count": 23,
+  "build_time_s": 18.2,
+  "build_cost_usd": 0.0021345,
+  "build_token_usage": {
+    "gemini-2.5-flash-lite": {
+      "calls": 12,
+      "input_tokens": 2532,
+      "output_tokens": 132
+    },
+    "gemini-2.5-flash": {
+      "calls": 23,
+      "input_tokens": 5824,
+      "output_tokens": 1719
+    }
+  },
+  "build_log": "/home/lorinc/ClaudeCode/ImagineBot/poc/poc1_single_doc/eval/index_en_policy2_technology.build.log",
+  "level_counts": {
+    "1": 15,
+    "2": 8
+  },
+  "nodes_flat": [
+    {
+      "id": "imagine-montessori-schoo",
+      "level": 1,
+      "title": "Montessori Mobile Device Online Safety Policy",
+      "char_count": 0,
+      "full_text_char_count": 889,
+      "topics": "Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; Mobile phone use; Pupil mobile use; Parent; Volunteer; Visitor; Online safety; E-safety; Camera use; Device use; Device loss; Theft; Damage; Complaints; Policy violations; Monitoring; Policy review; Reference documents",
+      "phrase_count": 23,
+      "is_preamble": false,
+      "content": ""
+    },
+    {
+      "id": "index",
+      "level": 2,
+      "title": "Montessori Mobile Device Online Safety Policy",
+      "char_count": 790,
+      "full_text_char_count": 840,
+      "topics": "Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; Mobile phone use; Pupil mobile use; Parent; Volunteer; Visitor; Online safety; E-safety; Camera use; Device use; Device loss; Theft; Damage; Complaints; Policy violations; Monitoring; Policy review; Reference documents",
+      "phrase_count": 23,
+      "is_preamble": false,
+      "content": "[1. Scope](#scope)\n[2. Terminology](#terminology)\n[3. Policy Statement and Principles](#policy-statement-and-principles)\n[4. Roles and Responsibilities](#roles-and-responsibilities)\n[5. Technology Itinerary](#technology-itinerary)\n[6. Mobile Phone Use](#mobile-phone-use)\n[7. Pupils’ Mobile Phone Use](#pupils’-mobile-phone-use)\n[8. Parents, Volunteers, and Visitors](#parents,-volunteers,-and-visitors)\n[9. Online Safety and E-Safety](#online-safety-and-e-safety)\n[10. Use of Cameras and Mobile Devices](#use-of-cameras-and-mobile-devices)\n[11. Loss, Theft, or Damage of Devices](#loss,-theft,-or-damage-of-devices)\n[12. Complaints and Policy Violations](#complaints-and-policy-violations)\n[13. Monitoring and Review](#monitoring-and-review)\n[14. Reference Documents](#reference-documents)"
+    },
+    {
+      "id": "1",
+      "level": 1,
+      "title": "Technology Policy Scope and Application",
+      "char_count": 1241,
+      "full_text_char_count": 1284,
+      "topics": "Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; Safe responsible use; Device use guidelines; Pupils' device use; Staff device use; Parents' device use; Visitors' device use; Safeguarding support; Child protection support; Data protection support; Behaviour policy support; Technology challenges; Child protection risks; Data security risks; Lesson disruption; Theft and loss; Classroom usage; Policy applicability; Community responsibilities; Device usage obligations",
+      "phrase_count": 25,
+      "is_preamble": false,
+      "content": "Imagine Montessori School recognizes that technology and internet access are essential tools in education. This policy provides comprehensive guidelines on the use of mobile devices, personal technology, and online safety to ensure a secure environment for learning. The aims are to:\n\n*   Promote safe, responsible use of mobile phones and devices within the school.\n*   Define clear guidelines for mobile and device use among pupils, staff, parents, and visitors.\n*   Support safeguarding, child protection, data protection, and behaviour policies.\n\nThis policy addresses potential challenges related to technology use, such as risks to child protection, data security, lesson disruptions, theft, loss, and appropriate classroom usage.\n\nThis policy applies to all staff, pupils, parents, volunteers, and visitors at Imagine Montessori School. It covers the use of mobile devices, personal technology, and online safety within the school environment. The policy sets out clear guidelines for ensuring the responsible, secure, and professional use of technology, ensuring that all individuals in the school community are aware of their responsibilities and obligations regarding device usage, safeguarding, data protection, and online safety."
+    },
+    {
+      "id": "2",
+      "level": 1,
+      "title": "Key Technology Policy Terminology",
+      "char_count": 867,
+      "full_text_char_count": 904,
+      "topics": "Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding",
+      "phrase_count": 6,
+      "is_preamble": false,
+      "content": "*   **Personal Devices:** Mobile phones, smartwatches, tablets, laptops, and any other personal electronic devices owned by staff, pupils, or visitors.\n*   **School-Issued Devices:** Devices provided by the school for educational or administrative purposes.\n*   **E-Safety:** The practice of safeguarding pupils and staff from potential risks associated with internet use and online activities.\n*   **Confiscation:** The removal of a device from a pupil or staff member due to policy violations.\n*   **Data Protection:** Adherence to laws governing the privacy and security of personal data, including the General Data Protection Regulation (GDPR) and Spain’s LOPDGDD (Organic Law on the Protection of Personal Data and Digital Rights).\n*   **Safeguarding:** The measures and policies designed to protect children and vulnerable individuals from harm or exploitation."
+    },
+    {
+      "id": "3",
+      "level": 1,
+      "title": "Technology Use Policy and Principles",
+      "char_count": 1644,
+      "full_text_char_count": 1684,
+      "topics": "Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; Secure data handling; Data protection laws; No unauthorized photography; Parental consent; Educational images; Device security; Password protection; Report lost devices; Misuse sanctions; Device confiscation; Parental notification; Police involvement; Educational use only; Communication purposes; Unauthorized use sanctions",
+      "phrase_count": 21,
+      "is_preamble": false,
+      "content": "*   **Safe and Responsible Use:** All users of mobile devices and technology must act responsibly and professionally while using personal or school-issued devices. This includes ensuring that mobile devices are used in accordance with the school’s safeguarding policies and do not compromise the safety or well-being of the students or staff.\n*   **Confidentiality and Data Protection:** The school is committed to protecting the privacy and confidentiality of all individuals. All personal data, including mobile numbers and any other confidential information, must be securely stored and handled in compliance with data protection laws (GDPR and LOPDGDD).\n*   **Respect for Privacy:** The school enforces strict guidelines to prevent unauthorized photography or recording of pupils. Only authorized school personnel, with explicit parental consent, may take images of pupils for educational purposes.\n*   **Security of Devices:** Personal and school-issued devices must be secured with passwords or PINs to prevent unauthorized access. Devices should be kept secure at all times, and if lost or stolen, immediate reporting to the school authorities is required.\n*   **Sanctions for Misuse:** The school will take appropriate disciplinary action if mobile devices are misused. This may include confiscation of the device, parental notification, and in serious cases, police involvement.\n*   **Educational Purpose:** The use of mobile devices should be restricted to educational and communication purposes, in line with school protocols. Unauthorized usage, especially for personal reasons or disruptive behaviour, will be subject to sanctions."
+    },
+    {
+      "id": "4",
+      "level": 1,
+      "title": "Technology Policy Stakeholder Roles Responsibilities",
+      "char_count": 623,
+      "full_text_char_count": 679,
+      "topics": "Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; Pupil device security; Authorized device use; Respect school protocols; Parent visitor responsibilities; Prohibited photography recording; Explicit consent required",
+      "phrase_count": 12,
+      "is_preamble": false,
+      "content": "This policy applies to all staff, pupils, parents, volunteers, and visitors.\n\n*   **Specific Responsibilities:**\n    *   **Staff:** Enforce the policy, ensuring safeguarding and data protection practices are observed. Staff are required to secure personal and school-issued devices with passwords or PINs.\n    *   **Pupils:** Must secure devices with passwords to prevent unauthorised access. They should only use devices as permitted and respect school protocols.\n    *   **Parents/Visitors:** Follow the school’s mobile and device policy; taking photographs or recordings of pupils without explicit consent is prohibited."
+    },
+    {
+      "id": "5",
+      "level": 1,
+      "title": "Technology use guidelines by age",
+      "char_count": 1007,
+      "full_text_char_count": 1043,
+      "topics": "Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; Research projects 9-11; Handwritten work 9-11; Shared laptops 12-14; Weekly laptop use 12-14; ICT lessons 12-14; Personal laptops 15-18; Lesson complement 15-18; Project work 15-18; Headphones music policy; Chromebook music source; Study Hall music; Supervised music listening",
+      "phrase_count": 18,
+      "is_preamble": false,
+      "content": "*   **From 3 to 6 years old:** There is no contact with screens, except occasionally video content related.\n*   **From 6 to 9 years old (Lower):** They work 1 hour per week in IT (programming). They should only use a computer when appropriate for research purposes on projects under the teacher’s supervision, but all text processing will always be handwritten.\n*   **From 9 to 11 years old (Upper):** Some laptops are provided per classroom (shared use) for research purposes on projects. The work will always be delivered in handwriting.\n*   **From 12 to 14 years old (KS3):** There is a set of shared laptops for these ages. The expectation is to be used 2 to 4 hours per week including ICT weekly lesson.\n*   **From 15 to 18 (KS4 & KS5):** Each student has their own laptop, which is used as a complement to lessons and for project work. Use of headphones to listen to music will be allowed only if:\n    *   Music source being a Chromebook\n    *   During Study Hall\n    *   Under a teacher’s supervision"
+    },
+    {
+      "id": "6",
+      "level": 1,
+      "title": "Staff Mobile Phone Policy",
+      "char_count": 0,
+      "full_text_char_count": 1989,
+      "topics": "Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; Learning photos; Emergency device use; Off-site devices; School phones outing; System access; Data protection; Lost/stolen reporting; No personal contact; No social media; Emergency contact; Leadership approval",
+      "phrase_count": 17,
+      "is_preamble": false,
+      "content": ""
+    },
+    {
+      "id": "staff-mobile-phone-use",
+      "level": 2,
+      "title": "Staff Mobile Phone Policy",
+      "char_count": 1930,
+      "full_text_char_count": 1960,
+      "topics": "Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; Learning progress photos; Emergency device use; Off-site trip devices; Outing school phones; School system access; Data protection; Lost/stolen reporting; No personal contact; No social media; Emergency contact; Leadership approval",
+      "phrase_count": 17,
+      "is_preamble": false,
+      "content": "*   **Work Phones:** School-issued phones are provided to authorised staff members strictly for work-related communication, and all use should remain appropriate and professional at all times.\n*   Use of the mobile phone/smartwatches for personal reasons during contact time is not allowed.\n*   **Personal Devices:**\n    *   Staff may keep personal phones on silent/vibrate in outside class areas only, such as staff rooms. In the case of staff using their personal devices, it will be registered at school following the Bring Your Own Device (BYOD) agreement, therefore staff will be able to use it during contact hours to take pictures and keep a record of the students' learning progress in Transparent Classroom or Drive.\n    *   In specific situations, such as emergency evacuations or off-site trips, staff may use personal mobile devices in accordance with school protocols.\n    *   For outings, however, a school phone is always provided to ensure consistency and reliability. Additionally, we have a \"Bring Your Own Device\" (BYOD) agreement in place, allowing staff to use their personal devices for accessing the school system or email if they choose to, provided they adhere to the same safety and security measures required for school-issued devices. In all cases, the use of personal devices must align with the professional standards outlined in the Staff Code of Conduct.\n*   **In Case of Emergency:** Immediate contact should be coordinated through the school office if necessary. Any exceptions to these rules require approval from school leadership on a case-by-case basis.\n*   **Data Protection and Safeguarding:** Personal devices can only be used to process school data if registered with the school, with a requirement for prompt reporting if lost or stolen to mitigate data risks. Staff should avoid sharing personal contact details with parents or students and refrain from connecting through social media."
+    },
+    {
+      "id": "7",
+      "level": 1,
+      "title": "Pupils' mobile phone use policy",
+      "char_count": 0,
+      "full_text_char_count": 2123,
+      "topics": "Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; Day trip device ban; After-school club ban; Exceptional approval; Phone confiscation; Spanish law; Parent device collection; Device search; Data protection; Privacy rights; First confiscation; Second confiscation; Third confiscation; Incident report; Parent meeting; Inappropriate content; Police involvement; Disciplinary consequences; Suspension; Expulsion; Behaviour policy",
+      "phrase_count": 26,
+      "is_preamble": false,
+      "content": ""
+    },
+    {
+      "id": "use-policy-and-exception",
+      "level": 2,
+      "title": "Pupil Mobile Phone Use Policy Exceptions",
+      "char_count": 664,
+      "full_text_char_count": 709,
+      "topics": "Permitted phone use; Outside school hours use; Daily phone collection; Year 12 phone collection; Overnight trip phone use; Parent contact purpose; Day trip device prohibition; After-school club prohibition; Exceptional approval circumstances",
+      "phrase_count": 9,
+      "is_preamble": false,
+      "content": "*   **Permitted Use:** Pupils in Year 9 and above may bring phones for specific purposes, such as independent travel to and from school. However, mobile use is restricted to outside-school-hours.\n*   Phones will be collected every day by 09:00 am by the Tutors. In the case of Year 12, they will bring the phone by themselves to the staff room.\n*   **Off-Site and Overnight International Trips:** Mobile phones may be permitted on overnight trips with specific guidelines for use, primarily to contact parents in the morning or evening. Internet-enabled devices are prohibited during day trips or after-school clubs unless approved under exceptional circumstances."
+    },
+    {
+      "id": "sanctions-for-misuse",
+      "level": 2,
+      "title": "Mobile Phone Misuse Sanctions and Procedures",
+      "char_count": 1328,
+      "full_text_char_count": 1377,
+      "topics": "Confiscation; Spanish law; Parent collection; Device search; Data protection; Privacy rights; 1st confiscation; 2nd confiscation; 3rd confiscation; Incident report; Parent meeting; Inappropriate content; Police involvement; Disciplinary consequences; Suspension; Expulsion; Behaviour Policy",
+      "phrase_count": 17,
+      "is_preamble": false,
+      "content": "*   **Confiscation:** In accordance with Spanish law and educational procedures, staff may confiscate mobile devices if they are used inappropriately during school hours. In such cases, parents will be required to collect the confiscated device. If there is a reasonable suspicion that the device contains inappropriate or illegal content, the school is authorized to search the device. This will be done in compliance with current data protection regulations and under the guidance of the school’s safeguarding and disciplinary policies. Any action taken will respect the privacy rights of students while ensuring the safety and well-being of the school community.\n    *   Our procedure with confiscation is as follows:\n        *   1st time - Confiscated with the tutor until the end of the day.\n        *   2nd time - Confiscated with the Headteacher until a parent comes and collects it. An incident report will be sent to parents.\n        *   3rd time - An incident report will be sent and a meeting will be scheduled with parents.\n*   **Disciplinary Measures:** Incidents involving inappropriate content (e.g., sexting, upskirting, violent threats) may lead to police involvement and serious disciplinary consequences, such as suspension or expulsion, following our \"Behaviour Policy\" inside the \"Code of Conduct\" document."
+    },
+    {
+      "id": "8",
+      "level": 1,
+      "title": "Parents, Volunteers, Visitors Policy",
+      "char_count": 0,
+      "full_text_char_count": 906,
+      "topics": "Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; Parent contact restriction; Performances mobile use; Personal responsibility; Non-compliance sanctions; Guideline non-adherence; Restricted event access; Restricted grounds access; Visitor restrictions; Volunteer restrictions; Incident severity impact",
+      "phrase_count": 16,
+      "is_preamble": false,
+      "content": ""
+    },
+    {
+      "id": "general-policy-for-mobil",
+      "level": 2,
+      "title": "Mobile Use Policy: Parents, Visitors, Volunteers",
+      "char_count": 596,
+      "full_text_char_count": 649,
+      "topics": "School grounds mobile rules; No pupil photos; No mobile near pupils; School trips mobile rules; No pupil photos on trips; No parent contact; Performances mobile use; Personal responsibility",
+      "phrase_count": 8,
+      "is_preamble": false,
+      "content": "*   **On School Grounds:** Parents, visitors, and volunteers must adhere to staff guidelines regarding device use, including prohibitions on unauthorized recordings or photos of pupils, and refraining from using mobiles where pupils are present.\n*   **School Trips:** Parents or volunteers assisting on school trips or events must not use mobiles to contact other parents or take photos of pupils, their work, or any other potentially identifying information.\n*   **School Performances:** Parents are permitted to use their personal mobiles during school festivities, at their own responsibility."
+    },
+    {
+      "id": "sanctions-for-non-compli",
+      "level": 2,
+      "title": "Visitor/Volunteer Non-Compliance Sanctions",
+      "char_count": 168,
+      "full_text_char_count": 215,
+      "topics": "Guideline non-adherence; Restricted event access; Restricted grounds access; Visitor restrictions; Volunteer restrictions; Incident severity impact",
+      "phrase_count": 6,
+      "is_preamble": false,
+      "content": "Failure to adhere to these guidelines may result in restricted access to school events or grounds for visitors or volunteers, depending on the severity of the incident."
+    },
+    {
+      "id": "9",
+      "level": 1,
+      "title": "Online Safety Policy and Education",
+      "char_count": 0,
+      "full_text_char_count": 1099,
+      "topics": "Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; Authorized communication; Data protection compliance; Responsible internet use; Validate online information; Recognize online risks; Respect privacy; Respect copyright",
+      "phrase_count": 13,
+      "is_preamble": false,
+      "content": ""
+    },
+    {
+      "id": "9.p",
+      "level": 2,
+      "title": "Online Safety & E-Safety Policy",
+      "char_count": 763,
+      "full_text_char_count": 799,
+      "topics": "Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; Authorized communication; Data protection compliance",
+      "phrase_count": 8,
+      "is_preamble": false,
+      "content": "Imagine Montessori School is committed to the online safety of all pupils and staff. E-safety guidelines are in place to help manage the risks associated with digital devices and internet access.\n\n*   **Controlled Access:** All our school laptops and students' laptops are enrolled under the Imagine domain which prevents the misuse of internet access. Therefore, social media sites and improper content are restricted through school protection systems in place.\n*   **Staff Online Conduct:** Staff are not permitted to connect with pupils on personal social media platforms. Staff communications with pupils must only occur through school-authorized channels. Additionally, any personal data stored on school devices must comply with data protection regulations."
+    },
+    {
+      "id": "educating-pupils-on-e-sa",
+      "level": 2,
+      "title": "Pupil E-Safety Curriculum Education",
+      "char_count": 220,
+      "full_text_char_count": 260,
+      "topics": "Responsible internet use; Validate online information; Recognize online risks; Respect privacy; Respect copyright",
+      "phrase_count": 5,
+      "is_preamble": false,
+      "content": "The school’s e-safety curriculum teaches pupils responsible and secure use of the internet, emphasizing behaviors like validation of online information, recognition of online risks, and respect for privacy and copyright."
+    },
+    {
+      "id": "10",
+      "level": 1,
+      "title": "School Camera Mobile Device Policy",
+      "char_count": 546,
+      "full_text_char_count": 584,
+      "topics": "Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety",
+      "phrase_count": 6,
+      "is_preamble": false,
+      "content": "The school’s policy on mobile phones and cameras aligns with safeguarding protocols to protect pupils’ privacy and safety.\n\n*   **Parental Photography:** Parents are prohibited from photographing or recording pupils during events unless specified by the school (e.g., end-of-year celebrations).\n*   **Internet Filtering and Monitoring:** The school collaborates with internet service providers to ensure effective filtering. Any inappropriate content discovered is reported to the Headteachers and reviewed regularly to maintain safety standards."
+    },
+    {
+      "id": "11",
+      "level": 1,
+      "title": "Device Loss, Theft, Damage Policy",
+      "char_count": 370,
+      "full_text_char_count": 407,
+      "topics": "Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; Passcodes",
+      "phrase_count": 7,
+      "is_preamble": false,
+      "content": "*   **Liability:** Devices brought to school are the owner’s responsibility; the school assumes no liability for lost, stolen, or damaged items.\n*   **Confiscated Devices:** Confiscated phones are securely stored until collected by a parent or guardian. Pupils and staff must label devices appropriately and take reasonable security measures, such as enabling passcodes."
+    },
+    {
+      "id": "12",
+      "level": 1,
+      "title": "Complaints, Policy Violations, Staff Breaches",
+      "char_count": 275,
+      "full_text_char_count": 324,
+      "topics": "Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities",
+      "phrase_count": 6,
+      "is_preamble": false,
+      "content": "Complaints related to internet or device misuse are handled according to the school’s Complaints Policy inside our “Child Protection and Safeguarding Document”. Policy breaches involving staff may result in disciplinary measures or referral to local authorities if necessary."
+    },
+    {
+      "id": "13",
+      "level": 1,
+      "title": "Policy Monitoring and Review",
+      "char_count": 212,
+      "full_text_char_count": 244,
+      "topics": "Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form",
+      "phrase_count": 6,
+      "is_preamble": false,
+      "content": "**School Leadership:** The Imagine Leadership Team is responsible for monitoring and reviewing the policy biennially, with all instances of policy breaches documented through a “Record of Concern” form as needed."
+    },
+    {
+      "id": "14",
+      "level": 1,
+      "title": "Policy and Legal Reference Documents",
+      "char_count": 974,
+      "full_text_char_count": 1014,
+      "topics": "Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; Child protection policy; Safeguarding procedures; Complaints policy; Technology misuse complaints; Staff code of conduct; Technology use expectations",
+      "phrase_count": 12,
+      "is_preamble": false,
+      "content": "*   **Spanish Education Law (LOE) and LOMLOE:** Legislation governing the rights and responsibilities of students, parents, and educational institutions in Spain.\n*   **Organic Law 3/2018 (LOPDGDD):** The law regulating data protection and the guarantee of digital rights in Spain, including provisions for the use of personal data within educational institutions.\n*   **General Data Protection Regulation (GDPR):** European Union legislation governing data protection and privacy.\n*   **Imagine Montessori School Safeguarding and Child Protection Policy:** A comprehensive document outlining the procedures for ensuring the safety and well-being of all children within the school.\n*   **Imagine Montessori School Complaints Policy:** Procedures for addressing complaints related to the misuse of mobile devices and technology in the school.\n*   **Staff Code of Conduct:** The document outlining staff expectations, including the proper use of mobile devices and technology."
+    }
+  ],
+  "tree": {
+    "id": "root",
+    "level": 0,
+    "title": "Document Root",
+    "content": "",
+    "topics": "",
+    "is_preamble": false,
+    "children": [
+      {
+        "id": "imagine-montessori-schoo",
+        "level": 1,
+        "title": "Montessori Mobile Device Online Safety Policy",
+        "content": "",
+        "topics": "Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; Mobile phone use; Pupil mobile use; Parent; Volunteer; Visitor; Online safety; E-safety; Camera use; Device use; Device loss; Theft; Damage; Complaints; Policy violations; Monitoring; Policy review; Reference documents",
+        "is_preamble": false,
+        "children": [
+          {
+            "id": "index",
+            "level": 2,
+            "title": "Montessori Mobile Device Online Safety Policy",
+            "content": "[1. Scope](#scope)\n[2. Terminology](#terminology)\n[3. Policy Statement and Principles](#policy-statement-and-principles)\n[4. Roles and Responsibilities](#roles-and-responsibilities)\n[5. Technology Itinerary](#technology-itinerary)\n[6. Mobile Phone Use](#mobile-phone-use)\n[7. Pupils’ Mobile Phone Use](#pupils’-mobile-phone-use)\n[8. Parents, Volunteers, and Visitors](#parents,-volunteers,-and-visitors)\n[9. Online Safety and E-Safety](#online-safety-and-e-safety)\n[10. Use of Cameras and Mobile Devices](#use-of-cameras-and-mobile-devices)\n[11. Loss, Theft, or Damage of Devices](#loss,-theft,-or-damage-of-devices)\n[12. Complaints and Policy Violations](#complaints-and-policy-violations)\n[13. Monitoring and Review](#monitoring-and-review)\n[14. Reference Documents](#reference-documents)",
+            "topics": "Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; Mobile phone use; Pupil mobile use; Parent; Volunteer; Visitor; Online safety; E-safety; Camera use; Device use; Device loss; Theft; Damage; Complaints; Policy violations; Monitoring; Policy review; Reference documents",
+            "is_preamble": false,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "1",
+        "level": 1,
+        "title": "Technology Policy Scope and Application",
+        "content": "Imagine Montessori School recognizes that technology and internet access are essential tools in education. This policy provides comprehensive guidelines on the use of mobile devices, personal technology, and online safety to ensure a secure environment for learning. The aims are to:\n\n*   Promote safe, responsible use of mobile phones and devices within the school.\n*   Define clear guidelines for mobile and device use among pupils, staff, parents, and visitors.\n*   Support safeguarding, child protection, data protection, and behaviour policies.\n\nThis policy addresses potential challenges related to technology use, such as risks to child protection, data security, lesson disruptions, theft, loss, and appropriate classroom usage.\n\nThis policy applies to all staff, pupils, parents, volunteers, and visitors at Imagine Montessori School. It covers the use of mobile devices, personal technology, and online safety within the school environment. The policy sets out clear guidelines for ensuring the responsible, secure, and professional use of technology, ensuring that all individuals in the school community are aware of their responsibilities and obligations regarding device usage, safeguarding, data protection, and online safety.",
+        "topics": "Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; Safe responsible use; Device use guidelines; Pupils' device use; Staff device use; Parents' device use; Visitors' device use; Safeguarding support; Child protection support; Data protection support; Behaviour policy support; Technology challenges; Child protection risks; Data security risks; Lesson disruption; Theft and loss; Classroom usage; Policy applicability; Community responsibilities; Device usage obligations",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "2",
+        "level": 1,
+        "title": "Key Technology Policy Terminology",
+        "content": "*   **Personal Devices:** Mobile phones, smartwatches, tablets, laptops, and any other personal electronic devices owned by staff, pupils, or visitors.\n*   **School-Issued Devices:** Devices provided by the school for educational or administrative purposes.\n*   **E-Safety:** The practice of safeguarding pupils and staff from potential risks associated with internet use and online activities.\n*   **Confiscation:** The removal of a device from a pupil or staff member due to policy violations.\n*   **Data Protection:** Adherence to laws governing the privacy and security of personal data, including the General Data Protection Regulation (GDPR) and Spain’s LOPDGDD (Organic Law on the Protection of Personal Data and Digital Rights).\n*   **Safeguarding:** The measures and policies designed to protect children and vulnerable individuals from harm or exploitation.",
+        "topics": "Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "3",
+        "level": 1,
+        "title": "Technology Use Policy and Principles",
+        "content": "*   **Safe and Responsible Use:** All users of mobile devices and technology must act responsibly and professionally while using personal or school-issued devices. This includes ensuring that mobile devices are used in accordance with the school’s safeguarding policies and do not compromise the safety or well-being of the students or staff.\n*   **Confidentiality and Data Protection:** The school is committed to protecting the privacy and confidentiality of all individuals. All personal data, including mobile numbers and any other confidential information, must be securely stored and handled in compliance with data protection laws (GDPR and LOPDGDD).\n*   **Respect for Privacy:** The school enforces strict guidelines to prevent unauthorized photography or recording of pupils. Only authorized school personnel, with explicit parental consent, may take images of pupils for educational purposes.\n*   **Security of Devices:** Personal and school-issued devices must be secured with passwords or PINs to prevent unauthorized access. Devices should be kept secure at all times, and if lost or stolen, immediate reporting to the school authorities is required.\n*   **Sanctions for Misuse:** The school will take appropriate disciplinary action if mobile devices are misused. This may include confiscation of the device, parental notification, and in serious cases, police involvement.\n*   **Educational Purpose:** The use of mobile devices should be restricted to educational and communication purposes, in line with school protocols. Unauthorized usage, especially for personal reasons or disruptive behaviour, will be subject to sanctions.",
+        "topics": "Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; Secure data handling; Data protection laws; No unauthorized photography; Parental consent; Educational images; Device security; Password protection; Report lost devices; Misuse sanctions; Device confiscation; Parental notification; Police involvement; Educational use only; Communication purposes; Unauthorized use sanctions",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "4",
+        "level": 1,
+        "title": "Technology Policy Stakeholder Roles Responsibilities",
+        "content": "This policy applies to all staff, pupils, parents, volunteers, and visitors.\n\n*   **Specific Responsibilities:**\n    *   **Staff:** Enforce the policy, ensuring safeguarding and data protection practices are observed. Staff are required to secure personal and school-issued devices with passwords or PINs.\n    *   **Pupils:** Must secure devices with passwords to prevent unauthorised access. They should only use devices as permitted and respect school protocols.\n    *   **Parents/Visitors:** Follow the school’s mobile and device policy; taking photographs or recordings of pupils without explicit consent is prohibited.",
+        "topics": "Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; Pupil device security; Authorized device use; Respect school protocols; Parent visitor responsibilities; Prohibited photography recording; Explicit consent required",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "5",
+        "level": 1,
+        "title": "Technology use guidelines by age",
+        "content": "*   **From 3 to 6 years old:** There is no contact with screens, except occasionally video content related.\n*   **From 6 to 9 years old (Lower):** They work 1 hour per week in IT (programming). They should only use a computer when appropriate for research purposes on projects under the teacher’s supervision, but all text processing will always be handwritten.\n*   **From 9 to 11 years old (Upper):** Some laptops are provided per classroom (shared use) for research purposes on projects. The work will always be delivered in handwriting.\n*   **From 12 to 14 years old (KS3):** There is a set of shared laptops for these ages. The expectation is to be used 2 to 4 hours per week including ICT weekly lesson.\n*   **From 15 to 18 (KS4 & KS5):** Each student has their own laptop, which is used as a complement to lessons and for project work. Use of headphones to listen to music will be allowed only if:\n    *   Music source being a Chromebook\n    *   During Study Hall\n    *   Under a teacher’s supervision",
+        "topics": "Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; Research projects 9-11; Handwritten work 9-11; Shared laptops 12-14; Weekly laptop use 12-14; ICT lessons 12-14; Personal laptops 15-18; Lesson complement 15-18; Project work 15-18; Headphones music policy; Chromebook music source; Study Hall music; Supervised music listening",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "6",
+        "level": 1,
+        "title": "Staff Mobile Phone Policy",
+        "content": "",
+        "topics": "Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; Learning photos; Emergency device use; Off-site devices; School phones outing; System access; Data protection; Lost/stolen reporting; No personal contact; No social media; Emergency contact; Leadership approval",
+        "is_preamble": false,
+        "children": [
+          {
+            "id": "staff-mobile-phone-use",
+            "level": 2,
+            "title": "Staff Mobile Phone Policy",
+            "content": "*   **Work Phones:** School-issued phones are provided to authorised staff members strictly for work-related communication, and all use should remain appropriate and professional at all times.\n*   Use of the mobile phone/smartwatches for personal reasons during contact time is not allowed.\n*   **Personal Devices:**\n    *   Staff may keep personal phones on silent/vibrate in outside class areas only, such as staff rooms. In the case of staff using their personal devices, it will be registered at school following the Bring Your Own Device (BYOD) agreement, therefore staff will be able to use it during contact hours to take pictures and keep a record of the students' learning progress in Transparent Classroom or Drive.\n    *   In specific situations, such as emergency evacuations or off-site trips, staff may use personal mobile devices in accordance with school protocols.\n    *   For outings, however, a school phone is always provided to ensure consistency and reliability. Additionally, we have a \"Bring Your Own Device\" (BYOD) agreement in place, allowing staff to use their personal devices for accessing the school system or email if they choose to, provided they adhere to the same safety and security measures required for school-issued devices. In all cases, the use of personal devices must align with the professional standards outlined in the Staff Code of Conduct.\n*   **In Case of Emergency:** Immediate contact should be coordinated through the school office if necessary. Any exceptions to these rules require approval from school leadership on a case-by-case basis.\n*   **Data Protection and Safeguarding:** Personal devices can only be used to process school data if registered with the school, with a requirement for prompt reporting if lost or stolen to mitigate data risks. Staff should avoid sharing personal contact details with parents or students and refrain from connecting through social media.",
+            "topics": "Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; Learning progress photos; Emergency device use; Off-site trip devices; Outing school phones; School system access; Data protection; Lost/stolen reporting; No personal contact; No social media; Emergency contact; Leadership approval",
+            "is_preamble": false,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "7",
+        "level": 1,
+        "title": "Pupils' mobile phone use policy",
+        "content": "",
+        "topics": "Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; Day trip device ban; After-school club ban; Exceptional approval; Phone confiscation; Spanish law; Parent device collection; Device search; Data protection; Privacy rights; First confiscation; Second confiscation; Third confiscation; Incident report; Parent meeting; Inappropriate content; Police involvement; Disciplinary consequences; Suspension; Expulsion; Behaviour policy",
+        "is_preamble": false,
+        "children": [
+          {
+            "id": "use-policy-and-exception",
+            "level": 2,
+            "title": "Pupil Mobile Phone Use Policy Exceptions",
+            "content": "*   **Permitted Use:** Pupils in Year 9 and above may bring phones for specific purposes, such as independent travel to and from school. However, mobile use is restricted to outside-school-hours.\n*   Phones will be collected every day by 09:00 am by the Tutors. In the case of Year 12, they will bring the phone by themselves to the staff room.\n*   **Off-Site and Overnight International Trips:** Mobile phones may be permitted on overnight trips with specific guidelines for use, primarily to contact parents in the morning or evening. Internet-enabled devices are prohibited during day trips or after-school clubs unless approved under exceptional circumstances.",
+            "topics": "Permitted phone use; Outside school hours use; Daily phone collection; Year 12 phone collection; Overnight trip phone use; Parent contact purpose; Day trip device prohibition; After-school club prohibition; Exceptional approval circumstances",
+            "is_preamble": false,
+            "children": []
+          },
+          {
+            "id": "sanctions-for-misuse",
+            "level": 2,
+            "title": "Mobile Phone Misuse Sanctions and Procedures",
+            "content": "*   **Confiscation:** In accordance with Spanish law and educational procedures, staff may confiscate mobile devices if they are used inappropriately during school hours. In such cases, parents will be required to collect the confiscated device. If there is a reasonable suspicion that the device contains inappropriate or illegal content, the school is authorized to search the device. This will be done in compliance with current data protection regulations and under the guidance of the school’s safeguarding and disciplinary policies. Any action taken will respect the privacy rights of students while ensuring the safety and well-being of the school community.\n    *   Our procedure with confiscation is as follows:\n        *   1st time - Confiscated with the tutor until the end of the day.\n        *   2nd time - Confiscated with the Headteacher until a parent comes and collects it. An incident report will be sent to parents.\n        *   3rd time - An incident report will be sent and a meeting will be scheduled with parents.\n*   **Disciplinary Measures:** Incidents involving inappropriate content (e.g., sexting, upskirting, violent threats) may lead to police involvement and serious disciplinary consequences, such as suspension or expulsion, following our \"Behaviour Policy\" inside the \"Code of Conduct\" document.",
+            "topics": "Confiscation; Spanish law; Parent collection; Device search; Data protection; Privacy rights; 1st confiscation; 2nd confiscation; 3rd confiscation; Incident report; Parent meeting; Inappropriate content; Police involvement; Disciplinary consequences; Suspension; Expulsion; Behaviour Policy",
+            "is_preamble": false,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "8",
+        "level": 1,
+        "title": "Parents, Volunteers, Visitors Policy",
+        "content": "",
+        "topics": "Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; Parent contact restriction; Performances mobile use; Personal responsibility; Non-compliance sanctions; Guideline non-adherence; Restricted event access; Restricted grounds access; Visitor restrictions; Volunteer restrictions; Incident severity impact",
+        "is_preamble": false,
+        "children": [
+          {
+            "id": "general-policy-for-mobil",
+            "level": 2,
+            "title": "Mobile Use Policy: Parents, Visitors, Volunteers",
+            "content": "*   **On School Grounds:** Parents, visitors, and volunteers must adhere to staff guidelines regarding device use, including prohibitions on unauthorized recordings or photos of pupils, and refraining from using mobiles where pupils are present.\n*   **School Trips:** Parents or volunteers assisting on school trips or events must not use mobiles to contact other parents or take photos of pupils, their work, or any other potentially identifying information.\n*   **School Performances:** Parents are permitted to use their personal mobiles during school festivities, at their own responsibility.",
+            "topics": "School grounds mobile rules; No pupil photos; No mobile near pupils; School trips mobile rules; No pupil photos on trips; No parent contact; Performances mobile use; Personal responsibility",
+            "is_preamble": false,
+            "children": []
+          },
+          {
+            "id": "sanctions-for-non-compli",
+            "level": 2,
+            "title": "Visitor/Volunteer Non-Compliance Sanctions",
+            "content": "Failure to adhere to these guidelines may result in restricted access to school events or grounds for visitors or volunteers, depending on the severity of the incident.",
+            "topics": "Guideline non-adherence; Restricted event access; Restricted grounds access; Visitor restrictions; Volunteer restrictions; Incident severity impact",
+            "is_preamble": false,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "9",
+        "level": 1,
+        "title": "Online Safety Policy and Education",
+        "content": "",
+        "topics": "Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; Authorized communication; Data protection compliance; Responsible internet use; Validate online information; Recognize online risks; Respect privacy; Respect copyright",
+        "is_preamble": false,
+        "children": [
+          {
+            "id": "9.p",
+            "level": 2,
+            "title": "Online Safety & E-Safety Policy",
+            "content": "Imagine Montessori School is committed to the online safety of all pupils and staff. E-safety guidelines are in place to help manage the risks associated with digital devices and internet access.\n\n*   **Controlled Access:** All our school laptops and students' laptops are enrolled under the Imagine domain which prevents the misuse of internet access. Therefore, social media sites and improper content are restricted through school protection systems in place.\n*   **Staff Online Conduct:** Staff are not permitted to connect with pupils on personal social media platforms. Staff communications with pupils must only occur through school-authorized channels. Additionally, any personal data stored on school devices must comply with data protection regulations.",
+            "topics": "Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; Authorized communication; Data protection compliance",
+            "is_preamble": false,
+            "children": []
+          },
+          {
+            "id": "educating-pupils-on-e-sa",
+            "level": 2,
+            "title": "Pupil E-Safety Curriculum Education",
+            "content": "The school’s e-safety curriculum teaches pupils responsible and secure use of the internet, emphasizing behaviors like validation of online information, recognition of online risks, and respect for privacy and copyright.",
+            "topics": "Responsible internet use; Validate online information; Recognize online risks; Respect privacy; Respect copyright",
+            "is_preamble": false,
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "10",
+        "level": 1,
+        "title": "School Camera Mobile Device Policy",
+        "content": "The school’s policy on mobile phones and cameras aligns with safeguarding protocols to protect pupils’ privacy and safety.\n\n*   **Parental Photography:** Parents are prohibited from photographing or recording pupils during events unless specified by the school (e.g., end-of-year celebrations).\n*   **Internet Filtering and Monitoring:** The school collaborates with internet service providers to ensure effective filtering. Any inappropriate content discovered is reported to the Headteachers and reviewed regularly to maintain safety standards.",
+        "topics": "Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "11",
+        "level": 1,
+        "title": "Device Loss, Theft, Damage Policy",
+        "content": "*   **Liability:** Devices brought to school are the owner’s responsibility; the school assumes no liability for lost, stolen, or damaged items.\n*   **Confiscated Devices:** Confiscated phones are securely stored until collected by a parent or guardian. Pupils and staff must label devices appropriately and take reasonable security measures, such as enabling passcodes.",
+        "topics": "Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; Passcodes",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "12",
+        "level": 1,
+        "title": "Complaints, Policy Violations, Staff Breaches",
+        "content": "Complaints related to internet or device misuse are handled according to the school’s Complaints Policy inside our “Child Protection and Safeguarding Document”. Policy breaches involving staff may result in disciplinary measures or referral to local authorities if necessary.",
+        "topics": "Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "13",
+        "level": 1,
+        "title": "Policy Monitoring and Review",
+        "content": "**School Leadership:** The Imagine Leadership Team is responsible for monitoring and reviewing the policy biennially, with all instances of policy breaches documented through a “Record of Concern” form as needed.",
+        "topics": "Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form",
+        "is_preamble": false,
+        "children": []
+      },
+      {
+        "id": "14",
+        "level": 1,
+        "title": "Policy and Legal Reference Documents",
+        "content": "*   **Spanish Education Law (LOE) and LOMLOE:** Legislation governing the rights and responsibilities of students, parents, and educational institutions in Spain.\n*   **Organic Law 3/2018 (LOPDGDD):** The law regulating data protection and the guarantee of digital rights in Spain, including provisions for the use of personal data within educational institutions.\n*   **General Data Protection Regulation (GDPR):** European Union legislation governing data protection and privacy.\n*   **Imagine Montessori School Safeguarding and Child Protection Policy:** A comprehensive document outlining the procedures for ensuring the safety and well-being of all children within the school.\n*   **Imagine Montessori School Complaints Policy:** Procedures for addressing complaints related to the misuse of mobile devices and technology in the school.\n*   **Staff Code of Conduct:** The document outlining staff expectations, including the proper use of mobile devices and technology.",
+        "topics": "Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; Child protection policy; Safeguarding procedures; Complaints policy; Technology misuse complaints; Staff code of conduct; Technology use expectations",
+        "is_preamble": false,
+        "children": []
+      }
+    ]
+  }
+}

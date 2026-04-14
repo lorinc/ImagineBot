@@ -98,3 +98,19 @@ def make_synthesize_prompt(question: str, sections_text: str) -> str:
         f"QUESTION: {question}\n\n"
         f"SECTIONS:\n{sections_text}"
     )
+
+
+def make_route_prompt(routing_outline: str, question: str) -> str:
+    """Prompt for multi-doc routing: select which document(s) to search."""
+    return (
+        "You are routing a question to the relevant school document(s). "
+        "Below is a compact outline of each document: L1 section titles and representative topics.\n\n"
+        f"DOCUMENTS:\n{routing_outline}\n\n"
+        f"QUESTION: {question}\n\n"
+        "Select the 1–2 document IDs (exactly as shown in the === header, "
+        "e.g. 'en_policy1_child_protection') most likely to contain the answer. "
+        "Select 2 only if the question clearly requires content from both. "
+        "Return JSON with:\n"
+        "  selected_doc_ids: array of document IDs\n"
+        "  reasoning: one sentence explaining the choice"
+    )

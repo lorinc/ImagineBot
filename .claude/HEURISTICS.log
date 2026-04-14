@@ -560,3 +560,86 @@ PREVENTED_BY: Any asyncio.gather over LLM calls needs retry+backoff on 429.
               Five attempts at 5s/10s/20s/40s covers typical Vertex quota reset windows.
 SOLUTION: Added try/except ResourceExhausted with exponential backoff in _llm_call.
 DEAD_ENDS: Manual retries (running build again) failed repeatedly before backoff was added.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-13]
+CATEGORY: BUILD_BUG
+SERVICE: poc/indexer
+TASK: pageindex monolith → package refactor
+SYMPTOM: `python3 indexer/pageindex.py build ...` fails with ImportError after converting
+         to a package with relative imports. Previously ran as a script; now fails.
+ROOT_CAUSE: Relative imports (`from .config import X`) require the file to be loaded
+            as part of a package. Direct script execution sets __name__ = "__main__"
+            before package context is established.
+PREVENTED_BY: When adding relative imports to any Python file, update all call sites
+              to use `python3 -m package.module`, not `python3 path/to/module.py`.
+              Do this at the same time as the refactor, not after.
+SOLUTION: Updated all build commands to `python3 -m indexer.pageindex build ...`
+DEAD_ENDS: None; caught on first test run.
+
+[2026-04-13]
+CATEGORY: BUILD_BUG
+SERVICE: poc/indexer
+TASK: pageindex monolith → package refactor
+SYMPTOM: `python3 -m indexer.pageindex` emits RuntimeWarning: "module found in
+         sys.modules after import of package, but prior to execution as __main__"
+ROOT_CAUSE: __init__.py imported from `pageindex` (re-exporting build_index). When
+            Python runs indexer.pageindex as __main__ it imports the package first,
+            putting pageindex in sys.modules before it runs as __main__.
+PREVENTED_BY: Keep __init__.py shallow — never import from a submodule that may be
+              run as __main__. Re-export only from leaf modules (config, llm).
+              Consumers of the orchestrator import from indexer.pageindex directly.
+SOLUTION: Removed build_index/query_index from __init__.py.
+DEAD_ENDS: None; fixed in one pass.
+
+[2026-04-13]
+CATEGORY: CONCURRENCY_BUG
+SERVICE: poc/indexer
+TASK: pageindex hardening for multi-tenant use
+SYMPTOM: (latent — not yet triggered) Concurrent build_index calls interleave log
+         entries in _BUILD_LOG and mix cost attribution in _BUILD_USAGE.
+ROOT_CAUSE: Module-level mutable globals used as per-call state. reset_build_log()
+            originally used `= []` (reassignment) — callers that imported the list
+            before reset held a stale binding to the old object.
+PREVENTED_BY: Never reassign module-level mutable containers in reset functions.
+              Use .clear() + .update() to mutate in place. Next: ContextVar migration
+              so concurrent calls each get isolated state automatically.
+SOLUTION: Changed to _BUILD_LOG.clear() / _BUILD_USAGE.clear(). Full fix (ContextVar)
+          deferred to next session.
+DEAD_ENDS: None.
+
+[2026-04-14]
+CATEGORY: QUERY_QUALITY
+SERVICE: poc/indexer
+TASK: multi-doc eval — fire drill query (Q6)
+SYMPTOM: "What should happen after a fire drill and who is responsible?" answers
+         "The provided sections do not answer this question." despite routing correctly
+         to en_policy3_health_safety_reporting (83 nodes, 58K char outline).
+         Per-doc selection picked 1.1 (scope) and 1.10 (policy review) instead of
+         the fire drill procedure nodes.
+ROOT_CAUSE: Not yet isolated. Two hypotheses: (A) the 83-node outline overloads the
+            selection LLM and it falls back to summary/header nodes; (B) this is a
+            pre-existing single-doc quality issue unrelated to multi-doc context.
+PREVENTED_BY: Before diagnosing a multi-doc pipeline regression, first run the same
+              query single-doc against the affected index. If single-doc also fails,
+              the root cause is in the index, not the pipeline.
+SOLUTION: Not yet investigated.
+DEAD_ENDS: None yet — first eval run.
+
+[2026-04-14]
+CATEGORY: EVAL_OBSERVATION
+SERVICE: poc/indexer/multi
+TASK: multi-doc routing eval (7 queries, 6 docs)
+SYMPTOM: Routing model selected 2 documents for all 7 queries, including 2 queries
+         that only require 1 document (child protection, health & safety). No query
+         routed to a single document only.
+ROOT_CAUSE: gemini-2.5-flash-lite is conservative — it interprets adjacent topics as
+            potentially overlapping. The routing prompt says "select 2 only if question
+            clearly spans both" but the model selects 2 by default.
+PREVENTED_BY: Accepted cost (routing is $0.00023/query; extra doc adds one concurrent
+              LLM call). Monitor whether false-positive docs pollute synthesis answers.
+SOLUTION: Accepted as-is for this eval iteration.
+DEAD_ENDS: None.

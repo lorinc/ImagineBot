@@ -124,3 +124,15 @@ NODE_SELECTION_SCHEMA = {
     },
     "required": ["selected_ids", "reasoning"],
 }
+
+DOC_ROUTING_SCHEMA = {
+    "type": "object",
+    "properties": {
+        "selected_doc_ids": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+        "reasoning": {"type": "string"},
+    },
+    "required": ["selected_doc_ids", "reasoning"],
+}

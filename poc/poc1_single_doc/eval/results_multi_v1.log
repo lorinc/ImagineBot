@@ -1,0 +1,1419 @@
+MultiDoc PageIndex Eval Log
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Multi-index: eval/multi_index.json
+Built      : 2026-04-14T20:57:24Z
+Docs       : ['en_policy1_child_protection', 'en_policy2_technology', 'en_policy3_health_safety_reporting', 'en_policy4_trips_and_outings', 'en_policy5_code_of_conduct', 'en_family_manual_24_25']
+Queries    : 7
+Eval run   : 2026-04-14T20:57:53Z
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+QUERY PIPELINE LOG
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 1/7  [cross-doc]
+Can my son bring a football to the school and play during breaks?
+Note: Football/equipment during breaks — spans code-of-conduct and family manual
+
+── Stage 1: Routing (2247ms) ──────────────────────────────
+Tokens: in=2,649  out=85  ≈$0.00022
+Routing outline: 11558 chars
+
+=== en_policy1_child_protection (35 nodes) ===
+[1] Comprehensive Child Protection Policy: Staff reporting duty; Abuse types; Parent discussion; Social care referral; Risk exception; Social care advice; ... (273 more)
+[2] School Confidentiality Policy and Data Protection: Parent reassurance; Data protection; Professional confidentiality; Child information protection; Parent information protection; Legal compliance; ... (48 more)
+
+=== en_policy2_technology (23 nodes) ===
+[imagine-montessori-schoo] Montessori Mobile Device Online Safety Policy: Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; ... (17 more)
+[1] Technology Policy Scope and Application: Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; ... (19 more)
+[2] Key Technology Policy Terminology: Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding
+[3] Technology Use Policy and Principles: Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; ... (15 more)
+[4] Technology Policy Stakeholder Roles Responsibilities: Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; ... (6 more)
+[5] Technology use guidelines by age: Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; ... (12 more)
+[6] Staff Mobile Phone Policy: Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; ... (11 more)
+[7] Pupils' mobile phone use policy: Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; ... (20 more)
+[8] Parents, Volunteers, Visitors Policy: Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; ... (10 more)
+[9] Online Safety Policy and Education: Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; ... (7 more)
+[10] School Camera Mobile Device Policy: Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety
+[11] Device Loss, Theft, Damage Policy: Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; ... (1 more)
+[12] Complaints, Policy Violations, Staff Breaches: Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities
+[13] Policy Monitoring and Review: Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form
+[14] Policy and Legal Reference Documents: Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; ... (6 more)
+
+=== en_policy3_health_safety_reporting (83 nodes) ===
+[1] Fire Emergency Policy and Procedures: Child safety; Staff safety; Risk assessment purpose; Termly emergency drills; Annual risk assessment; Change assessment; ... (56 more)
+[2] Comprehensive School Health Safety Policy: Children activity engagement; Health safety support; Children risk management; Risk assessment proportionality; Staff safety training; Employer safety policy; ... (155 more)
+[3] Weather alerts, emergencies action policy: Weather alert protocol; Risk level definitions; Green level actions; Yellow level actions; Orange level actions; Red level actions; ... (40 more)
+[4] School Food Policy and Guidelines: Policy scope; Student staff food; Food provision; Meals snacks diet; Montessori philosophy; Food preparation; ... (57 more)
+[5] Data Protection Privacy Policy Overview: Data protection importance; Data Controller; Regulatory compliance; Processing basis; User consent; Processing purposes; ... (55 more)
+[6] Whistleblowing Channel Policy and Procedures: Policy scope; Channel users; Reporting obligation; No retaliation; Confidentiality; Channel purpose; ... (188 more)
+
+=== en_policy4_trips_and_outings (13 nodes) ===
+[school-outings-policy] School Outings: Policy, Planning, Safety, Conduct: Outings purpose; educational philosophy; learning beyond classroom; independence aim; academic learning; social skills; ... (125 more)
+
+=== en_policy5_code_of_conduct (120 nodes) ===
+[1] School Commitment to Equality, Diversity: School core values; Montessori philosophy; Respect cultures; Individual value; Equal treatment; Fairness; ... (44 more)
+[2] School Dress Code Policy Guidelines: Cultural diversity; Valuing differences; No uniform policy; Individual expression; Dress code restrictions; Safety; ... (83 more)
+[3] School Attendance Policy Overview: Attendance importance; Punctuality value; Regular attendance benefits; School responsibility; Policy application; Parent access; ... (84 more)
+[4] School Behaviour Policy and Management: Policy scope; Community applicability; Behaviour expectations; Positive environment; Child development; Collaboration; ... (218 more)
+[5] School Anti-Racism Policy: Policy scope; Community members; School activities; Off-site trips; Direct racism; Indirect racism; ... (95 more)
+[6] Anti-Bullying Policy: Scope, Prevention, Action: Policy scope; Student coverage; Staff coverage; Parent coverage; Visitor coverage; School grounds; ... (152 more)
+[7] School Drug Alcohol Policy Guidelines: Policy applicability; Covered individuals; Covered locations; Covered activities; Covered substances; Policy aims; ... (130 more)
+[8] Weapons Dangerous Items Policy: Policy scope; Applicable individuals; Policy purpose; Preventative measures; Actions, procedures; Support, safety; ... (84 more)
+[9] External Exam Malpractice, Appeals Policies: Exam malpractice policy; Malpractice definition; Malpractice consequences; Assessment integrity; Student malpractice examples; Unauthorised exam materials; ... (109 more)
+
+=== en_family_manual_24_25 (49 nodes) ===
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; ... (54 more)
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; ... (47 more)
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; ... (9 more)
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; ... (13 more)
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; ... (80 more)
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; ... (18 more)
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; ... (36 more)
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; ... (3 more)
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; ... (31 more)
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; ... (3 more)
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; ... (2 more)
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; ... (7 more)
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; ... (8 more)
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; ... (3 more)
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; ... (7 more)
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; ... (5 more)
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; ... (1 more)
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; ... (9 more)
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; ... (7 more)
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; ... (1 more)
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; ... (3 more)
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; ... (23 more)
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected docs : ['en_family_manual_24_25', 'en_policy5_code_of_conduct']
+Reasoning     : The question is about bringing a football to school and playing during breaks, which relates to school policies on student behavior, dangerous items, and specific item usage like balls.
+
+── Stage 2: Per-doc node selection ──────────────────────────────
+
+  en_family_manual_24_25  (1633ms)
+  Tokens: in=4,281  out=62
+  Outline: 21280 chars
+  Selected IDs: ['18', '19']
+  Reasoning: These sections directly address policies regarding toys and specifically student balls, which are crucial for answering whether a football can be brought to school and played with.
+
+  en_policy5_code_of_conduct  (7960ms)
+  Tokens: in=11,266  out=94
+  Outline: 58037 chars
+  Selected IDs: ['8.2', '8.3', '4.6', '4.19']
+  Reasoning: To determine if a football can be brought to school, sections defining prohibited items are necessary, and sections outlining rules for playground behavior and managing play with equipment are essential for understanding if and how it can be used during breaks.
+
+── Stage 3: Synthesis (3481ms) ─────────────────────────────────
+Tokens: in=1,403  out=113  ≈$0.00028
+  [en_family_manual_24_25:18] School Toy and Pacifier Policy  (direct=251c, full=285c)
+  [en_family_manual_24_25:19] Student balls: use, storage, and school responsibility  (direct=449c, full=507c)
+  [en_policy5_code_of_conduct:8.2] Weapons Policy Terminology Definitions  (direct=889c, full=932c)
+  [en_policy5_code_of_conduct:8.3] Weapons Policy Statement and Principles  (direct=1283c, full=1327c)
+  [en_policy5_code_of_conduct:4.6] Montessori School Behaviour Principles  (direct=1942c, full=1985c)
+  [en_policy5_code_of_conduct:4.19] Managing Aggressive Rough Play  (direct=827c, full=862c)
+
+Total chars sent to synthesis: 6154
+
+Full text sent:
+········································
+[Section en_family_manual_24_25:18: School Toy and Pacifier Policy]
+Toys are not permitted at school, except for a comfort item for naptime if recommended by the guides. Similarly, for hygiene reasons and to aid language development, pacifiers are only allowed during naptime, if necessary, for children in Early Years.
+
+---
+
+[Section en_family_manual_24_25:19: Student balls: use, storage, and school responsibility]
+Students may bring balls to the centre. For students who use the bus, the ball must be kept in a bag, like other materials, and must not be loose, as this could cause an accident.
+
+The school is not responsible for lost balls, including those that may end up in the ditch. It is important to communicate from home that balls should only be used in outdoor spaces, such as the playground, and if misused inside the premises, they will be confiscated.
+
+---
+
+[Section en_policy5_code_of_conduct:8.2: Weapons Policy Terminology Definitions]
+*   **Weapon**: For the purposes of this policy, a weapon includes but is not limited to:
+    *   Firearms, including starting pistols, air guns, pellet guns, BB guns, and replicas or toy guns.
+    *   Bladed objects such as knives, craft knives, scissors, and razor blades.
+    *   Explosives, including fireworks.
+    *   Other objects like aerosol sprays, lighters, matches, laser pens, and martial arts equipment (e.g., nunchaku, death stars).
+    *   Tools such as screwdrivers, hammers, and chisels that can be offensively used.
+*   **Prohibited Item**: Any object identified under this policy that poses a potential risk to the safety and well-being of the school community.
+*   **Safety Plan**: A structured intervention created for a pupil following a weapon-related incident, aimed at ensuring their safety and the safety of others while promoting positive behaviour and support.
+
+---
+
+[Section en_policy5_code_of_conduct:8.3: Weapons Policy Statement and Principles]
+1.  **Commitment to Safety**: At IMS, the safety and well-being of all community members is a top priority. Immediate action will always be taken to reduce risks and ensure a secure environment for everyone on-site.
+2.  **Preventative Culture**:
+    *   IMS promotes a strong safeguarding culture where staff, students, and parents are vigilant and proactive in addressing potential risks.
+    *   The Personal, Social, Health, and Economic (PSHE) curriculum educates students on the dangers and legal implications of carrying or using weapons.
+    *   Open communication between the school and parents is essential to reinforce a shared responsibility in addressing safety concerns.
+3.  **Responsiveness and Individual Context**:
+    *   Every incident involving a weapon will be handled based on the individual circumstances, intent, and level of risk posed.
+    *   Decisions will prioritize the safety of all while considering the needs of the pupil involved, with actions ranging from exclusion to safety planning and support.
+4.  **Zero Tolerance**:
+    *   Weapons of any kind are strictly prohibited on school premises.
+    *   Staff will take immediate action upon suspicion or discovery of a weapon, including searches, confiscation, and necessary reporting to authorities.
+
+---
+
+[Section en_policy5_code_of_conduct:4.6: Montessori School Behaviour Principles]
+*   Grace and courtesy are our key principles as per Maria Montessori’s philosophy.
+*   We respect all cultures and differences arising therein.
+*   Every staff member at Imagine Montessori School will serve as a positive role model for behaviour.
+*   All new staff will have an induction, which will include familiarizing them with the policy and the expectations.
+*   We expect all members of our community to treat others with the respect and care afforded to every individual to make them feel included in our community and school ethos.
+*   Staff and parents work in partnership to assure that positive behavioural supports are in place for all children in our care, and parents are informed regularly about their child’s behaviour.
+*   Parents are also expected to inform the school of any changes in behaviour or family circumstances.
+*   The Behaviour Flowchart guides our actions in deciding jointly how to respond appropriately in the event of instances that require our support.
+*   We value individuality and understand different children may have different needs.
+
+Good behaviour should be acknowledged and respected. Even in a Montessori environment, we can thank others for being kind or demonstrating grace or courtesy in situations. This might be through guides in the class or at a peer level.
+
+“Thank you for walking so nicely…”
+“Thank you for coming in so quietly…”
+“Thank you for waiting…”
+
+This will vary according to the needs of the individuals involved. This positive comment avoids the idea of extrinsic motivation and focuses on recognition of the individual when necessary to help maintain standards.
+
+Standards of behaviour must be made explicit and described in behavioural terms that are relevant to them:
+
+What does respect look like in the playground?
+
+*   Asking if you can take turns or share the equipment.
+*   Respecting the space of others and their games.
+*   Being kind and including everyone in games.
+
+---
+
+[Section en_policy5_code_of_conduct:4.19: Managing Aggressive Rough Play]
+Children can often engage in play that can be based on aggressive themes: superhero and weapon play. Children who engage in this type of play are not necessarily trying to be hurtful. If this play becomes inconsiderate, we need to address it with the following strategies:
+
+*   We understand that this type of play is normal within boundaries and that children like to engage in imaginative play of ‘goodies’ and ‘baddies’. Unless this play becomes hurtful, we do not interfere.
+*   We agree ground rules with these children about fantasy play and hurting someone.
+*   Encourage children to say no: “Stop, I don’t like it.”
+*   We encourage children to learn to accept when someone says “no” and stop.
+*   We observe and understand this play and can offer more appropriate alternatives when we see it getting excessively rough.
+········································
+
+Answer:
+Yes, your son can bring a football to school [en_family_manual_24_25:19]. Balls should only be used in outdoor spaces, such as the playground [en_family_manual_24_25:19]. If your son uses the bus, the ball must be kept in a bag and not loose [en_family_manual_24_25:19]. The school is not responsible for lost balls [en_family_manual_24_25:19].
+
+Total: 13688ms  |  chars→synthesis: 6154  |  tokens: 19,599 in + 354 out  |  ≈$0.00293
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 2/7  [cross-doc]
+What are the rules about taking photos of students during school trips?
+Note: Photography on trips — spans technology policy and trips/outings policy
+
+── Stage 1: Routing (612ms) ──────────────────────────────
+Tokens: in=2,648  out=77  ≈$0.00022
+Routing outline: 11558 chars
+
+=== en_policy1_child_protection (35 nodes) ===
+[1] Comprehensive Child Protection Policy: Staff reporting duty; Abuse types; Parent discussion; Social care referral; Risk exception; Social care advice; ... (273 more)
+[2] School Confidentiality Policy and Data Protection: Parent reassurance; Data protection; Professional confidentiality; Child information protection; Parent information protection; Legal compliance; ... (48 more)
+
+=== en_policy2_technology (23 nodes) ===
+[imagine-montessori-schoo] Montessori Mobile Device Online Safety Policy: Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; ... (17 more)
+[1] Technology Policy Scope and Application: Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; ... (19 more)
+[2] Key Technology Policy Terminology: Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding
+[3] Technology Use Policy and Principles: Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; ... (15 more)
+[4] Technology Policy Stakeholder Roles Responsibilities: Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; ... (6 more)
+[5] Technology use guidelines by age: Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; ... (12 more)
+[6] Staff Mobile Phone Policy: Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; ... (11 more)
+[7] Pupils' mobile phone use policy: Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; ... (20 more)
+[8] Parents, Volunteers, Visitors Policy: Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; ... (10 more)
+[9] Online Safety Policy and Education: Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; ... (7 more)
+[10] School Camera Mobile Device Policy: Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety
+[11] Device Loss, Theft, Damage Policy: Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; ... (1 more)
+[12] Complaints, Policy Violations, Staff Breaches: Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities
+[13] Policy Monitoring and Review: Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form
+[14] Policy and Legal Reference Documents: Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; ... (6 more)
+
+=== en_policy3_health_safety_reporting (83 nodes) ===
+[1] Fire Emergency Policy and Procedures: Child safety; Staff safety; Risk assessment purpose; Termly emergency drills; Annual risk assessment; Change assessment; ... (56 more)
+[2] Comprehensive School Health Safety Policy: Children activity engagement; Health safety support; Children risk management; Risk assessment proportionality; Staff safety training; Employer safety policy; ... (155 more)
+[3] Weather alerts, emergencies action policy: Weather alert protocol; Risk level definitions; Green level actions; Yellow level actions; Orange level actions; Red level actions; ... (40 more)
+[4] School Food Policy and Guidelines: Policy scope; Student staff food; Food provision; Meals snacks diet; Montessori philosophy; Food preparation; ... (57 more)
+[5] Data Protection Privacy Policy Overview: Data protection importance; Data Controller; Regulatory compliance; Processing basis; User consent; Processing purposes; ... (55 more)
+[6] Whistleblowing Channel Policy and Procedures: Policy scope; Channel users; Reporting obligation; No retaliation; Confidentiality; Channel purpose; ... (188 more)
+
+=== en_policy4_trips_and_outings (13 nodes) ===
+[school-outings-policy] School Outings: Policy, Planning, Safety, Conduct: Outings purpose; educational philosophy; learning beyond classroom; independence aim; academic learning; social skills; ... (125 more)
+
+=== en_policy5_code_of_conduct (120 nodes) ===
+[1] School Commitment to Equality, Diversity: School core values; Montessori philosophy; Respect cultures; Individual value; Equal treatment; Fairness; ... (44 more)
+[2] School Dress Code Policy Guidelines: Cultural diversity; Valuing differences; No uniform policy; Individual expression; Dress code restrictions; Safety; ... (83 more)
+[3] School Attendance Policy Overview: Attendance importance; Punctuality value; Regular attendance benefits; School responsibility; Policy application; Parent access; ... (84 more)
+[4] School Behaviour Policy and Management: Policy scope; Community applicability; Behaviour expectations; Positive environment; Child development; Collaboration; ... (218 more)
+[5] School Anti-Racism Policy: Policy scope; Community members; School activities; Off-site trips; Direct racism; Indirect racism; ... (95 more)
+[6] Anti-Bullying Policy: Scope, Prevention, Action: Policy scope; Student coverage; Staff coverage; Parent coverage; Visitor coverage; School grounds; ... (152 more)
+[7] School Drug Alcohol Policy Guidelines: Policy applicability; Covered individuals; Covered locations; Covered activities; Covered substances; Policy aims; ... (130 more)
+[8] Weapons Dangerous Items Policy: Policy scope; Applicable individuals; Policy purpose; Preventative measures; Actions, procedures; Support, safety; ... (84 more)
+[9] External Exam Malpractice, Appeals Policies: Exam malpractice policy; Malpractice definition; Malpractice consequences; Assessment integrity; Student malpractice examples; Unauthorised exam materials; ... (109 more)
+
+=== en_family_manual_24_25 (49 nodes) ===
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; ... (54 more)
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; ... (47 more)
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; ... (9 more)
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; ... (13 more)
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; ... (80 more)
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; ... (18 more)
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; ... (36 more)
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; ... (3 more)
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; ... (31 more)
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; ... (3 more)
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; ... (2 more)
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; ... (7 more)
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; ... (8 more)
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; ... (3 more)
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; ... (7 more)
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; ... (5 more)
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; ... (1 more)
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; ... (9 more)
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; ... (7 more)
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; ... (1 more)
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; ... (3 more)
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; ... (23 more)
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected docs : ['en_policy2_technology', 'en_policy4_trips_and_outings']
+Reasoning     : The question asks about taking photos of students during school trips, which involves both technology/camera policies and policies related to school trips and outings.
+
+── Stage 2: Per-doc node selection ──────────────────────────────
+
+  en_policy2_technology  (9623ms)
+  Tokens: in=1,738  out=76
+  Outline: 7705 chars
+  Selected IDs: ['staff-mobile-phone-use', 'general-policy-for-mobil', '10']
+  Reasoning: These sections directly address rules for staff, parents, and general event recording regarding taking photos of pupils, which would apply to school trips.
+
+  en_policy4_trips_and_outings  (1968ms)
+  Tokens: in=1,273  out=78
+  Outline: 6047 chars
+  Selected IDs: ['10', '13']
+  Reasoning: Section 10 directly mentions 'Overnight trip photos' in the context of parent communication, and section 13 includes 'Privacy Policy' and 'Data Protection' which are relevant to rules about taking and sharing photos.
+
+── Stage 3: Synthesis (13515ms) ─────────────────────────────────
+Tokens: in=1,383  out=255  ≈$0.00036
+  [en_policy2_technology:staff-mobile-phone-use] Staff Mobile Phone Policy  (direct=1930c, full=1960c)
+  [en_policy2_technology:general-policy-for-mobil] Mobile Use Policy: Parents, Visitors, Volunteers  (direct=596c, full=649c)
+  [en_policy2_technology:10] School Camera Mobile Device Policy  (direct=546c, full=584c)
+  [en_policy4_trips_and_outings:10] School trip parent communication  (direct=644c, full=681c)
+  [en_policy4_trips_and_outings:13] Referenced Legal Frameworks and Policies  (direct=2243c, full=2288c)
+
+Total chars sent to synthesis: 6407
+
+Full text sent:
+········································
+[Section en_policy2_technology:staff-mobile-phone-use: Staff Mobile Phone Policy]
+*   **Work Phones:** School-issued phones are provided to authorised staff members strictly for work-related communication, and all use should remain appropriate and professional at all times.
+*   Use of the mobile phone/smartwatches for personal reasons during contact time is not allowed.
+*   **Personal Devices:**
+    *   Staff may keep personal phones on silent/vibrate in outside class areas only, such as staff rooms. In the case of staff using their personal devices, it will be registered at school following the Bring Your Own Device (BYOD) agreement, therefore staff will be able to use it during contact hours to take pictures and keep a record of the students' learning progress in Transparent Classroom or Drive.
+    *   In specific situations, such as emergency evacuations or off-site trips, staff may use personal mobile devices in accordance with school protocols.
+    *   For outings, however, a school phone is always provided to ensure consistency and reliability. Additionally, we have a "Bring Your Own Device" (BYOD) agreement in place, allowing staff to use their personal devices for accessing the school system or email if they choose to, provided they adhere to the same safety and security measures required for school-issued devices. In all cases, the use of personal devices must align with the professional standards outlined in the Staff Code of Conduct.
+*   **In Case of Emergency:** Immediate contact should be coordinated through the school office if necessary. Any exceptions to these rules require approval from school leadership on a case-by-case basis.
+*   **Data Protection and Safeguarding:** Personal devices can only be used to process school data if registered with the school, with a requirement for prompt reporting if lost or stolen to mitigate data risks. Staff should avoid sharing personal contact details with parents or students and refrain from connecting through social media.
+
+---
+
+[Section en_policy2_technology:general-policy-for-mobil: Mobile Use Policy: Parents, Visitors, Volunteers]
+*   **On School Grounds:** Parents, visitors, and volunteers must adhere to staff guidelines regarding device use, including prohibitions on unauthorized recordings or photos of pupils, and refraining from using mobiles where pupils are present.
+*   **School Trips:** Parents or volunteers assisting on school trips or events must not use mobiles to contact other parents or take photos of pupils, their work, or any other potentially identifying information.
+*   **School Performances:** Parents are permitted to use their personal mobiles during school festivities, at their own responsibility.
+
+---
+
+[Section en_policy2_technology:10: School Camera Mobile Device Policy]
+The school’s policy on mobile phones and cameras aligns with safeguarding protocols to protect pupils’ privacy and safety.
+
+*   **Parental Photography:** Parents are prohibited from photographing or recording pupils during events unless specified by the school (e.g., end-of-year celebrations).
+*   **Internet Filtering and Monitoring:** The school collaborates with internet service providers to ensure effective filtering. Any inappropriate content discovered is reported to the Headteachers and reviewed regularly to maintain safety standards.
+
+---
+
+[Section en_policy4_trips_and_outings:10: School trip parent communication]
+*   **Pre-Trip Information:** Families will receive detailed information about the outing, including learning objectives, itinerary, transportation arrangements, and costs, with sufficient time for proper management.
+*   **During-Trip Feedback:** When children are on overnight outings, families will receive photos of the experience daily through Phidias. In the Secondary Department, a WhatsApp group is set up to keep parents informed of events and activities, and all media will be sent through this group. From Year 9 upwards (during trips abroad only), students are allowed to use their own mobile to keep in touch with staff and parents.
+
+---
+
+[Section en_policy4_trips_and_outings:13: Referenced Legal Frameworks and Policies]
+*   **Ley Orgánica 2/2006, de 3 de mayo, de Educación (LOE):** The Spanish Education Law, which outlines the legal framework for educational activities, including school outings, ensuring that they comply with national education standards and student safety regulations.
+*   **Ley 31/1995, de 8 de noviembre, de Prevención de Riesgos Laborales:** The Law on the Prevention of Occupational Risks, which mandates that risk assessments be carried out for any activity that could pose a danger to students or staff, ensuring that safety measures are in place during school outings.
+*   **Reglamento de Transportes Terrestres (Royal Decree 1211/1990):** Spanish regulations governing transport safety, including requirements for licensed operators and protocols for the safe transportation of students during school outings.
+*   **Protocolos Internos de Seguridad y Emergencias:** The school’s internal safety and emergency procedures, which detail the actions to take in case of accidents, medical emergencies, or other unforeseen incidents during outings. These protocols align with national safety standards and the school’s specific policies.
+*   **Política de Inclusión y Accesibilidad Escolar:** The school’s policy on inclusion, ensuring that all students, regardless of background or ability, can participate in school outings. This policy is aligned with Spain’s legal framework on equal opportunities and non-discrimination (Ley 51/2003, de 2 de diciembre, de Igualdad de Oportunidades, No Discriminación y Accesibilidad Universal de las Personas con Discapacidad).
+*   **Procedimiento Interno de Autorización de Medicamentos:** The school’s internal procedure for obtaining parental consent for the administration of medication during outings, aligned with Spain’s health and safety regulations in educational settings.
+*   **Política de Privacidad y Protección de Datos (LOPD):** The school’s privacy and data protection policy, in line with the Spanish Personal Data Protection and Digital Rights Law (Ley Orgánica 3/2018, de 5 de diciembre, de Protección de Datos Personales y garantía de los derechos digitales), which governs the management of student and family data, including emergency contacts and consent forms for outings.
+```
+········································
+
+Answer:
+Parents or volunteers assisting on school trips or events must not use mobiles to take photos of pupils, their work, or any other potentially identifying information [en_policy2_technology:general-policy-for-mobil].
+
+While families will receive photos of the experience daily when children are on overnight outings [en_policy4_trips_and_outings:10], the specific rules governing staff taking photos of students during school trips are not explicitly detailed. Staff are generally allowed to use registered personal devices to take pictures to keep a record of students' learning progress during contact hours [en_policy2_technology:staff-mobile-phone-use], and a school phone is always provided for outings [en_policy2_technology:staff-mobile-phone-use].
+
+There are no specific rules provided regarding students taking photos of other students during school trips, although students from Year 9 upwards on trips abroad are allowed to use their own mobile to keep in touch with staff and parents [en_policy4_trips_and_outings:10]. The school's privacy and data protection policy governs student data management, including consent forms for outings [en_policy4_trips_and_outings:13].
+
+Total: 23750ms  |  chars→synthesis: 6407  |  tokens: 7,042 in + 486 out  |  ≈$0.00113
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 3/7  [cross-doc]
+What should happen if a student is injured during a school trip?
+Note: Injury on a trip — spans trips/outings and health & safety
+
+── Stage 1: Routing (717ms) ──────────────────────────────
+Tokens: in=2,648  out=85  ≈$0.00022
+Routing outline: 11558 chars
+
+=== en_policy1_child_protection (35 nodes) ===
+[1] Comprehensive Child Protection Policy: Staff reporting duty; Abuse types; Parent discussion; Social care referral; Risk exception; Social care advice; ... (273 more)
+[2] School Confidentiality Policy and Data Protection: Parent reassurance; Data protection; Professional confidentiality; Child information protection; Parent information protection; Legal compliance; ... (48 more)
+
+=== en_policy2_technology (23 nodes) ===
+[imagine-montessori-schoo] Montessori Mobile Device Online Safety Policy: Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; ... (17 more)
+[1] Technology Policy Scope and Application: Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; ... (19 more)
+[2] Key Technology Policy Terminology: Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding
+[3] Technology Use Policy and Principles: Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; ... (15 more)
+[4] Technology Policy Stakeholder Roles Responsibilities: Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; ... (6 more)
+[5] Technology use guidelines by age: Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; ... (12 more)
+[6] Staff Mobile Phone Policy: Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; ... (11 more)
+[7] Pupils' mobile phone use policy: Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; ... (20 more)
+[8] Parents, Volunteers, Visitors Policy: Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; ... (10 more)
+[9] Online Safety Policy and Education: Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; ... (7 more)
+[10] School Camera Mobile Device Policy: Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety
+[11] Device Loss, Theft, Damage Policy: Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; ... (1 more)
+[12] Complaints, Policy Violations, Staff Breaches: Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities
+[13] Policy Monitoring and Review: Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form
+[14] Policy and Legal Reference Documents: Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; ... (6 more)
+
+=== en_policy3_health_safety_reporting (83 nodes) ===
+[1] Fire Emergency Policy and Procedures: Child safety; Staff safety; Risk assessment purpose; Termly emergency drills; Annual risk assessment; Change assessment; ... (56 more)
+[2] Comprehensive School Health Safety Policy: Children activity engagement; Health safety support; Children risk management; Risk assessment proportionality; Staff safety training; Employer safety policy; ... (155 more)
+[3] Weather alerts, emergencies action policy: Weather alert protocol; Risk level definitions; Green level actions; Yellow level actions; Orange level actions; Red level actions; ... (40 more)
+[4] School Food Policy and Guidelines: Policy scope; Student staff food; Food provision; Meals snacks diet; Montessori philosophy; Food preparation; ... (57 more)
+[5] Data Protection Privacy Policy Overview: Data protection importance; Data Controller; Regulatory compliance; Processing basis; User consent; Processing purposes; ... (55 more)
+[6] Whistleblowing Channel Policy and Procedures: Policy scope; Channel users; Reporting obligation; No retaliation; Confidentiality; Channel purpose; ... (188 more)
+
+=== en_policy4_trips_and_outings (13 nodes) ===
+[school-outings-policy] School Outings: Policy, Planning, Safety, Conduct: Outings purpose; educational philosophy; learning beyond classroom; independence aim; academic learning; social skills; ... (125 more)
+
+=== en_policy5_code_of_conduct (120 nodes) ===
+[1] School Commitment to Equality, Diversity: School core values; Montessori philosophy; Respect cultures; Individual value; Equal treatment; Fairness; ... (44 more)
+[2] School Dress Code Policy Guidelines: Cultural diversity; Valuing differences; No uniform policy; Individual expression; Dress code restrictions; Safety; ... (83 more)
+[3] School Attendance Policy Overview: Attendance importance; Punctuality value; Regular attendance benefits; School responsibility; Policy application; Parent access; ... (84 more)
+[4] School Behaviour Policy and Management: Policy scope; Community applicability; Behaviour expectations; Positive environment; Child development; Collaboration; ... (218 more)
+[5] School Anti-Racism Policy: Policy scope; Community members; School activities; Off-site trips; Direct racism; Indirect racism; ... (95 more)
+[6] Anti-Bullying Policy: Scope, Prevention, Action: Policy scope; Student coverage; Staff coverage; Parent coverage; Visitor coverage; School grounds; ... (152 more)
+[7] School Drug Alcohol Policy Guidelines: Policy applicability; Covered individuals; Covered locations; Covered activities; Covered substances; Policy aims; ... (130 more)
+[8] Weapons Dangerous Items Policy: Policy scope; Applicable individuals; Policy purpose; Preventative measures; Actions, procedures; Support, safety; ... (84 more)
+[9] External Exam Malpractice, Appeals Policies: Exam malpractice policy; Malpractice definition; Malpractice consequences; Assessment integrity; Student malpractice examples; Unauthorised exam materials; ... (109 more)
+
+=== en_family_manual_24_25 (49 nodes) ===
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; ... (54 more)
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; ... (47 more)
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; ... (9 more)
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; ... (13 more)
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; ... (80 more)
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; ... (18 more)
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; ... (36 more)
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; ... (3 more)
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; ... (31 more)
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; ... (3 more)
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; ... (2 more)
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; ... (7 more)
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; ... (8 more)
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; ... (3 more)
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; ... (7 more)
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; ... (5 more)
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; ... (1 more)
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; ... (9 more)
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; ... (7 more)
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; ... (1 more)
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; ... (3 more)
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; ... (23 more)
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected docs : ['en_policy4_trips_and_outings', 'en_policy3_health_safety_reporting']
+Reasoning     : The question is about an injury during a school trip, so policies related to trips and outings, as well as general health and safety reporting, are most relevant.
+
+── Stage 2: Per-doc node selection ──────────────────────────────
+
+  en_policy4_trips_and_outings  (3071ms)
+  Tokens: in=1,273  out=65
+  Outline: 6047 chars
+  Selected IDs: ['7', '8']
+  Reasoning: These sections directly address procedures for student safety, medical conditions, first aid, and specific actions to take in case of minor or serious injuries and other emergencies during school outings.
+
+  en_policy3_health_safety_reporting  (5115ms)
+  Tokens: in=6,708  out=78
+  Outline: 34670 chars
+  Selected IDs: ['2.3.s3', '2.3.s6', '2.4']
+  Reasoning: These sections cover policies for off-site visits, accident recording and emergency procedures, and comprehensive first aid, accident, and medical response protocols for students.
+
+── Stage 3: Synthesis (5631ms) ─────────────────────────────────
+Tokens: in=2,201  out=256  ≈$0.00048
+  [en_policy4_trips_and_outings:7] Outing Safety and Emergency Procedures  (direct=1681c, full=1724c)
+  [en_policy4_trips_and_outings:8] Accident and Emergency Procedures  (direct=3068c, full=3106c)
+  [en_policy3_health_safety_reporting:2.3.s3] Off-site, Contractors, and Security  (direct=951c, full=992c)
+  [en_policy3_health_safety_reporting:2.3.s6] Vehicle Movements, Maintenance, Accidents, Emergencies  (direct=926c, full=986c)
+  [en_policy3_health_safety_reporting:2.4] First Aid, Accidents, Medical, Hygiene  (direct=3229c, full=3272c)
+
+Total chars sent to synthesis: 10326
+
+Full text sent:
+········································
+[Section en_policy4_trips_and_outings:7: Outing Safety and Emergency Procedures]
+*   **Transportation:** All transportation arrangements must meet safety regulations and be provided by licensed operators. Students must adhere to safety protocols such as seatbelt use and supervised boarding and disembarking. In case an issue should arise, a member of staff needs to contact the Head of Admin.
+*   **Medical Needs:** Teachers must be aware of any medical conditions or allergies of students. A first aid kit must always be available, and at least one staff member trained in first aid must accompany the group. The first aid kit is an essential collection of medical supplies and equipment designed to provide immediate care for minor injuries and emergencies that may occur in the school environment (bandages, antiseptics, and cleaning supplies). Staff will have an updated list of all allergies and specific conditions, as well as information on medication needed during the experience. All medication will require authorization from the family through a Phidias procedure, and the medicine must be given to an adult.
+    *   From Year 9 upwards, students are responsible for their own medication. However, the administration of medication needs to be logged by the responsible adult.
+*   **Emergency Contact:** It is extremely important to update your contact details in Phidias. If you do not have a local phone number, please ensure that you provide us with one. Staff will have a list of emergency contacts for each student that must be on hand during the outing, prepared by the admin team.
+*   **Contingency Planning:** In the event of bad weather or unforeseen circumstances, alternative arrangements must be planned, or the outing postponed/cancelled.
+
+---
+
+[Section en_policy4_trips_and_outings:8: Accident and Emergency Procedures]
+*   **Minor Injuries:**
+    *   In case of minor injuries (such as cuts or bruises), first aid will be administered by the staff member trained in first aid. Families will be notified about the incident at the end of the outing, unless further medical attention is required.
+*   **Serious Injuries or Medical Emergencies:**
+    *   In the event of a serious injury or medical emergency, staff will immediately call emergency services (112) and follow the instructions provided by the professionals.
+    *   Family/guardians will be contacted as soon as possible by the designated staff member. A member of the school staff will accompany the child to the hospital if necessary and remain with the child until the parent/guardian arrives. (This applies also in the event of an accident abroad).
+    *   If the child has a fever or any other symptom that prevents him/her from enjoying the experience, the family will be contacted to pick him/her up as soon as possible.
+    *   All families must agree to the pickup commitment before authorizing the outing.
+    *   A full report of the incident will be submitted to the school administration.
+*   **Actions to Mitigate the Risk of Losing a Child:**
+    *   What actions staff need to follow to reduce the risk of missing a child during an outing:
+        *   For one-day experiences, Early Years and Primary students will wear the Imagine t-shirt, which helps adults to oversee the children.
+        *   Before and during the outing, remind students to notify when they need to go to a different place (e.g., the toilet) as adults need to know where children are at all times for safety reasons. Students must always go in a minimum of two.
+        *   Count children every time they are changing activities or moving from one place to another (e.g., before having lunch, after lunch, when moving from a closed space to an open area) to ensure that all children are present.
+*   **Lost or Missing Child:**
+    *   If a child is unaccounted for during the experience, staff will immediately initiate a search of the area while keeping other students safe.
+    *   If the child is not found, a member of staff needs to phone the Headteacher and, if agreed, call the police.
+    *   Parents/guardians will be informed as soon as possible, and all necessary steps will be taken to ensure the child’s safety and well-being.
+    *   In case there is a child missing, these are the actions to be followed by staff once the child is found:
+        *   Talk to, take care of, and comfort the child.
+        *   Speak to the other children to ensure they understand why they should not leave the premises/separate from a group on an outing.
+        *   The Headteacher will speak to the parents to discuss events and give an account of the incident.
+        *   A detailed report should be submitted, covering: time, place, numbers of staff and children, when the child was last seen, what appeared to have happened, the duration the child was missing, how s/he appeared to have gone missing, and lessons learned for the future.
+
+---
+
+[Section en_policy3_health_safety_reporting:2.3.s3: Off-site, Contractors, and Security]
+E. Off-site visits including school-led adventure activities**
+
+See separate policy: Trips and Outings Policy
+
+**F. Selecting and controlling contractors**
+
+The school will use these indicators to select and control contractors: past performance, work undertaken in other schools, membership of trade bodies, accreditation of trade bodies, general health and safety awareness, organisation and arrangements for health and safety and commitment to recognised codes of practice.
+
+**H. School Security**
+
+This is covered in the check of the inside and external building by the Maintenance Team. The main door is always locked. The doors that are used to access the outside areas are only opened when such areas are under supervision. At the start and end of the school day, two doors are used for children to arrive or depart, and both are continuously supervised by Imagine’s staff. All other doors remain secure and are not used during these times.
+
+**
+
+---
+
+[Section en_policy3_health_safety_reporting:2.3.s6: Vehicle Movements, Maintenance, Accidents, Emergencies]
+N. On site vehicle movements:**
+
+Not applicable
+
+**O. Maintenance and when necessary, examination and test of plant and equipment such as electrical equipment, local exhaust ventilation, pressure systems, gas appliances, lifting equipment and glazing safety**
+
+The school would identify the hazard or suspected hazard and use an external contractor.
+
+**P. Recording and reporting accidents to staff, pupils and visitors - including those reportable under the Reporting of Injuries, Diseases and Dangerous Occurrences Regulations 1995 (RIDDOR).**
+
+The school would record any of the above.
+
+**Q. Fire safety, including testing of alarms and evacuation procedures**
+
+See separate policy: Fire Safety Policy
+
+**R. Dealing with health and safety emergencies- procedures and contacts**
+
+By having policies, guidance and training for all the above, the school can deal with any emergencies using the correct procedures and contacts.
+
+---
+
+[Section en_policy3_health_safety_reporting:2.4: First Aid, Accidents, Medical, Hygiene]
+All Imagine’s staff have qualified first-aider status and are trained on an annual recurrent basis. Therefore, we have well above the required ratio of first aiders to pupils. For minor accidents, they will refer any accidents or any other medical conditions to the designated member of staff: Secretary. For medical emergencies, the person who finds the child/adult will deal with it immediately. Only trained first aiders administer first aid.
+
+There is always more than one designated first-aider on the site of the school. All first aiders attend training courses biannually. First aid equipment is in the designated first aid cupboard, which is kept in the admin staff room and bathroom.
+
+All accidents and other medical emergencies should be recorded appropriately in an accident report form. Parents /guardians should be notified and asked to sign the record sheet and a record kept. In the case of students using our bus service, parents will be notified by Phidias and we expect an acknowledgment. The accident report will be kept both on paper and in digital format at the Secretary.
+
+Based on the information from accident reports, risk analyses are periodically conducted using multivariable analysis to implement mitigation actions for recurring potential risks.
+
+If the accident is serious, the head teacher should be made aware and immediate action taken to ensure the location of the accident is still safe to use. Necessary action should be taken and where possible details recorded for an accident investigation. If members of the public are involved, names and addresses should be taken (including any witnesses).
+
+Members of staff should be made aware of any hazards in the subjects that they teach or the activities that they supervise and should have appropriate training and access to first aid kits.
+
+Pupils with medical conditions, such as epilepsy, asthma or severe allergies should be identified. All staff should be aware of their conditions and alert to the need for prompt action. The Secretary administers medication and is witnessed by another member of staff. A written record is kept and signed by the two members of staff. Medication is kept in the office or the refrigerator in Reception. A signed consent form is needed from the parent /guardian before prescribed medication is administered.
+
+Staff should be aware of what levels of injury can be treated on-site and what levels automatically trigger an emergency ambulance call or visit to the hospital.
+
+There are hygiene procedures in place in case of spillage of blood or body fluid: Employees must wear disposable gloves and aprons when cleaning any bodily fluids (spillages of blood, vomit, urine and excreta). Other persons should be kept away from the contamination until it is effectively dealt with.
+
+The following action should be taken in the event of spillages:
+
+*   Soak up the spillages using paper towels
+*   Clean the area with hot water containing soap or detergent
+*   Clean the area with a bleach or disinfectant solution - use as directed by the manufacturer.
+*   'Solids’ should be carefully flushed down the toilet. Dressings, gloves, and aprons should be carefully disposed of in sealed plastic bags as clinical waste.
+········································
+
+Answer:
+If a student is injured during a school trip, the following procedures should be followed:
+
+**General Preparedness:**
+*   At least one staff member trained in first aid must accompany the group [7].
+*   A first aid kit must always be available [7].
+*   Staff will have an updated list of all allergies and specific conditions, as well as information on medication needed [7].
+*   Staff will have a list of emergency contacts for each student [7].
+
+**Minor Injuries:**
+*   First aid will be administered by the staff member trained in first aid [8].
+*   Families will be notified about the incident at the end of the outing, unless further medical attention is required [8].
+
+**Serious Injuries or Medical Emergencies:**
+*   Staff will immediately call emergency services (112) and follow the instructions provided by the professionals [8].
+*   Family/guardians will be contacted as soon as possible by the designated staff member [8].
+*   A member of the school staff will accompany the child to the hospital if necessary and remain with the child until the parent/guardian arrives [8].
+*   A full report of the incident will be submitted to the school administration [8].
+
+Total: 11463ms  |  chars→synthesis: 10326  |  tokens: 12,830 in + 484 out  |  ≈$0.00199
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 4/7  [cross-doc]
+Are students allowed to use mobile phones during PE lessons?
+Note: Mobile phones during sport — spans technology and code of conduct
+
+── Stage 1: Routing (716ms) ──────────────────────────────
+Tokens: in=2,646  out=102  ≈$0.00023
+Routing outline: 11558 chars
+
+=== en_policy1_child_protection (35 nodes) ===
+[1] Comprehensive Child Protection Policy: Staff reporting duty; Abuse types; Parent discussion; Social care referral; Risk exception; Social care advice; ... (273 more)
+[2] School Confidentiality Policy and Data Protection: Parent reassurance; Data protection; Professional confidentiality; Child information protection; Parent information protection; Legal compliance; ... (48 more)
+
+=== en_policy2_technology (23 nodes) ===
+[imagine-montessori-schoo] Montessori Mobile Device Online Safety Policy: Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; ... (17 more)
+[1] Technology Policy Scope and Application: Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; ... (19 more)
+[2] Key Technology Policy Terminology: Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding
+[3] Technology Use Policy and Principles: Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; ... (15 more)
+[4] Technology Policy Stakeholder Roles Responsibilities: Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; ... (6 more)
+[5] Technology use guidelines by age: Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; ... (12 more)
+[6] Staff Mobile Phone Policy: Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; ... (11 more)
+[7] Pupils' mobile phone use policy: Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; ... (20 more)
+[8] Parents, Volunteers, Visitors Policy: Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; ... (10 more)
+[9] Online Safety Policy and Education: Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; ... (7 more)
+[10] School Camera Mobile Device Policy: Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety
+[11] Device Loss, Theft, Damage Policy: Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; ... (1 more)
+[12] Complaints, Policy Violations, Staff Breaches: Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities
+[13] Policy Monitoring and Review: Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form
+[14] Policy and Legal Reference Documents: Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; ... (6 more)
+
+=== en_policy3_health_safety_reporting (83 nodes) ===
+[1] Fire Emergency Policy and Procedures: Child safety; Staff safety; Risk assessment purpose; Termly emergency drills; Annual risk assessment; Change assessment; ... (56 more)
+[2] Comprehensive School Health Safety Policy: Children activity engagement; Health safety support; Children risk management; Risk assessment proportionality; Staff safety training; Employer safety policy; ... (155 more)
+[3] Weather alerts, emergencies action policy: Weather alert protocol; Risk level definitions; Green level actions; Yellow level actions; Orange level actions; Red level actions; ... (40 more)
+[4] School Food Policy and Guidelines: Policy scope; Student staff food; Food provision; Meals snacks diet; Montessori philosophy; Food preparation; ... (57 more)
+[5] Data Protection Privacy Policy Overview: Data protection importance; Data Controller; Regulatory compliance; Processing basis; User consent; Processing purposes; ... (55 more)
+[6] Whistleblowing Channel Policy and Procedures: Policy scope; Channel users; Reporting obligation; No retaliation; Confidentiality; Channel purpose; ... (188 more)
+
+=== en_policy4_trips_and_outings (13 nodes) ===
+[school-outings-policy] School Outings: Policy, Planning, Safety, Conduct: Outings purpose; educational philosophy; learning beyond classroom; independence aim; academic learning; social skills; ... (125 more)
+
+=== en_policy5_code_of_conduct (120 nodes) ===
+[1] School Commitment to Equality, Diversity: School core values; Montessori philosophy; Respect cultures; Individual value; Equal treatment; Fairness; ... (44 more)
+[2] School Dress Code Policy Guidelines: Cultural diversity; Valuing differences; No uniform policy; Individual expression; Dress code restrictions; Safety; ... (83 more)
+[3] School Attendance Policy Overview: Attendance importance; Punctuality value; Regular attendance benefits; School responsibility; Policy application; Parent access; ... (84 more)
+[4] School Behaviour Policy and Management: Policy scope; Community applicability; Behaviour expectations; Positive environment; Child development; Collaboration; ... (218 more)
+[5] School Anti-Racism Policy: Policy scope; Community members; School activities; Off-site trips; Direct racism; Indirect racism; ... (95 more)
+[6] Anti-Bullying Policy: Scope, Prevention, Action: Policy scope; Student coverage; Staff coverage; Parent coverage; Visitor coverage; School grounds; ... (152 more)
+[7] School Drug Alcohol Policy Guidelines: Policy applicability; Covered individuals; Covered locations; Covered activities; Covered substances; Policy aims; ... (130 more)
+[8] Weapons Dangerous Items Policy: Policy scope; Applicable individuals; Policy purpose; Preventative measures; Actions, procedures; Support, safety; ... (84 more)
+[9] External Exam Malpractice, Appeals Policies: Exam malpractice policy; Malpractice definition; Malpractice consequences; Assessment integrity; Student malpractice examples; Unauthorised exam materials; ... (109 more)
+
+=== en_family_manual_24_25 (49 nodes) ===
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; ... (54 more)
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; ... (47 more)
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; ... (9 more)
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; ... (13 more)
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; ... (80 more)
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; ... (18 more)
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; ... (36 more)
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; ... (3 more)
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; ... (31 more)
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; ... (3 more)
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; ... (2 more)
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; ... (7 more)
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; ... (8 more)
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; ... (3 more)
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; ... (7 more)
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; ... (5 more)
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; ... (1 more)
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; ... (9 more)
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; ... (7 more)
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; ... (1 more)
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; ... (3 more)
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; ... (23 more)
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected docs : ['en_policy2_technology', 'en_policy4_trips_and_outings']
+Reasoning     : The 'Pupils' mobile phone use policy' within en_policy2_technology is most likely to address mobile phone usage during school activities, and en_policy4_trips_and_outings may contain specific rules for PE lessons or similar activities.
+
+── Stage 2: Per-doc node selection ──────────────────────────────
+
+  en_policy2_technology  (4302ms)
+  Tokens: in=1,736  out=57
+  Outline: 7705 chars
+  Selected IDs: ['use-policy-and-exception']
+  Reasoning: This section specifically outlines permitted mobile phone use for pupils and any exceptions, which would clarify if use is allowed during PE lessons.
+
+  en_policy4_trips_and_outings  (6643ms)
+  Tokens: in=1,271  out=100
+  Outline: 6047 chars
+  Selected IDs: ['2', '9']
+  Reasoning: To determine if students are allowed to use mobile phones during PE lessons, it is necessary to first consult section [2] to understand the definition of a 'School Outing' and ascertain if PE lessons fall under this policy's scope; if they do, section [9] would then provide the specific policy regarding digital device prohibition and exceptions.
+
+── Stage 3: Synthesis (4187ms) ─────────────────────────────────
+Tokens: in=618  out=63  ≈$0.00013
+  [en_policy2_technology:use-policy-and-exception] Pupil Mobile Phone Use Policy Exceptions  (direct=664c, full=709c)
+  [en_policy4_trips_and_outings:2] Key Terms and Definitions for School Outings  (direct=846c, full=895c)
+  [en_policy4_trips_and_outings:9] Student Conduct, Dress, Digital Devices Policy  (direct=828c, full=879c)
+
+Total chars sent to synthesis: 2627
+
+Full text sent:
+········································
+[Section en_policy2_technology:use-policy-and-exception: Pupil Mobile Phone Use Policy Exceptions]
+*   **Permitted Use:** Pupils in Year 9 and above may bring phones for specific purposes, such as independent travel to and from school. However, mobile use is restricted to outside-school-hours.
+*   Phones will be collected every day by 09:00 am by the Tutors. In the case of Year 12, they will bring the phone by themselves to the staff room.
+*   **Off-Site and Overnight International Trips:** Mobile phones may be permitted on overnight trips with specific guidelines for use, primarily to contact parents in the morning or evening. Internet-enabled devices are prohibited during day trips or after-school clubs unless approved under exceptional circumstances.
+
+---
+
+[Section en_policy4_trips_and_outings:2: Key Terms and Definitions for School Outings]
+*   **School Outing:** Any trip organized by the school for educational, cultural, or recreational purposes, typically extending beyond the regular school grounds and outside the classroom.
+*   **Pedagogical Coordinator:** The staff member responsible for ensuring the educational objectives of outings align with the curriculum and the broader goals of the school.
+*   **Risk Assessment:** A process of identifying, evaluating, and mitigating potential risks involved in the outing to ensure the safety and well-being of all participants.
+*   **External Providers:** Outside individuals or organizations providing services or expertise during an outing, such as guides, instructors, or activity leaders.
+*   **Emergency Contact:** A designated individual, typically a family member, who can be reached in case of emergencies involving a student.
+
+---
+
+[Section en_policy4_trips_and_outings:9: Student Conduct, Dress, Digital Devices Policy]
+*   **Behaviour Expectations:** Students are expected to follow the school's behaviour policy during outings, showing respect for staff, peers, and the environment. Any breaches of behaviour may result in removal from future outings.
+*   **Dress Code and Materials:** Students should adhere to any specific dress code (e.g., footwear, sportswear) and bring any required materials for the outing.
+*   **Digital Devices:** Unless otherwise stated, the use of personal electronic devices (phones, tablets, smartwatches, etc.) is prohibited during educational outings to ensure students remain engaged.
+    *   Expectations include students from Year 9 upwards during trips abroad and when students are using Metro Valencia to travel; they may use their mobile phone to ensure their safety and keep in contact with members of staff.
+········································
+
+Answer:
+Mobile phone use is restricted to outside-school-hours, and phones are collected every day by 09:00 am [en_policy2_technology:use-policy-and-exception]. Therefore, students are not allowed to use mobile phones during PE lessons, as these occur during school hours.
+
+Total: 11546ms  |  chars→synthesis: 2627  |  tokens: 6,271 in + 322 out  |  ≈$0.00090
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 5/7  [single-doc]
+What is the correct procedure when a student discloses abuse to a teacher?
+Note: Abuse disclosure — should route to child protection only
+
+── Stage 1: Routing (571ms) ──────────────────────────────
+Tokens: in=2,649  out=93  ≈$0.00023
+Routing outline: 11558 chars
+
+=== en_policy1_child_protection (35 nodes) ===
+[1] Comprehensive Child Protection Policy: Staff reporting duty; Abuse types; Parent discussion; Social care referral; Risk exception; Social care advice; ... (273 more)
+[2] School Confidentiality Policy and Data Protection: Parent reassurance; Data protection; Professional confidentiality; Child information protection; Parent information protection; Legal compliance; ... (48 more)
+
+=== en_policy2_technology (23 nodes) ===
+[imagine-montessori-schoo] Montessori Mobile Device Online Safety Policy: Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; ... (17 more)
+[1] Technology Policy Scope and Application: Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; ... (19 more)
+[2] Key Technology Policy Terminology: Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding
+[3] Technology Use Policy and Principles: Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; ... (15 more)
+[4] Technology Policy Stakeholder Roles Responsibilities: Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; ... (6 more)
+[5] Technology use guidelines by age: Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; ... (12 more)
+[6] Staff Mobile Phone Policy: Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; ... (11 more)
+[7] Pupils' mobile phone use policy: Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; ... (20 more)
+[8] Parents, Volunteers, Visitors Policy: Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; ... (10 more)
+[9] Online Safety Policy and Education: Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; ... (7 more)
+[10] School Camera Mobile Device Policy: Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety
+[11] Device Loss, Theft, Damage Policy: Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; ... (1 more)
+[12] Complaints, Policy Violations, Staff Breaches: Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities
+[13] Policy Monitoring and Review: Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form
+[14] Policy and Legal Reference Documents: Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; ... (6 more)
+
+=== en_policy3_health_safety_reporting (83 nodes) ===
+[1] Fire Emergency Policy and Procedures: Child safety; Staff safety; Risk assessment purpose; Termly emergency drills; Annual risk assessment; Change assessment; ... (56 more)
+[2] Comprehensive School Health Safety Policy: Children activity engagement; Health safety support; Children risk management; Risk assessment proportionality; Staff safety training; Employer safety policy; ... (155 more)
+[3] Weather alerts, emergencies action policy: Weather alert protocol; Risk level definitions; Green level actions; Yellow level actions; Orange level actions; Red level actions; ... (40 more)
+[4] School Food Policy and Guidelines: Policy scope; Student staff food; Food provision; Meals snacks diet; Montessori philosophy; Food preparation; ... (57 more)
+[5] Data Protection Privacy Policy Overview: Data protection importance; Data Controller; Regulatory compliance; Processing basis; User consent; Processing purposes; ... (55 more)
+[6] Whistleblowing Channel Policy and Procedures: Policy scope; Channel users; Reporting obligation; No retaliation; Confidentiality; Channel purpose; ... (188 more)
+
+=== en_policy4_trips_and_outings (13 nodes) ===
+[school-outings-policy] School Outings: Policy, Planning, Safety, Conduct: Outings purpose; educational philosophy; learning beyond classroom; independence aim; academic learning; social skills; ... (125 more)
+
+=== en_policy5_code_of_conduct (120 nodes) ===
+[1] School Commitment to Equality, Diversity: School core values; Montessori philosophy; Respect cultures; Individual value; Equal treatment; Fairness; ... (44 more)
+[2] School Dress Code Policy Guidelines: Cultural diversity; Valuing differences; No uniform policy; Individual expression; Dress code restrictions; Safety; ... (83 more)
+[3] School Attendance Policy Overview: Attendance importance; Punctuality value; Regular attendance benefits; School responsibility; Policy application; Parent access; ... (84 more)
+[4] School Behaviour Policy and Management: Policy scope; Community applicability; Behaviour expectations; Positive environment; Child development; Collaboration; ... (218 more)
+[5] School Anti-Racism Policy: Policy scope; Community members; School activities; Off-site trips; Direct racism; Indirect racism; ... (95 more)
+[6] Anti-Bullying Policy: Scope, Prevention, Action: Policy scope; Student coverage; Staff coverage; Parent coverage; Visitor coverage; School grounds; ... (152 more)
+[7] School Drug Alcohol Policy Guidelines: Policy applicability; Covered individuals; Covered locations; Covered activities; Covered substances; Policy aims; ... (130 more)
+[8] Weapons Dangerous Items Policy: Policy scope; Applicable individuals; Policy purpose; Preventative measures; Actions, procedures; Support, safety; ... (84 more)
+[9] External Exam Malpractice, Appeals Policies: Exam malpractice policy; Malpractice definition; Malpractice consequences; Assessment integrity; Student malpractice examples; Unauthorised exam materials; ... (109 more)
+
+=== en_family_manual_24_25 (49 nodes) ===
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; ... (54 more)
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; ... (47 more)
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; ... (9 more)
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; ... (13 more)
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; ... (80 more)
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; ... (18 more)
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; ... (36 more)
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; ... (3 more)
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; ... (31 more)
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; ... (3 more)
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; ... (2 more)
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; ... (7 more)
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; ... (8 more)
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; ... (3 more)
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; ... (7 more)
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; ... (5 more)
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; ... (1 more)
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; ... (9 more)
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; ... (7 more)
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; ... (1 more)
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; ... (3 more)
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; ... (23 more)
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected docs : ['en_policy1_child_protection', 'en_policy3_health_safety_reporting']
+Reasoning     : The 'Comprehensive Child Protection Policy' directly addresses staff reporting duties and abuse types, while the 'Whistleblowing Channel Policy' outlines procedures for reporting concerns and ensures no retaliation, which is relevant to a student disclosing abuse.
+
+── Stage 2: Per-doc node selection ──────────────────────────────
+
+  en_policy1_child_protection  (9275ms)
+  Tokens: in=3,472  out=77
+  Outline: 17691 chars
+  Selected IDs: ['1.5', '1.13']
+  Reasoning: These sections detail the immediate response and conversation guidelines for staff receiving a disclosure, the subsequent reporting process to the Designated Safeguarding Lead (DSL), and the DSL's responsibilities for referral to external agencies.
+
+  en_policy3_health_safety_reporting  (12840ms)
+  Tokens: in=6,709  out=137
+  Outline: 34670 chars
+  Selected IDs: ['6.1', '6.3', '6.5', '6.7', '6.8', '6.9', '6.10', '6.13.s6', '6.13.s7']
+  Reasoning: These sections of the Whistleblowing Channel Policy outline the scope, principles, communication guidelines, receipt, admission, investigation, and conclusion procedures for reportable incidents, including specific types of harassment and misconduct relevant to abuse disclosures.
+
+── Stage 3: Synthesis (5437ms) ─────────────────────────────────
+Tokens: in=4,199  out=380  ≈$0.00086
+  [en_policy1_child_protection:1.5] Designated Safeguarding Lead (DSL) Responsibilities  (direct=2483c, full=2539c)
+  [en_policy1_child_protection:1.13] Responding to child abuse disclosures  (direct=3649c, full=3691c)
+  [en_policy3_health_safety_reporting:6.1] Whistleblowing Channel Policy Scope  (direct=808c, full=848c)
+  [en_policy3_health_safety_reporting:6.3] Whistleblowing Channel Policy Principles  (direct=1529c, full=1574c)
+  [en_policy3_health_safety_reporting:6.5] Whistleblower Channel Communication Guidelines  (direct=2023c, full=2074c)
+  [en_policy3_health_safety_reporting:6.7] Report Receipt and Registration Process  (direct=1232c, full=1276c)
+  [en_policy3_health_safety_reporting:6.8] Whistleblowing Report Admission Procedure  (direct=2358c, full=2404c)
+  [en_policy3_health_safety_reporting:6.9] Whistleblowing Investigation Process and Rights  (direct=1820c, full=1872c)
+  [en_policy3_health_safety_reporting:6.10] Proceedings Conclusion Decisions and Data Retention  (direct=2614c, full=2670c)
+  [en_policy3_health_safety_reporting:6.13.s6] Discrimination and harassment  (direct=1931c, full=1966c)
+  [en_policy3_health_safety_reporting:6.13.s7] Workplace conduct  (direct=972c, full=995c)
+
+Total chars sent to synthesis: 22479
+
+Full text sent:
+········································
+[Section en_policy1_child_protection:1.5: Designated Safeguarding Lead (DSL) Responsibilities]
+The DSL:
+
+*   Is a senior member of staff from the school’s leadership team and therefore has the status and authority within the school to carry out the duties of the post, including committing resources and supporting and directing other staff.
+*   Takes lead responsibility for safeguarding and child protection in the school, which will not be delegated, although the activities of the DSL may be delegated to appropriately trained deputies.
+*   Acts as a source of support and expertise to the school community.
+*   Encourages a culture of listening to children and taking account of their wishes and feelings.
+*   Is alert to the specific needs of children in need, those with special educational needs, looked-after children, and young carers.
+*   Keeps detailed written records of all concerns, ensuring that such records are stored securely and flagged, but kept separate from, the pupil's general file.
+*   Refers cases of suspected abuse to Children's Social Care or the Police as appropriate.
+*   Notifies Children's Social Care if a child with a “Child protection plan” is absent for more than three days without explanation.
+*   Ensures that, when a pupil leaves the school, all child protection records are passed to the new school (separately from the main pupil file and ensuring secure transit) and confirmation of receipt is obtained. If the child is the subject of an open case to Children's Social Care, the pupil's social worker is also informed.
+*   Co-ordinates the school's contribution to child protection plans as part of core groups, attending and actively participating in core group meetings.
+*   Ensures that all staff sign to indicate that they have read and understood the child protection and safeguarding policy and Staff Behaviour Policy (Code of Conduct).
+*   Ensures that the child protection and safeguarding policy and procedures are regularly reviewed and updated annually, working with the whole school community of pupils, parents, staff, and volunteers regarding this.
+*   Keeps a record of staff attendance at child protection training.
+*   Makes the child protection and safeguarding policy available publicly, i.e., on the school's website or by other means.
+*   Ensures parents are aware of the school's role in safeguarding and that referrals about suspected abuse and neglect may be made.
+
+**DSL 1:** Sheila Ortiz Morales - Head Teacher of Children’s House and Primary
+**DSL 2:** Lindsay Kerr - Head Teacher of Secondary and A Levels
+
+---
+
+[Section en_policy1_child_protection:1.13: Responding to child abuse disclosures]
+Any child in any family in any school could become a victim of abuse. Staff should always maintain an attitude of "It could happen here".
+
+1.  **If a pupil discloses to a member of staff or volunteer:**
+    It takes a lot of courage for a child to disclose that they are being abused. They may feel ashamed, particularly if the abuse is sexual. Their abuser may have threatened what will happen if they tell. They may have lost all trust in adults. Or they may believe, or have been told, that the abuse is their own fault. Sometimes they may not be aware that what is happening is abusive.
+
+    If a pupil talks to a member of staff about any risks to their safety or wellbeing, the staff member will need to let the pupil know that they must pass the information on - staff are not allowed to keep secrets. The point at which they tell the pupil this is a matter of professional judgment. If they jump in immediately, the pupil may think that they do not want to listen, but if left until the very end of the conversation, the pupil may feel that they have been misled into revealing more than they would have otherwise.
+
+    The pupils who have been completing the Protective Behaviours curriculum will have been taught about confidentiality and will generally understand the concept of safe and unsafe secrets. They should have a good knowledge and understanding of why staff cannot keep some information confidential but also know that information is passed on to specific people on a 'need to know' basis only.
+
+    During their conversations with pupils, staff will:
+    *   Allow them to speak freely.
+    *   Remain calm and not overreact - the pupil may stop talking if they feel they are upsetting their listener.
+    *   Give reassuring nods or words of comfort - 'I'm so sorry this has happened', 'I want to help', 'This isn't your fault', 'You are doing the right thing in talking to me'.
+    *   Not be afraid of silences - staff must remember how hard this must be for the pupil.
+    *   Under no circumstances ask investigative questions - such as how many times this has happened, whether it happens to siblings too, or what does the pupil's mother think about all this (however, it is reasonable to ask questions to clarify understanding and to support a meaningful referral if that is required, e.g., when did this happen, where did this happen?).
+    *   At an appropriate time, tell the pupil that in order to help them, the member of staff must pass the information on.
+    *   Not automatically offer any physical touch as comfort. It may be anything but comforting to a child who has been abused.
+    *   Avoid admonishing the child for not disclosing earlier. Saying things such as 'I do wish you had told me about this when it started,' or 'I can't believe what I'm hearing' may be the staff member's way of being supportive but may be interpreted by the child to mean that they have done something wrong.
+    *   Tell the pupil what will happen next.
+    *   Let them know that someone (either you or another named person, e.g., the DSL) will come to see them before the end of the day.
+    *   Report verbally to the DSL.
+    *   Seek support if they feel distressed or need to debrief.
+
+2.  **Notifying Parents:**
+    The school will normally seek to discuss any concerns about a pupil with their parents. This must be handled sensitively, and the DSL will make contact with the parent in the event of a concern, suspicion, or disclosure.
+
+    However, if the school believes that notifying parents could increase the risk to the child or exacerbate the problem, advice will be sought first from Children's Social Care.
+
+---
+
+[Section en_policy3_health_safety_reporting:6.1: Whistleblowing Channel Policy Scope]
+This policy is intended for employees, clients, suppliers, and third parties involved in the Company's operations, who may use the Whistleblowing Channel as detailed herein.
+
+All employees (regardless of the legal form of their employment or service relationship), suppliers, sponsors, collaborators, agents, and members of the Company's various collegiate bodies are required to report any irregularity or breach within their objective scope through the Whistleblowing Channel, without fear of dismissal or other forms of retaliation. The information provided will be treated with utmost confidentiality.
+
+The Whistleblowing Channel is intended as an instrument for reporting irregularities or breaches. Therefore, it should not be used indiscriminately but solely for the purposes for which it is designed.
+
+---
+
+[Section en_policy3_health_safety_reporting:6.3: Whistleblowing Channel Policy Principles]
+This policy has been developed by Zubi Education, SL (hereinafter referred to as "the Company"), to maintain group-wide consistency of action. Its objective is to outline the procedure followed within the internal whistleblowing channel, in compliance with various regulatory provisions, including Article 8 of Directive (EU) 2019/1937 of the European Parliament and Council dated 23 October 2019, regarding the protection of individuals who report breaches of EU law.
+
+The objective of the Whistleblowing Channel is to enable employees, clients, suppliers, and third parties associated with the Company or its operations to report any incident within the Company that could represent a breach, offence, or violation of our internal procedures, among others:
+
+*   Breach of Anti-Money Laundering (AML) regulations
+*   Breach of Data Protection regulations
+*   Breach of Market Abuse regulations
+*   Breach of comprehensive sexual freedom assurance regulations
+*   Breach of regulations ensuring effective equality between men and women
+*   Internal Code of Conduct
+
+The Company’s Whistleblowing Channel is accessible through the corporate website: , and is available to individuals aware of potential administrative and/or serious criminal risks attributable to any person or entity linked to the group in their professional capacity.
+
+This Channel enables secure communication, ensuring that privacy and confidentiality are maintained throughout the process. Reports may be submitted anonymously if the whistleblower so chooses.
+
+---
+
+[Section en_policy3_health_safety_reporting:6.5: Whistleblower Channel Communication Guidelines]
+The public whistleblowing channel (“canal de denuncias”) on our website should be used as the preferred method for submitting information, as it ensures confidential data processing in accordance with the Data Protection Act.
+
+The "Whistleblower Channel" is available on our website and is accessible to all individuals who have a relationship with us, including clients, employees, suppliers, partners, or any other parties connected to our activities. This channel allows the reporting of irregularities or inappropriate behavior, ensuring confidentiality and the right to the presumption of innocence for all involved parties. The information received through this channel will be handled with the utmost seriousness and in compliance with personal data protection regulations, ensuring that investigation procedures are conducted in accordance with applicable laws.
+
+As a general rule, the maximum time to respond to investigation actions shall not exceed three months from the receipt of the report or, if no acknowledgment of receipt was sent to the informant, three months from the expiration of the seven-day period following the submission of the report, except in cases of special complexity that require an extension of the period, in which case it may be extended by a maximum of an additional three months.
+
+At various stages of the processing procedure, there is provision for maintaining communication with the informant and, if deemed necessary, requesting additional information from the informant, unless they have waived this option.
+
+In all cases, the right to the presumption of innocence and the honour of the affected parties shall be respected, as well as the provisions on the protection of personal data as stipulated.
+
+If the reported facts are potentially indicative of a crime, the information will be referred immediately to the Public Prosecutor’s Office. Should the facts affect the financial interests of the European Union, they will be referred to the European Public Prosecutor’s Office.
+
+---
+
+[Section en_policy3_health_safety_reporting:6.7: Report Receipt and Registration Process]
+Information can be provided anonymously. In other cases, the identity of the informant will be kept confidential.
+
+When submitting information, the informant may provide an address, email, or secure location for receiving notifications and may also expressly decline to receive any communications regarding actions taken by the Company because of the report.
+
+Without prejudice to the rights accorded to them under data protection regulations, the informant will be given the opportunity to review, correct, and sign the transcript of the message.
+
+Each case will be recorded within the whistleblowing channel and assigned an identification code. All information recorded within the whistleblowing channel will be stored in a secure, restricted-access database, where the following details of each communication will be registered:
+
+a)  Date of receipt.
+b)  Identification code.
+c)  Actions taken.
+d)  Measures adopted.
+e)  Closure date.
+
+Upon receipt of the information, an acknowledgment will be issued within a maximum period of 7 calendar days from receipt, unless the informant has expressly declined to receive communications related to the investigation, or unless doing so could jeopardise the confidentiality of the report.
+
+---
+
+[Section en_policy3_health_safety_reporting:6.8: Whistleblowing Report Admission Procedure]
+Once the information is registered, the System Administrator will verify whether it presents facts or behaviours that fall within the scope of Annex I. They will also determine if the report needs to be reassigned to another person or management team due to any of the following circumstances:
+
+1.  Conflict of interest of the System Administrator, as they may be personally affected by the report.
+2.  Existence of an ad hoc team responsible for managing the report based on the subject matter.
+
+The ad hoc team for handling reports will, in this case, be composed of the Chief Officer People of Zubi Group, ensuring impartiality in the process.
+
+Following this preliminary analysis, a decision will be made within a maximum period of ten business days from the registration date of the information:
+
+a)  **Dismiss the report** in any of the following cases:
+    1.  When the facts reported are entirely implausible.
+    2.  When the facts reported do not constitute a breach of the legal framework covered under Annex I.
+    3.  When the report is manifestly unfounded, or there are, in the System Administrator’s opinion, reasonable indications that it was obtained through the commission of a crime. In this latter case, in addition to dismissal, a detailed report of the facts deemed to constitute a crime will be forwarded to the Public Prosecutor’s Office.
+    4.  When the report contains no new and significant information regarding breaches in comparison with a previous report for which the procedures have been concluded, unless there are new factual or legal circumstances that justify a different follow-up. In such cases, the System Administrator will issue a reasoned notification of the decision.
+    The dismissal will be communicated to the informant within five business days.
+
+b)  **Admit the report for processing**.
+    The admission of the report will be communicated to the informant within seven business days, unless the informant has waived the right to receive communications from the Company’s System Administrator.
+
+c)  **Immediately forward the information to the Public Prosecutor’s Office** if the facts may indicate a crime, or to the European Public Prosecutor’s Office if the facts affect the financial interests of the European Union.
+
+d)  **Refer the report** to the competent authority, entity, or body for processing.
+
+---
+
+[Section en_policy3_health_safety_reporting:6.9: Whistleblowing Investigation Process and Rights]
+The investigation will encompass all actions aimed at verifying the credibility of the reported facts.
+
+It will be ensured that the person affected by the information is informed of the report, as well as of the facts presented in a summarised form. Additionally, they will be informed of their right to submit written arguments and the handling of their personal data. However, this information may be provided at the hearing stage if prior disclosure could facilitate the concealment, destruction, or alteration of evidence.
+
+In no case will the identity of the informant be disclosed to the affected parties, nor will they be given access to the report. During the investigation, a summary of the reported facts will be provided to the respondent. This information may also be presented at the hearing if prior disclosure could facilitate the concealment, destruction, or alteration of evidence.
+
+Without prejudice to the right to submit written arguments, the investigation will include, whenever possible, an interview with the affected individual in which they are invited to present their version of the events and to provide any evidence they consider appropriate and relevant, all while respecting the presumption of innocence.
+
+To ensure the right to a defence, the affected individual will have access to the case file without revealing any information that could identify the informant, and they may be heard at any point in the proceedings.
+
+The System Administrator is obligated to maintain confidentiality regarding the information they acquire during this investigation.
+
+All Company personnel are required to cooperate with the investigation and must comply with any requests made to provide documentation, data, or any information related to the ongoing procedures, including personal data if required.
+
+---
+
+[Section en_policy3_health_safety_reporting:6.10: Proceedings Conclusion Decisions and Data Retention]
+At the conclusion of the investigation, the System Administrator will adopt one of the following decisions:
+
+a)  **Filing of the case**, which will be notified to the informant and, if applicable, to the affected individual. In such cases, the informant will retain the right to protection as provided by this law, unless, because of the actions carried out during the investigation phase, it is concluded that the report should have been dismissed based on one of the grounds specified in this Procedure.
+b)  **Referral to the Public Prosecutor’s Office** if, despite initially finding no indication that the facts may constitute a crime, this determination changes over the course of the investigation. If the crime affects the financial interests of the European Union, the case will be referred to the European Public Prosecutor’s Office.
+c)  **Transfer of all actions to the competent authority**, in accordance with the provisions of this Procedure.
+d)  **Initiation of disciplinary proceedings**.
+
+Upon conclusion of all actions, the System Administrator will retain information related to the report within the whistleblowing channel software, which will contain:
+
+a)  Date of receipt.
+b)  Classification of the report.
+c)  Closure date.
+d)  Actions taken.
+
+This record will not be public, and only upon a reasoned request from the competent judicial authority, within the framework of a judicial proceeding and under its supervision, may partial or full access to the content of the record be granted.
+
+Personal data related to received reports and internal investigations referred to in the preceding section will only be retained for as long as necessary and proportionate to comply with applicable legislation. In no case will data be retained for more than ten years.
+
+If the investigation concludes with verified proof that the reported facts are true and involve irregular or unlawful conduct, the accused may be subject to sanctions in accordance with the applicable Collective Bargaining Agreement, labour legislation, and other civil and commercial obligations held by Company staff, executive personnel, or the Board of Directors.
+
+The Company may also refer the matter to the relevant judicial authorities if deemed necessary.
+
+If the accused is a third party with no employment relationship with the Company (supplier, commercial agent, or business partner), applicable sanctions will be limited to the commercial sphere (limitation of actions, unilateral termination of the contract by the Company), without prejudice to the aforementioned communication to the competent judicial authorities.
+
+---
+
+[Section en_policy3_health_safety_reporting:6.13.s6: Discrimination and harassment]
+| Equal Opportunities and Non-Discrimination            | Conduct not aligned with the Company’s principle of equal opportunities in job access and career advancement, ensuring the absence of discrimination based on gender, sexual orientation, gender identity, gender expression, sexual characteristics, race, religion, disability, origin, marital status, age, or social status. Also includes derogatory expressions based on sexual orientation, gender identity, or gender characteristics in public or private service provision.                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Sexual or Gender-Based Harassment                     | Disrespectful or unwanted conduct of a sexual nature that causes discomfort and creates an intimidating, offensive, or hostile work environment.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+
+---
+
+[Section en_policy3_health_safety_reporting:6.13.s7: Workplace conduct]
+| Workplace Harassment                                  | Systematic hostile or vexatious treatment in the workplace that creates an intimidating, offensive, or hostile environment.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+········································
+
+Answer:
+When a student discloses abuse to a member of staff or volunteer, the following procedure should be followed:
+
+1.  The staff member must inform the pupil that they cannot keep secrets and must pass the information on, exercising professional judgment on the timing of this disclosure [1.13].
+2.  During the conversation, the staff member should allow the pupil to speak freely, remain calm, and offer reassuring words such as "I'm so sorry this has happened," "I want to help," "This isn't your fault," or "You are doing the right thing in talking to me" [1.13].
+3.  The staff member should not be afraid of silences and must under no circumstances ask investigative questions, though clarifying questions (e.g., "when did this happen," "where did this happen") are reasonable to support a meaningful referral [1.13].
+4.  The staff member should not automatically offer physical touch as comfort and should avoid admonishing the child for not disclosing earlier [1.13].
+5.  The staff member must tell the pupil what will happen next and let them know that someone (either the staff member or another named person, such as the DSL) will come to see them before the end of the day [1.13].
+6.  The staff member must report verbally to the Designated Safeguarding Lead (DSL) [1.13].
+7.  The staff member should seek support if they feel distressed or need to debrief [1.13].
+8.  The school will normally seek to discuss any concerns with parents, with the DSL making contact. However, if the school believes that notifying parents could increase the risk to the child or exacerbate the problem, advice will be sought first from Children's Social Care [1.13].
+
+Total: 18848ms  |  chars→synthesis: 22479  |  tokens: 17,029 in + 687 out  |  ≈$0.00274
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 6/7  [single-doc]
+What should happen after a fire drill and who is responsible?
+Note: Fire drill — should route to health & safety only
+
+── Stage 1: Routing (615ms) ──────────────────────────────
+Tokens: in=2,647  out=90  ≈$0.00023
+Routing outline: 11558 chars
+
+=== en_policy1_child_protection (35 nodes) ===
+[1] Comprehensive Child Protection Policy: Staff reporting duty; Abuse types; Parent discussion; Social care referral; Risk exception; Social care advice; ... (273 more)
+[2] School Confidentiality Policy and Data Protection: Parent reassurance; Data protection; Professional confidentiality; Child information protection; Parent information protection; Legal compliance; ... (48 more)
+
+=== en_policy2_technology (23 nodes) ===
+[imagine-montessori-schoo] Montessori Mobile Device Online Safety Policy: Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; ... (17 more)
+[1] Technology Policy Scope and Application: Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; ... (19 more)
+[2] Key Technology Policy Terminology: Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding
+[3] Technology Use Policy and Principles: Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; ... (15 more)
+[4] Technology Policy Stakeholder Roles Responsibilities: Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; ... (6 more)
+[5] Technology use guidelines by age: Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; ... (12 more)
+[6] Staff Mobile Phone Policy: Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; ... (11 more)
+[7] Pupils' mobile phone use policy: Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; ... (20 more)
+[8] Parents, Volunteers, Visitors Policy: Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; ... (10 more)
+[9] Online Safety Policy and Education: Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; ... (7 more)
+[10] School Camera Mobile Device Policy: Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety
+[11] Device Loss, Theft, Damage Policy: Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; ... (1 more)
+[12] Complaints, Policy Violations, Staff Breaches: Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities
+[13] Policy Monitoring and Review: Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form
+[14] Policy and Legal Reference Documents: Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; ... (6 more)
+
+=== en_policy3_health_safety_reporting (83 nodes) ===
+[1] Fire Emergency Policy and Procedures: Child safety; Staff safety; Risk assessment purpose; Termly emergency drills; Annual risk assessment; Change assessment; ... (56 more)
+[2] Comprehensive School Health Safety Policy: Children activity engagement; Health safety support; Children risk management; Risk assessment proportionality; Staff safety training; Employer safety policy; ... (155 more)
+[3] Weather alerts, emergencies action policy: Weather alert protocol; Risk level definitions; Green level actions; Yellow level actions; Orange level actions; Red level actions; ... (40 more)
+[4] School Food Policy and Guidelines: Policy scope; Student staff food; Food provision; Meals snacks diet; Montessori philosophy; Food preparation; ... (57 more)
+[5] Data Protection Privacy Policy Overview: Data protection importance; Data Controller; Regulatory compliance; Processing basis; User consent; Processing purposes; ... (55 more)
+[6] Whistleblowing Channel Policy and Procedures: Policy scope; Channel users; Reporting obligation; No retaliation; Confidentiality; Channel purpose; ... (188 more)
+
+=== en_policy4_trips_and_outings (13 nodes) ===
+[school-outings-policy] School Outings: Policy, Planning, Safety, Conduct: Outings purpose; educational philosophy; learning beyond classroom; independence aim; academic learning; social skills; ... (125 more)
+
+=== en_policy5_code_of_conduct (120 nodes) ===
+[1] School Commitment to Equality, Diversity: School core values; Montessori philosophy; Respect cultures; Individual value; Equal treatment; Fairness; ... (44 more)
+[2] School Dress Code Policy Guidelines: Cultural diversity; Valuing differences; No uniform policy; Individual expression; Dress code restrictions; Safety; ... (83 more)
+[3] School Attendance Policy Overview: Attendance importance; Punctuality value; Regular attendance benefits; School responsibility; Policy application; Parent access; ... (84 more)
+[4] School Behaviour Policy and Management: Policy scope; Community applicability; Behaviour expectations; Positive environment; Child development; Collaboration; ... (218 more)
+[5] School Anti-Racism Policy: Policy scope; Community members; School activities; Off-site trips; Direct racism; Indirect racism; ... (95 more)
+[6] Anti-Bullying Policy: Scope, Prevention, Action: Policy scope; Student coverage; Staff coverage; Parent coverage; Visitor coverage; School grounds; ... (152 more)
+[7] School Drug Alcohol Policy Guidelines: Policy applicability; Covered individuals; Covered locations; Covered activities; Covered substances; Policy aims; ... (130 more)
+[8] Weapons Dangerous Items Policy: Policy scope; Applicable individuals; Policy purpose; Preventative measures; Actions, procedures; Support, safety; ... (84 more)
+[9] External Exam Malpractice, Appeals Policies: Exam malpractice policy; Malpractice definition; Malpractice consequences; Assessment integrity; Student malpractice examples; Unauthorised exam materials; ... (109 more)
+
+=== en_family_manual_24_25 (49 nodes) ===
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; ... (54 more)
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; ... (47 more)
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; ... (9 more)
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; ... (13 more)
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; ... (80 more)
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; ... (18 more)
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; ... (36 more)
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; ... (3 more)
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; ... (31 more)
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; ... (3 more)
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; ... (2 more)
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; ... (7 more)
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; ... (8 more)
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; ... (3 more)
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; ... (7 more)
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; ... (5 more)
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; ... (1 more)
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; ... (9 more)
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; ... (7 more)
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; ... (1 more)
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; ... (3 more)
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; ... (23 more)
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected docs : ['en_policy3_health_safety_reporting', 'en_policy1_child_protection']
+Reasoning     : The question asks about procedures after a fire drill, which is directly addressed in the 'Fire Emergency Policy and Procedures' document, and child safety during emergencies is also covered in the 'Comprehensive Child Protection Policy'.
+
+── Stage 2: Per-doc node selection ──────────────────────────────
+
+  en_policy3_health_safety_reporting  (11981ms)
+  Tokens: in=6,707  out=84
+  Outline: 34670 chars
+  Selected IDs: ['1.1', '1.10']
+  Reasoning: These sections detail the scope of emergency procedures, risk assessment, and the roles of H&S Officers and External Technicians in post-drill evaluation, as well as the Leadership Team's responsibility for monitoring and reviewing the Fire Emergency Policy.
+
+  en_policy1_child_protection  (2749ms)
+  Tokens: in=3,470  out=52
+  Outline: 17691 chars
+  Selected IDs: []
+  Reasoning: The provided outline does not contain any sections that directly address fire drill procedures or responsibilities after a fire drill; the document focuses on child protection, safeguarding, and confidentiality.
+
+── Stage 3: Synthesis (2249ms) ─────────────────────────────────
+Tokens: in=344  out=9  ≈$0.00006
+  [en_policy3_health_safety_reporting:1.1] Safety, Risk Assessment, Emergency Procedures Scope  (direct=1058c, full=1114c)
+  [en_policy3_health_safety_reporting:1.10] Biennial Policy Monitoring and Review  (direct=94c, full=136c)
+
+Total chars sent to synthesis: 1350
+
+Full text sent:
+········································
+[Section en_policy3_health_safety_reporting:1.1: Safety, Risk Assessment, Emergency Procedures Scope]
+The safety of the children and staff at Imagine Montessori School is paramount. Therefore, the risk assessment ensures the safety of everyone. There is an emergency drill carried out every term. A risk assessment is made annually or when there is a significant change or new risk to consider.
+
+**The Health and Safety Officers:**
+
+*   Identify the hazard, record significant findings and assess the risks
+*   Review the existing control measures
+*   Where necessary, provide additional control measures
+*   Carry out risk assessments
+
+**The External Technician in Emergency Risk Assessment is responsible for:**
+
+*   Identification of hazards
+*   Detect who might be harmed and how
+*   Evaluate the risks, deciding whether existing controls are adequate, or the school needs to do more
+*   Record findings
+*   Review and revise annually
+
+These responsible agents collaborate to prepare an emergency plan in accordance with the risks identified. The emergency plan is validated with the Leadership Team and explained and practised with the whole Imagine Team.
+
+---
+
+[Section en_policy3_health_safety_reporting:1.10: Biennial Policy Monitoring and Review]
+The Imagine Leadership Team is responsible for monitoring and reviewing the policy biennially.
+········································
+
+Answer:
+The provided sections do not answer this question.
+
+Total: 14845ms  |  chars→synthesis: 1350  |  tokens: 13,168 in + 235 out  |  ≈$0.00189
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query 7/7  [cross-doc]
+What is the school's position on students posting about school on social media?
+Note: Social media and school — spans technology policy and code of conduct
+
+── Stage 1: Routing (613ms) ──────────────────────────────
+Tokens: in=2,651  out=87  ≈$0.00022
+Routing outline: 11558 chars
+
+=== en_policy1_child_protection (35 nodes) ===
+[1] Comprehensive Child Protection Policy: Staff reporting duty; Abuse types; Parent discussion; Social care referral; Risk exception; Social care advice; ... (273 more)
+[2] School Confidentiality Policy and Data Protection: Parent reassurance; Data protection; Professional confidentiality; Child information protection; Parent information protection; Legal compliance; ... (48 more)
+
+=== en_policy2_technology (23 nodes) ===
+[imagine-montessori-schoo] Montessori Mobile Device Online Safety Policy: Policy scope; Key terms; Policy principles; Roles; Responsibilities; Technology plan; ... (17 more)
+[1] Technology Policy Scope and Application: Technology essential education; Policy guidelines; Mobile device use; Personal technology use; Online safety; Secure learning environment; ... (19 more)
+[2] Key Technology Policy Terminology: Personal devices; School devices; E-safety; Confiscation; Data protection; Safeguarding
+[3] Technology Use Policy and Principles: Responsible device use; Professional conduct; Safeguarding compliance; Student safety; Privacy protection; Data confidentiality; ... (15 more)
+[4] Technology Policy Stakeholder Roles Responsibilities: Policy applicability; Staff responsibilities; Policy enforcement; Safeguarding data protection; Staff device security; Pupil responsibilities; ... (6 more)
+[5] Technology use guidelines by age: Screen contact 3-6; Occasional video 3-6; IT programming 6-9; Computer research 6-9; Handwritten text 6-9; Shared laptops 9-11; ... (12 more)
+[6] Staff Mobile Phone Policy: Work phone use; Professional conduct; No personal use; Personal device rules; Silent/vibrate mode; BYOD registration; ... (11 more)
+[7] Pupils' mobile phone use policy: Permitted phone use; Outside school hours; Daily phone collection; Year 12 phone collection; Overnight trip phones; Parent contact phones; ... (20 more)
+[8] Parents, Volunteers, Visitors Policy: Mobile use policy; School grounds mobile rules; Pupil photo prohibition; Mobile near pupils restriction; School trips mobile rules; Trip pupil photo prohibition; ... (10 more)
+[9] Online Safety Policy and Education: Online safety commitment; E-safety guidelines; Controlled internet access; Domain enrollment; Content restriction; Staff social media; ... (7 more)
+[10] School Camera Mobile Device Policy: Safeguarding mobile devices; Parental photography rules; Event recording restrictions; Internet filtering collaboration; Inappropriate content reporting; Content review safety
+[11] Device Loss, Theft, Damage Policy: Device owner responsibility; School no liability; Confiscated phone storage; Parent collection; Device labeling; Security measures; ... (1 more)
+[12] Complaints, Policy Violations, Staff Breaches: Internet misuse complaints; Complaints Policy reference; Child Protection Document; Staff policy breaches; Staff disciplinary measures; Referral to authorities
+[13] Policy Monitoring and Review: Leadership Team Responsibility; Policy Monitoring; Policy Review; Biennial Review; Policy Breach Documentation; Record of Concern Form
+[14] Policy and Legal Reference Documents: Spanish education law; Student rights; Spanish data protection law; Digital rights; GDPR; EU data protection; ... (6 more)
+
+=== en_policy3_health_safety_reporting (83 nodes) ===
+[1] Fire Emergency Policy and Procedures: Child safety; Staff safety; Risk assessment purpose; Termly emergency drills; Annual risk assessment; Change assessment; ... (56 more)
+[2] Comprehensive School Health Safety Policy: Children activity engagement; Health safety support; Children risk management; Risk assessment proportionality; Staff safety training; Employer safety policy; ... (155 more)
+[3] Weather alerts, emergencies action policy: Weather alert protocol; Risk level definitions; Green level actions; Yellow level actions; Orange level actions; Red level actions; ... (40 more)
+[4] School Food Policy and Guidelines: Policy scope; Student staff food; Food provision; Meals snacks diet; Montessori philosophy; Food preparation; ... (57 more)
+[5] Data Protection Privacy Policy Overview: Data protection importance; Data Controller; Regulatory compliance; Processing basis; User consent; Processing purposes; ... (55 more)
+[6] Whistleblowing Channel Policy and Procedures: Policy scope; Channel users; Reporting obligation; No retaliation; Confidentiality; Channel purpose; ... (188 more)
+
+=== en_policy4_trips_and_outings (13 nodes) ===
+[school-outings-policy] School Outings: Policy, Planning, Safety, Conduct: Outings purpose; educational philosophy; learning beyond classroom; independence aim; academic learning; social skills; ... (125 more)
+
+=== en_policy5_code_of_conduct (120 nodes) ===
+[1] School Commitment to Equality, Diversity: School core values; Montessori philosophy; Respect cultures; Individual value; Equal treatment; Fairness; ... (44 more)
+[2] School Dress Code Policy Guidelines: Cultural diversity; Valuing differences; No uniform policy; Individual expression; Dress code restrictions; Safety; ... (83 more)
+[3] School Attendance Policy Overview: Attendance importance; Punctuality value; Regular attendance benefits; School responsibility; Policy application; Parent access; ... (84 more)
+[4] School Behaviour Policy and Management: Policy scope; Community applicability; Behaviour expectations; Positive environment; Child development; Collaboration; ... (218 more)
+[5] School Anti-Racism Policy: Policy scope; Community members; School activities; Off-site trips; Direct racism; Indirect racism; ... (95 more)
+[6] Anti-Bullying Policy: Scope, Prevention, Action: Policy scope; Student coverage; Staff coverage; Parent coverage; Visitor coverage; School grounds; ... (152 more)
+[7] School Drug Alcohol Policy Guidelines: Policy applicability; Covered individuals; Covered locations; Covered activities; Covered substances; Policy aims; ... (130 more)
+[8] Weapons Dangerous Items Policy: Policy scope; Applicable individuals; Policy purpose; Preventative measures; Actions, procedures; Support, safety; ... (84 more)
+[9] External Exam Malpractice, Appeals Policies: Exam malpractice policy; Malpractice definition; Malpractice consequences; Assessment integrity; Student malpractice examples; Unauthorised exam materials; ... (109 more)
+
+=== en_family_manual_24_25 (49 nodes) ===
+[welcome-to-the-school-ye] Executive Director Welcome Message: School welcome; New families; Handbook purpose; School operations; Executive Director
+[index] Imagine Montessori School Valencia Overview: School identity; Pedagogical team; Leadership; Administration
+[1] School Overview, Staff, and Administration: School type; Co-educational; Secular school; Montessori curriculum; British curriculum; UK education standards; ... (54 more)
+[2] School Timetables and Logistical Procedures: Timetable design; Age-based schedules; Timetable options; Timetable changes; Change process; Consult Guide; ... (47 more)
+[3] School-Family Communication Channels: Communication importance; Communication platforms; Administrative language; Pedagogical language; Phidias overview; Phidias features; ... (9 more)
+[4] Family-School Pedagogical Meetings: Family-school alignment; Educational guidelines; Quarterly meetings; Family-educator discussions; Pedagogical approach understanding; Recommended family attendance; ... (13 more)
+[5] Curriculum Overview: British, Montessori, EYFS, Primary: British curriculum goals; Montessori philosophy; Student independence; Positive learning attitude; Classroom materials; Child-sized furniture; ... (80 more)
+[6] Psycho Pedagogical and Career Guidance: Psycho Pedagogical Guidance; Psychologist role; Special needs identification; External specialist advice; Specialist coordination; Teacher support; ... (18 more)
+[7] Nutrition: Healthy Eating, Montessori, Meal Logistics, Dietary Needs: Student nutrition; Curricular links; Quality ingredients; Varied diet; Balanced meals; Daily scratch cooking; ... (36 more)
+[8] Nap time provisions and costs: Rest period; Infant Community nap; Nursery nap; Fitted sheet provision; Laundry service; Blanket provision; ... (3 more)
+[9] Health Standards, Illness, and Vaccination: Illness school attendance; Contagion risk; Student isolation; Unwell student collection; 24-hour return rule; Fever attendance; ... (31 more)
+[10] Student Behavior Incident Reporting: Behavior referral form; Incident reporting; Family notification; 24-hour notification; Three incidents meeting; Intervention meeting; ... (3 more)
+[11] Commitment to English Language Instruction: English instruction language; Family learning opportunity; Choosing English education; Encourage English reading; Support English speaking; Play English music; ... (2 more)
+[12] Imagine School Dress Code Policy: No school uniforms; Optional school garments; Imagine Shop orders; PE uniform required; Excursion uniform; All clothing labelled; ... (7 more)
+[13] Required Clothing and Equipment: Spare clothing requirements; Spare clothing 2-3 years; Spare clothing 4+ years; Replace used spare clothing; Closed footwear; Free play footwear; ... (8 more)
+[14] Nappy and Accident Policy: Nappy/wipe provision; Nappy supply notification; Nappy use location; Toilet training expectation; Accident support; Spare clothes use; ... (3 more)
+[15] Birthday Celebrations Early Years, Children's House: Birthday celebration purpose; Family participation; Photo request; Student photo timeline; Student legacy; Classroom enduring gift; ... (7 more)
+[16] Children's Enrichment Programme and Enrollment: Enrichment Programme; Extracurricular activities; Children; Teenagers; Creativity; Social skills; ... (5 more)
+[17] Returning Accidentally Taken School Materials: Child takes material; Return to reception; Return promptly; Part of set; Incomplete set unusable
+[18] School Toy and Pacifier Policy: Toys prohibited; Comfort items naptime; Pacifiers naptime; Early Years pacifiers; Hygiene reasons; Language development
+[19] Student balls: use, storage, and school responsibility: Student ball allowance; Bus ball storage; Loose ball hazard; Lost ball responsibility; Outdoor use only; Indoor misuse confiscation
+[20] Lost and Found Item Recovery Policy: Lost and Found location; Monthly item display; Display notification; Unclaimed item clearing; Item donation; Item discarding; ... (1 more)
+[21] School Excursions: Participation and Consent: Excursion purpose; Scheduled, ad-hoc outings; Additional cost; Advance notification; Group participation; School transport; ... (9 more)
+[22] School Bus Routes and Policies: Bus routes; Service options; Route adjustments; Departure time; Arrival time; Service contracting; ... (7 more)
+[23] Updating Contact and Family Information: Update contact information; Update records Phidias; Emergency contact importance; Edit Phidias profile; Inform guide family changes; Separation or divorce; ... (1 more)
+[24] Student Photos and Media Policy: Internal image sharing consent; External media authorization; Media consent impact; Annual yearbook photos; Professional photographer; Digital photo cost; ... (3 more)
+[25] Payment Policy and Financial Aid Programs: Fees; Payment method; Annual fee revision; Direct debit; Monthly flat rate; Included costs; ... (23 more)
+[26] Education System Comparison: British, Spanish, Montessori: Education system comparison; British education system; Spanish education system; Montessori education system; Age stages; Educational equivalences
+[27] School Policies Overview for Families: School policies; Shared with families; Phidias documents
+
+Selected docs : ['en_policy2_technology', 'en_family_manual_24_25']
+Reasoning     : The question is about students posting on social media, which falls under technology use and online safety policies, and the family manual likely contains specific rules or consent forms related to student media and online presence.
+
+── Stage 2: Per-doc node selection ──────────────────────────────
+
+  en_policy2_technology  (9524ms)
+  Tokens: in=1,741  out=131
+  Outline: 7705 chars
+  Selected IDs: ['3', '4', 'sanctions-for-misuse', '9.p', 'educating-pupils-on-e-sa', '10', '12']
+  Reasoning: These sections cover general principles of online safety, student responsibilities, prohibitions on photography, guidelines for responsible internet use, definitions of inappropriate content, and the sanctions for misuse, all of which are crucial for understanding the school's stance on students posting about school on social media.
+
+  en_family_manual_24_25  (3989ms)
+  Tokens: in=4,283  out=89
+  Outline: 21280 chars
+  Selected IDs: ['24']
+  Reasoning: The question asks about the school's position on students posting about school on social media, and section [24] 'Student Photos and Media Policy' is the most relevant as it discusses media authorization and consent, which would likely cover or be related to any policy regarding external sharing of school-related content.
+
+── Stage 3: Synthesis (12286ms) ─────────────────────────────────
+Tokens: in=1,562  out=117  ≈$0.00030
+  [en_policy2_technology:3] Technology Use Policy and Principles  (direct=1644c, full=1684c)
+  [en_policy2_technology:4] Technology Policy Stakeholder Roles Responsibilities  (direct=623c, full=679c)
+  [en_policy2_technology:sanctions-for-misuse] Mobile Phone Misuse Sanctions and Procedures  (direct=1328c, full=1377c)
+  [en_policy2_technology:9.p] Online Safety & E-Safety Policy  (direct=763c, full=799c)
+  [en_policy2_technology:educating-pupils-on-e-sa] Pupil E-Safety Curriculum Education  (direct=220c, full=260c)
+  [en_policy2_technology:10] School Camera Mobile Device Policy  (direct=546c, full=584c)
+  [en_policy2_technology:12] Complaints, Policy Violations, Staff Breaches  (direct=275c, full=324c)
+  [en_family_manual_24_25:24] Student Photos and Media Policy  (direct=1508c, full=1543c)
+
+Total chars sent to synthesis: 7600
+
+Full text sent:
+········································
+[Section en_policy2_technology:3: Technology Use Policy and Principles]
+*   **Safe and Responsible Use:** All users of mobile devices and technology must act responsibly and professionally while using personal or school-issued devices. This includes ensuring that mobile devices are used in accordance with the school’s safeguarding policies and do not compromise the safety or well-being of the students or staff.
+*   **Confidentiality and Data Protection:** The school is committed to protecting the privacy and confidentiality of all individuals. All personal data, including mobile numbers and any other confidential information, must be securely stored and handled in compliance with data protection laws (GDPR and LOPDGDD).
+*   **Respect for Privacy:** The school enforces strict guidelines to prevent unauthorized photography or recording of pupils. Only authorized school personnel, with explicit parental consent, may take images of pupils for educational purposes.
+*   **Security of Devices:** Personal and school-issued devices must be secured with passwords or PINs to prevent unauthorized access. Devices should be kept secure at all times, and if lost or stolen, immediate reporting to the school authorities is required.
+*   **Sanctions for Misuse:** The school will take appropriate disciplinary action if mobile devices are misused. This may include confiscation of the device, parental notification, and in serious cases, police involvement.
+*   **Educational Purpose:** The use of mobile devices should be restricted to educational and communication purposes, in line with school protocols. Unauthorized usage, especially for personal reasons or disruptive behaviour, will be subject to sanctions.
+
+---
+
+[Section en_policy2_technology:4: Technology Policy Stakeholder Roles Responsibilities]
+This policy applies to all staff, pupils, parents, volunteers, and visitors.
+
+*   **Specific Responsibilities:**
+    *   **Staff:** Enforce the policy, ensuring safeguarding and data protection practices are observed. Staff are required to secure personal and school-issued devices with passwords or PINs.
+    *   **Pupils:** Must secure devices with passwords to prevent unauthorised access. They should only use devices as permitted and respect school protocols.
+    *   **Parents/Visitors:** Follow the school’s mobile and device policy; taking photographs or recordings of pupils without explicit consent is prohibited.
+
+---
+
+[Section en_policy2_technology:sanctions-for-misuse: Mobile Phone Misuse Sanctions and Procedures]
+*   **Confiscation:** In accordance with Spanish law and educational procedures, staff may confiscate mobile devices if they are used inappropriately during school hours. In such cases, parents will be required to collect the confiscated device. If there is a reasonable suspicion that the device contains inappropriate or illegal content, the school is authorized to search the device. This will be done in compliance with current data protection regulations and under the guidance of the school’s safeguarding and disciplinary policies. Any action taken will respect the privacy rights of students while ensuring the safety and well-being of the school community.
+    *   Our procedure with confiscation is as follows:
+        *   1st time - Confiscated with the tutor until the end of the day.
+        *   2nd time - Confiscated with the Headteacher until a parent comes and collects it. An incident report will be sent to parents.
+        *   3rd time - An incident report will be sent and a meeting will be scheduled with parents.
+*   **Disciplinary Measures:** Incidents involving inappropriate content (e.g., sexting, upskirting, violent threats) may lead to police involvement and serious disciplinary consequences, such as suspension or expulsion, following our "Behaviour Policy" inside the "Code of Conduct" document.
+
+---
+
+[Section en_policy2_technology:9.p: Online Safety & E-Safety Policy]
+Imagine Montessori School is committed to the online safety of all pupils and staff. E-safety guidelines are in place to help manage the risks associated with digital devices and internet access.
+
+*   **Controlled Access:** All our school laptops and students' laptops are enrolled under the Imagine domain which prevents the misuse of internet access. Therefore, social media sites and improper content are restricted through school protection systems in place.
+*   **Staff Online Conduct:** Staff are not permitted to connect with pupils on personal social media platforms. Staff communications with pupils must only occur through school-authorized channels. Additionally, any personal data stored on school devices must comply with data protection regulations.
+
+---
+
+[Section en_policy2_technology:educating-pupils-on-e-sa: Pupil E-Safety Curriculum Education]
+The school’s e-safety curriculum teaches pupils responsible and secure use of the internet, emphasizing behaviors like validation of online information, recognition of online risks, and respect for privacy and copyright.
+
+---
+
+[Section en_policy2_technology:10: School Camera Mobile Device Policy]
+The school’s policy on mobile phones and cameras aligns with safeguarding protocols to protect pupils’ privacy and safety.
+
+*   **Parental Photography:** Parents are prohibited from photographing or recording pupils during events unless specified by the school (e.g., end-of-year celebrations).
+*   **Internet Filtering and Monitoring:** The school collaborates with internet service providers to ensure effective filtering. Any inappropriate content discovered is reported to the Headteachers and reviewed regularly to maintain safety standards.
+
+---
+
+[Section en_policy2_technology:12: Complaints, Policy Violations, Staff Breaches]
+Complaints related to internet or device misuse are handled according to the school’s Complaints Policy inside our “Child Protection and Safeguarding Document”. Policy breaches involving staff may result in disciplinary measures or referral to local authorities if necessary.
+
+---
+
+[Section en_family_manual_24_25:24: Student Photos and Media Policy]
+At Imagine, children work in shared spaces and often in teams. While working, their guides take photographs and videos to document their progress, with many of them featuring several children together. Therefore, it is part of our policy that all families at the centre give their consent to share images of their children with other families in the school.
+
+Additionally, we occasionally share content in the media (press, our website, or social media). For this, a specific authorization will be required, which you should sign if you give your consent.
+
+As we take this matter very seriously, it is possible that the total number of photos or videos of children whose images are not authorized for media use will be fewer than those with full permissions.
+
+**Annual Yearbook:** During the school year, a professional photographer will take individual and group photos of all our children. We will provide digital copies to all families at an additional cost, which will be charged using the usual method. We will notify you in advance of the date on which the photo session will take place.
+
+Given the variety of preferences among families regarding different formats for their various uses—photo albums (digital or physical), sharing with distant relatives and friends, multiple copies in different sizes, etc.—and following our sustainability principles to avoid printing photos that might not be used, we provide them digitally so that families can decide how to use them, either digitally or in print.
+········································
+
+Answer:
+The school restricts access to social media sites through its protection systems on school laptops and students' laptops enrolled under the Imagine domain [en_policy2_technology:9.p]. Students are expected to use mobile devices and technology responsibly and professionally, ensuring they do not compromise the safety or well-being of students or staff, and respecting privacy [en_policy2_technology:3]. Misuse of devices or incidents involving inappropriate content may lead to disciplinary measures [en_policy2_technology:3, en_policy2_technology:sanctions-for-misuse].
+
+Total: 22423ms  |  chars→synthesis: 7600  |  tokens: 10,237 in + 424 out  |  ≈$0.00157
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+COST SUMMARY
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Query pipeline (7 queries):  ≈$0.0131
+  Total tokens: 86,176 in + 2,992 out
+  Q1: 19,599 in + 354 out  ≈$0.00293
+  Q2: 7,042 in + 486 out  ≈$0.00113
+  Q3: 12,830 in + 484 out  ≈$0.00199
+  Q4: 6,271 in + 322 out  ≈$0.00090
+  Q5: 17,029 in + 687 out  ≈$0.00274
+  Q6: 13,168 in + 235 out  ≈$0.00189
+  Q7: 10,237 in + 424 out  ≈$0.00157
+
+Pricing used:
+  gemini-2.5-flash-lite: in=$0.075/out=$0.3 per 1M tokens
+  gemini-2.5-flash: in=$0.15/out=$0.6 per 1M tokens
+Verify against current Vertex AI pricing before using for budgeting.

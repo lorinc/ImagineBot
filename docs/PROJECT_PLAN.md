@@ -376,7 +376,20 @@ observability, pageindex (orchestrator). Eval confirmed identical behaviour post
 Known gap: module-level globals in observability.py — ContextVar migration pending.
 
 ### POC2 — Multi-document routing
-**Status:** BLOCKED on POC1 post-mortem — design TBD
+
+#### Two-stage routing — DONE 2026-04-14
+**Architecture:** compact routing outline (L1 nodes, 6 topics each) → structural model selects
+1–2 doc IDs → per-doc node selection (existing single-doc pipeline, concurrent) → cross-doc synthesis.
+
+**Files:** `indexer/multi.py`, `run/run_multi_eval.py`, `eval/queries_multi.json`
+
+**Eval results (7 queries, 6 docs — `eval/results_multi_v1.json`):**
+- 6/7 queries: correct routing and meaningful answer
+- Q6 (fire drill): routing correct, per-doc selection failed — under investigation
+- Routing always selects 2 docs (conservative); no routing misses
+- avg latency: 16.6s  avg cost: $0.0019/query  (routing ~12% of total cost)
+
+**Status:** First eval pass complete. Q6 regression to diagnose next session.
 
 ---
 
