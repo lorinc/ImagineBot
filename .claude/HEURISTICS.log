@@ -643,3 +643,149 @@ PREVENTED_BY: Accepted cost (routing is $0.00023/query; extra doc adds one concu
               LLM call). Monitor whether false-positive docs pollute synthesis answers.
 SOLUTION: Accepted as-is for this eval iteration.
 DEAD_ENDS: None.
+
+[2026-04-15]
+CATEGORY: QUERY_QUALITY
+SERVICE: poc/indexer
+TASK: Q6 fire drill miss — root cause complete
+SYMPTOM: (see [2026-04-14] Q6 entry) Single-doc query fails identically — multi-doc
+         pipeline innocent. Selection chose 1.1 (scope) + 1.10 (biennial review)
+         instead of 1.1 + 1.5 (personnel check / evacuation sweep).
+ROOT_CAUSE: Three compounding factors: (A) Document gap — policy has no post-drill
+            procedure section; "what happens after a drill" is genuinely absent.
+            (B) Semantic substitution — "who is responsible" matched "Leadership Team
+            Responsibility" in 1.10 topics (policy review), wrong referent entirely.
+            (C) 83-node flat outline forces coarse-grained (which section?) and
+            fine-grained (which subsection?) reasoning in a single LLM call; model
+            degrades under this load and makes plausible-but-wrong sub-selections.
+PREVENTED_BY: For "who is responsible" queries, check that the matched node's content
+              is responsible for the query subject, not just any subject. Topic label
+              "X Responsibility" does not imply responsibility for the queried topic.
+SOLUTION: Fix directions in poc/RETRIEVAL_ANALYSIS.md. Priority: hierarchical
+          selection (walk tree top-down, O(10) nodes/call vs O(83) flat).
+DEAD_ENDS: None.
+
+[2026-04-15]
+CATEGORY: ARCHITECTURE
+SERVICE: poc/indexer
+TASK: node selection at scale
+SYMPTOM: Selection quality degrades when outline > ~20 nodes because the model must
+         simultaneously resolve coarse routing (which section?) and fine discrimination
+         (which subsection?) in one call.
+ROOT_CAUSE: Flat outline presentation discards the tree structure the index already
+            encodes. O(83) siblings overwhelms working memory; late nodes are
+            under-weighted vs early nodes.
+PREVENTED_BY: Cap any single selection call to O(10-15) siblings. Walk the tree
+              top-down: select level-1 sections → select children within winner.
+              Same two-stage pattern already validated in POC2 doc-level routing.
+SOLUTION: Hierarchical selection — design in poc/RETRIEVAL_ANALYSIS.md.
+DEAD_ENDS: Hard node cap (truncate flat outline) — treats symptom, not cause;
+           may silently drop relevant nodes positioned late in the list.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-15]
+CATEGORY: QUERY_QUALITY
+SERVICE: poc/multi
+TASK: MH1 — "student physically attacks teacher" routing failure
+SYMPTOM: Router selected policy1 (Child Protection) + policy5 (Code of Conduct)
+         instead of policy3 (H&S) + policy5. policy3 §2.3.s5 contains the
+         "Violence to staff — see Code of Conduct" cross-reference that makes
+         policy3 a required source for this query.
+ROOT_CAUSE: "Harm to staff" in routing context maps to safeguarding (policy1) not
+            health & safety (policy3). policy3's routing summary does not surface
+            its staff-violence cross-reference prominently enough to compete.
+            The semantic gravity of "physical attack" pulls toward child protection
+            framing before H&S framing.
+PREVENTED_BY: When routing for violence/injury incidents, check whether any H&S
+              policy contains a cross-reference to the behaviour policy — if so,
+              include it. Alternatively, Fix 3 (content-preview rerank) would
+              surface §2.3.s5's redirect text directly.
+SOLUTION: Enrich policy3's routing summary to mention "staff violence cross-reference
+          to Code of Conduct". Document in poc/RETRIEVAL_ANALYSIS.md MH1 section.
+DEAD_ENDS: None.
+
+[2026-04-15]
+CATEGORY: QUERY_QUALITY
+SERVICE: poc/indexer
+TASK: hierarchical node selection (Fix 1) — results
+SYMPTOM: Q6 (fire drill) still fails to select 1.5 after Fix 1. P1H6 regressed from
+         exact (2 nodes) to noisy (7 nodes) post-hierarchical selection.
+ROOT_CAUSE (Q6): Fix 1 reduces outline size (83→17 nodes at discrimination stage) but
+         does not change topic vocabulary. "Personnel check" in 1.5 still doesn't match
+         "what happens after a drill". Root cause #3 (temporal semantics) is unchanged.
+ROOT_CAUSE (P1H6): 1.11.L* siblings (6 nodes) have near-identical topic content — all
+         sub-items of the same long policy section. Discrimination call can't distinguish
+         which 1-2 answer the specific question; selects most of them.
+PREVENTED_BY: Fix 1 addresses scale (breadth overload) but not vocabulary precision.
+         Dense-sibling discrimination needs either (a) more distinctive labels per node
+         (Fix 2 — temporal/phase-aware topic extraction), or (b) content-preview rerank
+         (Fix 3 — show first 200c of each candidate before committing).
+SOLUTION: Decision needed: Fix 2 (rebuild, better labels) vs Fix 3 (no rebuild, extra call).
+         See poc/poc1_single_doc/TODO.md.
+DEAD_ENDS: Fix 1 alone is insufficient for Q6.
+
+[2026-04-15]
+CATEGORY: ARCHITECTURE
+SERVICE: poc/indexer
+TASK: hierarchical selection prompt design
+SYMPTOM: Using the same selection prompt for routing (stage 1) and discrimination (stage 2+)
+         conflates two different cognitive tasks.
+ROOT_CAUSE: Stage 1 is recall-oriented routing (which section?). Stage 2+ is precision-
+         oriented discrimination (which specific leaf?). A single prompt can't optimise
+         for both simultaneously.
+PREVENTED_BY: Use distinct prompt functions per stage. Stage 1 prompt: broad, tolerate
+         false positives, framing is "route to sections". Stage 2+ prompt: narrow,
+         precision-oriented, explicitly provides parent section context and prior reasoning
+         so the model knows why the section was selected.
+SOLUTION: Implemented as make_route_section_prompt() and make_discriminate_prompt().
+DEAD_ENDS: None.
+
+[2026-04-15]
+CATEGORY: ARCHITECTURE
+SERVICE: poc/indexer
+TASK: two-stage vs walk-until-leaves
+SYMPTOM: "Two-stage hierarchical selection" plan breaks for documents with 3+ level trees.
+         Nodes like 1.11.L21 are at level 4; a two-stage walk stops at level 2 and never
+         exposes them to the selection call.
+ROOT_CAUSE: The plan assumed a two-level tree. The index has split-generated synthetic nodes
+         at levels 3-4.
+PREVENTED_BY: Implement "walk until all selected nodes are leaves" — recurse at each level
+         until no non-leaves remain. This generalises to arbitrary depth at O(depth) calls.
+         Two-stage is a special case of this for two-level trees.
+SOLUTION: _hierarchical_select() implements the recursive loop. Confirmed working:
+         1.11.L21 (level 4) correctly selected in eval.
+DEAD_ENDS: Fixed two-stage walk — breaks silently for deep trees.
+
+[2026-04-15]
+CATEGORY: ARCHITECTURE
+SERVICE: poc/indexer
+TASK: discrimination prompt precision vs recall
+SYMPTOM: Anchor-on-one discrimination (pick single best, add only if strictly absent)
+         reduces noise (P1H: +14→+3) but drops recall on compound multi-section queries
+         (P1H5: 3/3→1/3 expected nodes). P1H6 (dense siblings) requires anchoring;
+         P1H5 (cross-section compound) requires inclusion. The two conflict.
+ROOT_CAUSE: 300-char topic phrase descriptions are lossy. No retrieval prompt can recover
+         information that was never indexed. Precision-oriented prompts amplify this loss
+         by excluding nodes whose labels don't match the query vocabulary.
+PREVENTED_BY: Prefer recall over precision at the discrimination stage. Stage 0 vocabulary
+         fixes (corpus-grounded glossary, retrieval framing shift) are the correct tool for
+         noise reduction — not discrimination tightening.
+SOLUTION: Reverted to recall-oriented framing: "err inclusive; missing relevant content is
+         worse than one extra section."
+DEAD_ENDS: fix2 (anchor-on-one + "different facet"), fix3 (same + tighter wording),
+         fix4 ("different part of the question"), fix5 (sub-question decomposition) —
+         all traded recall for precision in ways the lossy index can't support.
+
+[2026-04-15]
+CATEGORY: ARCHITECTURE
+SERVICE: poc/indexer
+TASK: P1H5 recall miss — §1.13 never selected
+SYMPTOM: Query "what should staff do; what signs to look for" never retrieves §1.13
+         "Responding to child abuse disclosures" despite it being required for a full answer.
+ROOT_CAUSE: Vocabulary gap: query says "concerned about signs"; index label says "Responding
+         to disclosures". Student hasn't disclosed anything in the scenario. No discrimination
+         instruction causes the model to infer "disclosure procedure also needed" from a
+         signs-only query. All five prompt variants failed.
+PREVENTED_BY: Stage 0 fix path only: corpus-grounded glossary or retrieval framing shift.
+SOLUTION: None at Stage 2. Accepted as known gap; Stage 0 items (TODO priority 3, 4) target it.
+DEAD_ENDS: All fix2–fix5 discrimination prompt variants failed to surface §1.13 for this query.

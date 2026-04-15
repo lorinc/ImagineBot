@@ -389,12 +389,14 @@ Known gap: module-level globals in observability.py — ContextVar migration pen
 - Routing always selects 2 docs (conservative); no routing misses
 - avg latency: 16.6s  avg cost: $0.0019/query  (routing ~12% of total cost)
 
-**Status:** Fix 1 (hierarchical node selection) implemented 2026-04-15.
-- Walk-until-leaves replaces flat outline call: stage 1 routes over 6 level-1 nodes, stage 2+ discriminates within children, recurses until all selected are leaves.
-- Distinct prompt types: make_route_section_prompt (recall-oriented) + make_discriminate_prompt (precision-oriented, with parent context).
-- P3H: 5/5 PASS. P1H: 6/6 PASS. P1H5 improved 11→7 nodes. P1H6 regressed 2→7 (dense-sibling problem).
-- Q6 (fire drill) acceptance not met — temporal vocabulary root cause persists.
-- Next decision: Fix 2 (temporal-explicit topic extraction, rebuild) vs Fix 3 (content-preview rerank, no rebuild). See poc/poc1_single_doc/TODO.md.
+**Status (2026-04-15):**
+- Hierarchical selection (walk-until-leaves): stage 1 routes over L1 nodes, stage 2+ discriminates within children, recurses until all selected are leaves. Backward-compatible step1 view.
+- Structured synthesis prompt: CORE RULE / EXCEPTIONS AND CONDITIONS / FINAL ANSWER — conditional clauses now extracted explicitly.
+- All prompts rewritten to terse/technical format.
+- Discrimination: recall-oriented framing ("err inclusive"). Anchor-on-one approach attempted and reverted — precision gain causes recall loss on compound queries given lossy 300-char topic descriptions.
+- Evals: P3H 6/6, P1H 6/6 (§1.13 miss in P1H5 is Stage 0 vocabulary gap, not Stage 2).
+- Hard eval suite committed: queries_policy1_hard.json, queries_policy3_hard.json + result snapshots.
+- Next: Priority 3 — retrieval framing shift (Stage 0, no rebuild).
 
 ---
 
