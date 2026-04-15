@@ -1,0 +1,1019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ImagineBot — Evaluation Report</title>
+<style>
+  :root {
+    --bg: #f8f9fa;
+    --card: #ffffff;
+    --border: #e0e4ea;
+    --text: #1a1a2e;
+    --muted: #6b7280;
+    --accent: #3b5bdb;
+    --pass: #2d6a4f;
+    --pass-bg: #d8f3dc;
+    --fail: #9b2226;
+    --fail-bg: #ffe3e3;
+    --warn: #7c4700;
+    --warn-bg: #fff3bf;
+    --radius: 12px;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+          background: var(--bg); color: var(--text); line-height: 1.6; }
+  .page { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+  h1 { font-size: 2rem; font-weight: 700; margin-bottom: 4px; }
+  .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 40px; }
+  h2 { font-size: 1.35rem; font-weight: 700; margin: 48px 0 6px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: 1.05rem; font-weight: 600; color: var(--muted); margin: 28px 0 12px; text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; }
+  .section-intro { color: var(--muted); font-size: .95rem; margin-bottom: 20px; line-height: 1.7; }
+
+  /* Summary cards */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin: 24px 0 40px; }
+  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  .summary-card .big { font-size: 2.2rem; font-weight: 700; color: var(--accent); line-height: 1; }
+  .summary-card .label { font-size: .82rem; color: var(--muted); margin-top: 6px; }
+
+  /* QA cards */
+  .qa-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
+              margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
+  .qa-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--border); background: #fafbfc; }
+  .qa-qid { font-size: .75rem; font-weight: 700; color: var(--accent); background: #e8edff; border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
+  .qa-question { font-size: 1rem; font-weight: 600; flex: 1; }
+  .qa-body { padding: 20px; }
+  .qa-answer { font-size: .95rem; color: #222; }
+  .qa-answer p { margin-bottom: .7em; }
+  .qa-answer ul { margin: .4em 0 .7em 1.4em; }
+  .qa-answer li { margin-bottom: .3em; }
+  .qa-answer strong { color: #111; }
+  .qa-answer cite { font-style: normal; background: #eef2ff; color: var(--accent); border-radius: 4px; padding: 0 4px; font-size: .82em; }
+  .qa-meta { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: .8rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 12px; }
+
+  /* Score bars */
+  .scores { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
+  .score-item { display: flex; align-items: center; gap: 6px; font-size: .82rem; }
+  .score-label { color: var(--muted); white-space: nowrap; }
+  .score-bar-wrap { width: 80px; background: #e9ecef; border-radius: 999px; height: 8px; position: relative; display: inline-flex; align-items: center; }
+  .score-bar { height: 8px; border-radius: 999px; }
+  .score-val { font-weight: 700; font-size: .82rem; margin-left: 6px; }
+  .no-score { color: var(--muted); }
+
+  /* Badges */
+  .badge { font-size: .78rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+  .badge.pass { background: var(--pass-bg); color: var(--pass); }
+  .badge.fail { background: var(--fail-bg); color: var(--fail); }
+  .badge.warn { background: var(--warn-bg); color: var(--warn); }
+  .badge.neutral { background: #e9ecef; color: var(--muted); }
+
+  /* Doc pills */
+  .doc-pill { font-size: .75rem; background: #e8edff; color: var(--accent); border-radius: 6px; padding: 2px 8px; display: inline-block; margin: 2px 2px; }
+  .doc-pill.wrong { background: var(--fail-bg); color: var(--fail); }
+
+  /* Explainer box */
+  .explainer { background: #f0f4ff; border-left: 4px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin: 24px 0; font-size: .9rem; color: #333; }
+  .explainer strong { color: var(--accent); }
+  .explainer p { margin-bottom: .5em; }
+  .explainer p:last-child { margin-bottom: 0; }
+
+  /* Glossary */
+  .glossary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; margin: 16px 0 32px; }
+  @media (max-width: 600px) { .glossary { grid-template-columns: 1fr; } }
+  .glossary dt { font-weight: 700; font-size: .88rem; color: var(--accent); }
+  .glossary dd { font-size: .88rem; color: var(--muted); margin-bottom: 8px; }
+
+  /* Unscored note */
+  .unscored-note { font-size: .82rem; color: var(--muted); font-style: italic; }
+  .section-tag { font-size: .72rem; background: #e9ecef; color: var(--muted); border-radius: 4px; padding: 1px 6px; }
+
+  /* Overretrieval warning */
+  .over-warn { background: var(--warn-bg); border-radius: 8px; padding: 8px 12px; font-size: .82rem; color: var(--warn); margin-top: 10px; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <h1>ImagineBot — Evaluation Report</h1>
+  <div class="subtitle">How well does the system answer questions from school policy documents? · 2026-04-15</div>
+
+  <div class="explainer">
+    <p><strong>What this system does:</strong> ImagineBot reads school policy documents and answers questions about them.
+    When a question arrives, the system first figures out <em>which sections</em> of the relevant document are needed,
+    then retrieves exactly those sections and passes them to an AI to write the answer. Nothing is guessed from memory — every answer is grounded in the actual document text.</p>
+    <p><strong>What this report shows:</strong> We ran the system against a set of test questions where we already knew the correct answers and which document sections were needed. We then measured how accurately the system found the right sections and how well the answers matched the expected content.</p>
+  </div>
+
+  <h3>Glossary — terms used in this report</h3>
+  <dl class="glossary">
+    <dt>Section retrieval</dt><dd>Finding the right part of a document to answer a question.</dd>
+    <dt>Recall (completeness)</dt><dd>Did the system find <em>all</em> the sections needed? 100% = nothing missed.</dd>
+    <dt>Precision (efficiency)</dt><dd>Of the sections retrieved, how many were actually needed? 100% = no unnecessary sections fetched.</dd>
+    <dt>F1 score</dt><dd>A single number combining recall and precision. 100% = perfect on both. We care more about recall — missing a section is worse than fetching one extra.</dd>
+    <dt>Document routing</dt><dd>For questions that might span multiple documents, the system first decides <em>which document(s)</em> to look in. This step is tested separately.</dd>
+    <dt>Hard queries</dt><dd>Test questions specifically designed to be tricky — requiring cross-section reasoning, rare vocabulary, or information spread across multiple parts of a document.</dd>
+    <dt>Standard queries</dt><dd>Everyday questions a parent or staff member might ask. Simpler, but still representative of real usage.</dd>
+    <dt>Ground truth</dt><dd>The known-correct answer used to evaluate the system. Only the hard queries have ground truth labels; standard queries are shown for review but not automatically scored.</dd>
+  </dl>
+
+  <h2>Summary</h2>
+  <div class="summary-grid">
+    <div class="summary-card">
+      <div class="big">100%</div>
+      <div class="label">Recall on hard child-protection questions — nothing missed</div>
+    </div>
+    <div class="summary-card">
+      <div class="big">100%</div>
+      <div class="label">Recall on hard health &amp; safety questions — nothing missed</div>
+    </div>
+    <div class="summary-card">
+      <div class="big">5/6</div>
+      <div class="label">Multi-document routing correct — right document found</div>
+    </div>
+    <div class="summary-card">
+      <div class="big">57%</div>
+      <div class="label">Precision on child-protection hard queries — main open gap</div>
+    </div>
+  </div>
+
+  <div class="explainer">
+    <p><strong>The key finding:</strong> The system never misses required content — recall is perfect across all scored tests.
+    The main weakness is <em>over-retrieval</em>: on complex questions it sometimes fetches more document sections than strictly needed.
+    This does not affect answer correctness, but increases cost and processing time. Fixing precision is the next priority.</p>
+  </div>
+
+  <h2>Hard Questions — Child Protection Policy</h2>
+  <p class="section-intro">
+    Six questions designed to be difficult: they require finding information spread across multiple
+    sections, or where the question uses different vocabulary than the document.
+    Each question has a known ground truth — we know exactly which sections are needed.
+  </p>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P1H1</span>
+      <span class="qa-question">Will the school always inform parents when it has a concern about their child&#x27;s safety?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>No, the school will not always inform parents. If the school believes that notifying parents could increase the risk to the child or exacerbate the problem, advice will be sought first from Children&#x27;s Social Care <cite>[2]</cite>.</p></div>
+      
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 7.6s</span><span>💰 $0.0007</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P1H2</span>
+      <span class="qa-question">A student has been absent with no explanation for 8 days. What action should the school take?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The provided sections do not answer this question. While Section 1.8 states that DSLs will monitor unauthorised absences and take appropriate action <cite>[1.8]</cite>, and outlines procedures for 10 consecutive days of unexplained absence <cite>[1.8]</cite>, it does not specify the action to be taken for exactly 8 days of unexplained absence.</p></div>
+      <div class="over-warn">ℹ️ Retrieved 2 sections; only 1 were needed. Extra sections do not affect the answer but increase cost.</div>
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:66%;background:#ff9800"></div><span class="score-val">66%</span></div></div><span>⏱ 8.0s</span><span>💰 $0.0007</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P1H3</span>
+      <span class="qa-question">In what circumstances can a staff member keep what a student has told them confidential?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The provided sections do not answer this question. In fact, Section 1.13 states that if a pupil discloses risks to their safety or wellbeing, &quot;the staff member will need to let the pupil know that they must pass the information on - staff are not allowed to keep secrets&quot; <cite>[1.13]</cite>.</p></div>
+      <div class="over-warn">ℹ️ Retrieved 3 sections; only 1 were needed. Extra sections do not affect the answer but increase cost.</div>
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:33%;background:#f44336"></div><span class="score-val">33%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div></div><span>⏱ 7.5s</span><span>💰 $0.0008</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P1H4</span>
+      <span class="qa-question">A parent says their child&#x27;s teacher has been repeatedly humiliating and picking on the child. What is the correct process?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>When a parent raises a concern about a teacher repeatedly humiliating and picking on their child, the school&#x27;s complaints procedure will be followed <cite>[1.10]</cite>. This type of concern, which includes unfairly singling out a pupil or attempting to humiliate them, bullying, or belittling a pupil, is considered &quot;poor practice&quot; that initially does not reach the threshold for child protection action <cite>[1.10]</cite>.</p>
+
+<p>The complaints are managed by the head teacher or other members of the senior leadership team <cite>[1.10]</cite>. All complaints will be dealt with within 28 days <cite>[1.10]</cite>. If the complaint escalates into a child protection concern, it will automatically be managed under the school&#x27;s child protection procedures <cite>[1.10]</cite>.</p></div>
+      <div class="over-warn">ℹ️ Retrieved 3 sections; only 1 were needed. Extra sections do not affect the answer but increase cost.</div>
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:33%;background:#f44336"></div><span class="score-val">33%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div></div><span>⏱ 10.4s</span><span>💰 $0.0009</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P1H5</span>
+      <span class="qa-question">Staff are concerned about a student — she seems withdrawn, has unexplained bruising, and hasn&#x27;t been eating. What should they do and what specific signs are they looking for?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Staff should take the following actions:</p>
+<p>Staff have a moral and statutory responsibility to safeguard and promote the welfare of all pupils <cite>[1.3]</cite>. They must be alert to the signs of abuse and neglect and follow the school&#x27;s procedures <cite>[1.3, 1.4]</cite>. All staff have an equal responsibility to act on any suspicion that a child is at risk of harm <cite>[1.3]</cite>. When concerned about a child&#x27;s welfare, staff members should always act in the interests of the child <cite>[1.3]</cite>.</p>
+
+<p>It is the responsibility of staff to report their concerns, and they do not need &#x27;absolute proof&#x27; that the child is at risk <cite>[1.11.L21]</cite>. They should report all concerns, however minor or insignificant they may seem <cite>[1.11.L21]</cite>. Staff must report their concerns to the Designated Safeguarding Lead (DSL) <cite>[1.11.L21, 1.13, 1.16]</cite> or, in their absence, the deputy Designated Safeguarding Lead <cite>[1.16]</cite>. It is not their responsibility to investigate or decide whether a child has been abused <cite>[1.11.L21]</cite>.</p>
+
+<p>The school will normally seek to discuss concerns with parents, but if notifying parents could increase the risk to the child, advice will be sought first from Children&#x27;s Social Care <cite>[1.13]</cite>. The school will also seek advice from Children&#x27;s Social Care when they have reasonable cause to suspect a child may be suffering or likely to suffer significant harm <cite>[1.1]</cite>.</p>
+
+<p>The specific signs staff are looking for, based on the student&#x27;s presentation, include:</p>
+<ul>
+<li>  <strong>Withdrawn:</strong> This is an indicator of abuse, specifically a &quot;change in behaviour - from quiet to aggressive, or happy-go-lucky to withdrawn&quot; <cite>[1.11.L21]</cite>.</li>
+<li>  <strong>Unexplained bruising:</strong> This is a physical indicator of abuse, listed as &quot;bruises, bleeding, burns, fractures, or other injuries&quot; <cite>[1.11.L21]</cite>. Physical abuse may involve &quot;hitting... or otherwise causing physical harm to a child&quot; <cite>[1.11.L3]</cite>.</li>
+<li>  <strong>Hasn&#x27;t been eating:</strong> This is an indicator of abuse, specifically a &quot;change their eating habits&quot; <cite>[1.11.L21]</cite>. It is also a sign of neglect, which is defined as the &quot;persistent failure to meet a child&#x27;s basic physical and/or psychological needs,&quot; including a parent or carer failing to &quot;Provide adequate food&quot; <cite>[1.11.L12]</cite>.</li>
+</ul></div>
+      <div class="over-warn">ℹ️ Retrieved 11 sections; only 3 were needed. Extra sections do not affect the answer but increase cost.</div>
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:27%;background:#f44336"></div><span class="score-val">27%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:42%;background:#f44336"></div><span class="score-val">42%</span></div></div><span>⏱ 24.3s</span><span>💰 $0.0017</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P1H6</span>
+      <span class="qa-question">What is the difference between how the school responds when a student actively discloses abuse versus when staff only suspect it based on signs?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>When a student actively discloses abuse, the staff member engages directly with the student by allowing them to speak freely, remaining calm, offering reassuring words, and explaining that the information must be passed on (as staff cannot keep secrets) <cite>[1.13]</cite>. The staff member should avoid asking investigative questions but can ask clarifying ones, and should not offer physical touch as comfort or admonish the child for not disclosing earlier <cite>[1.13]</cite>. The staff member must tell the pupil what will happen next and that someone (staff or DSL) will see them before the end of the day, then report verbally to the Designated Safeguarding Lead (DSL) <cite>[1.13]</cite>.</p>
+
+<p>When staff only suspect abuse based on signs, their responsibility is to report their concerns to the Designated Safeguarding Lead (DSL); they are explicitly told not to investigate or decide whether a child has been abused <cite>[1.11.L21]</cite>. Staff should report all concerns, however minor, without needing &quot;absolute proof&quot; that the child is at risk <cite>[1.11.L21]</cite>.</p>
+
+<p>In both situations (disclosure or suspicion), the DSL will normally seek to discuss concerns with parents, but will first seek advice from Children&#x27;s Social Care if notifying parents could increase the risk to the child <cite>[1.13]</cite>.</p></div>
+      
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 18.0s</span><span>💰 $0.0010</span></div></div></div>
+
+  <h2>Hard Questions — Health &amp; Safety Policy</h2>
+  <p class="section-intro">
+    Six questions, five with ground truth. One question (P3H6) has no ground truth label yet —
+    it is shown for review only.
+  </p>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P3H1</span>
+      <span class="qa-question">Do supply teachers have any duties during a fire evacuation that permanent staff do not?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Yes, supply teachers have an additional duty to sweep any areas they pass through for personnel as they exit the building <cite>[1.5]</cite>.</p></div>
+      
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 5.2s</span><span>💰 $0.0011</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P3H2</span>
+      <span class="qa-question">Who has the authority to decide whether to close the school during a severe weather emergency?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The Generalitat Valenciana (GVA) or the town council can order the closure of the school <cite>[3.4]</cite>. The instructions of the GVA and local authorities will be followed regarding any decision on the closure <cite>[3.3]</cite>. If there is no closure order from these authorities but an evident risk exists, the school may decide to close as a precautionary measure <cite>[3.4]</cite>.</p></div>
+      <div class="over-warn">ℹ️ Retrieved 3 sections; only 2 were needed.</div>
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:66%;background:#ff9800"></div><span class="score-val">66%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:80%;background:#4caf50"></div><span class="score-val">80%</span></div></div><span>⏱ 9.1s</span><span>💰 $0.0012</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P3H3</span>
+      <span class="qa-question">A student collapses after eating lunch and is showing signs of a severe allergic reaction. What should staff do?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>In the event of a student collapsing after eating lunch and showing signs of a severe allergic reaction, staff should take the following actions:</p>
+
+<p>1.  The person who finds the child should deal with it immediately <cite>[2.4]</cite>.</p>
+<p>2.  Only trained first aiders should administer first aid <cite>[2.4]</cite>.</p>
+<p>3.  Staff should be alert to the need for prompt action for pupils with severe allergies <cite>[2.4]</cite>.</p>
+<p>4.  Call 112 immediately <cite>[2.5]</cite>.</p>
+<p>5.  Administer self-injectable adrenaline if reported by the family and available at the school <cite>[2.5]</cite>.</p>
+<p>6.  Place the child lying down with legs elevated, if conscious <cite>[2.5]</cite>.</p>
+<p>7.  Do not leave the child unattended until medical assistance arrives <cite>[2.5]</cite>.</p>
+<p>8.  Notify the family immediately <cite>[2.5]</cite>.</p>
+<p>9.  Record the incident (time, place, symptoms, and actions taken) <cite>[2.5]</cite> and complete an accident report form <cite>[2.4]</cite>.</p>
+<p>10. Ensure the child is taken to hospital, even if symptoms improve <cite>[2.5]</cite>.</p>
+<p>11. Monitor the student for at least 1 hour, as delayed reactions may occur <cite>[2.5]</cite>.</p>
+<p>12. Staff should be aware of students with known allergies and the location of their auto-injectors <cite>[2.5]</cite>.</p></div>
+      
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 20.0s</span><span>💰 $0.0014</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P3H4</span>
+      <span class="qa-question">How often are fire drills held compared to firefighting equipment inspections?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Emergency drills are carried out every term <cite>[1.1]</cite>. Firefighting equipment will be examined and tested at least once a year <cite>[1.8]</cite>.</p></div>
+      
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 4.3s</span><span>💰 $0.0011</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P3H5</span>
+      <span class="qa-question">What training do visiting contractors receive before they start working at the school?</span>
+      <span class="badge pass">✓ All required sections found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Visiting contractors receive different training depending on whether they are recurrent or non-recurrent:</p>
+
+<ul>
+<li>  <strong>Recurrent contractors</strong> (e.g., cleaning or kitchen staff) receive basic fire safety training. This training covers the action to be taken on hearing the fire alarm or discovering a fire, evacuation procedures including means of escape, location of fire assembly points, the name of the person in charge of evacuation procedures, and the location of firefighting equipment and fire alarm call points in relation to their work area <cite>[1.6]</cite>.</li>
+<li>  <strong>Non-recurrent contractors</strong> receive a brief summary of emergency procedures upon arrival, which includes the location of emergency exits and the fire assembly point <cite>[1.6]</cite>.</li>
+</ul></div>
+      
+      <div class="qa-meta">
+<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 5.9s</span><span>💰 $0.0012</span></div></div></div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">P3H6</span>
+      <span class="qa-question">What specific checks should staff carry out once the all-clear is given and everyone returns to the building after a fire drill?</span>
+      <span class="badge neutral">No ground truth</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The provided sections do not answer this question.</p></div>
+      
+      <div class="qa-meta">
+<span>⏱ 21.0s</span><span>💰 $0.0011</span></div></div></div>
+
+  <h2>Hard Questions — Spanning Multiple Documents</h2>
+  <p class="section-intro">
+    Six questions where the answer may require looking in more than one policy document.
+    The system must first decide <em>which documents</em> to consult before searching within them.
+    Ground truth records which documents are actually needed.
+  </p>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">MH1</span>
+      <span class="qa-question">What happens if a student physically attacks a teacher?</span>
+      <span class="badge fail">✗ Wrong document</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>If a student physically attacks a teacher, the school may avoid the standard behaviour flowchart and go straight to &quot;STEP 4&quot; <cite>[4.9]</cite>. This involves the Student Support Team contacting the family to communicate the consequence, and the student being picked up from school to stay home for one day <cite>[4.9]</cite>.</p>
+
+<p>Additionally, if the risk is clear and the intent is obvious, a fixed-term exclusion and a disciplinary hearing may follow, or the decision to permanently exclude may be made, which could involve reporting to the police and social services <cite>[8.5]</cite>. The student may also be removed from the situation if they present a danger to themselves or others <cite>[4.9, 4.13]</cite>. Any measure applied should be approved by the Head Teacher, and each case will be judged on an individual basis <cite>[4.9, 8.5]</cite>.</p></div>
+      <div class="over-warn">⚠️ Expected to look in: <span class="doc-pill">Code of Conduct</span><span class="doc-pill">Health &amp; Safety Policy</span> — but looked in: <span class="doc-pill">Code of Conduct</span><span class="doc-pill wrong">Child Protection Policy</span><br>Missing: <span class="doc-pill">Health &amp; Safety Policy</span></div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Code of Conduct</span><span class="doc-pill wrong">Child Protection Policy</span></span>
+        <span>⏱ 20.6s</span><span>💰 $0.0032</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">MH2</span>
+      <span class="qa-question">A parent visiting the school witnesses a staff member shout aggressively at a student and push them. Who should the parent report this to?</span>
+      <span class="badge pass">✓ Correct document found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>A parent should report this to the Head Teacher <cite>[1.10, 4.5, 6.10]</cite>. The Head Teachers are also the Designated Safeguarding Leads (DSLs) <cite>[1.5]</cite>, who take lead responsibility for safeguarding and child protection <cite>[1.5]</cite>. Alternatively, the parent could report to any member of staff <cite>[6.10]</cite> or other members of the senior leadership team <cite>[1.10]</cite>. The Key Stage Manager or the named person responsible for supporting good behaviour are also designated people to report to <cite>[6.10]</cite>.</p></div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Consulted one extra document (<span class="doc-pill">Child Protection Policy</span><span class="doc-pill wrong">Code of Conduct</span>) — answer still correct.</div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill wrong">Code of Conduct</span></span>
+        <span>⏱ 29.7s</span><span>💰 $0.0029</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">MH3</span>
+      <span class="qa-question">A student hasn&#x27;t come to school for two weeks and nobody can reach the family. A classmate also mentioned she had bruises last week. What should the school do?</span>
+      <span class="badge pass">✓ Correct document found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The school should take the following actions:</p>
+
+<p><strong>1.  <strong>Report Concerns to DSL:</strong></strong> Any staff member aware of the classmate&#x27;s mention of bruises should report this concern to the Designated Safeguarding Lead (DSL) <cite>[1.11.L21, 1.16]</cite>. It is the responsibility of staff to report concerns, not to investigate or decide if abuse has occurred <cite>[1.11.L21]</cite>. Bruises are a physical sign that defines a type of abuse <cite>[1.11.L21, 1.11.L3]</cite>.</p>
+<p><strong>2.  <strong>Address Unexplained Absence:</strong></strong> The student&#x27;s absence for two weeks (10 consecutive school days) with an unreachable family falls under &quot;Children Missing Education Procedures&quot; <cite>[1.8]</cite>. Frequent missing of school is also an indicator of abuse <cite>[1.11.L21]</cite>.</p>
+<p><strong>3.  <strong>Take Reasonable Steps to Locate the Child:</strong></strong> The school must take &quot;all reasonable steps&quot; to establish the child&#x27;s whereabouts. These steps include:</p>
+<ul>
+<li>  Telephone calls to all known contacts <cite>[1.8]</cite>.</li>
+<li>  E-mails to relatives <cite>[1.8]</cite>.</li>
+<li>  Contact with other schools where siblings may be registered <cite>[1.8]</cite>.</li>
+<li>  Enquiries to friends, neighbours etc. through school contacts <cite>[1.8]</cite>.</li>
+<li>  Enquiries with any other service known to be involved with the pupil/family <cite>[1.8]</cite>.</li>
+<li>  Possible home visits where safe to do so <cite>[1.8]</cite>.</li>
+</ul>
+<p>4.  <strong>Record All Actions:</strong> All contacts and outcomes from these steps must be recorded on the pupil&#x27;s file <cite>[1.8]</cite>. The DSL is responsible for keeping detailed written records of all concerns <cite>[1.5]</cite>.</p>
+<p>5.  <strong>Immediate Referral to Social Services:</strong> Since the pupil has 10 consecutive school days of unexplained absence and all reasonable steps to establish their whereabouts have been taken without success, the school must make an immediate referral to the appropriate local social services <cite>[1.8]</cite>. The DSL is responsible for referring cases of suspected abuse to Children&#x27;s Social Care or the Police as appropriate <cite>[1.5]</cite>.</p>
+<p>6.  <strong>Consider Notifying Parents:</strong> While the school would normally seek to discuss concerns with parents, if notifying them could increase the risk to the child or exacerbate the problem, advice should be sought first from Children&#x27;s Social Care <cite>[1.13]</cite>. Information sharing should be on a &quot;need-to-know&quot; basis and in accordance with legal obligations, and consent from parents is sought unless otherwise required by law <cite>[2.3]</cite>.</p>
+<p>7.  <strong>Utilize Local Contacts:</strong> The school can use local emergency contacts such as Servicios Sociales de Paterna (Children&#x27;s Social Care) or the Police for guidance and action in cases of child vulnerability <cite>[1.15]</cite>.</p></div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Consulted one extra document (<span class="doc-pill">Child Protection Policy</span><span class="doc-pill wrong">Health &amp; Safety Policy</span>) — answer still correct.</div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill wrong">Health &amp; Safety Policy</span></span>
+        <span>⏱ 26.8s</span><span>💰 $0.0037</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">MH4</span>
+      <span class="qa-question">A student has a severe allergic reaction on a school trip. What should the trip supervisor and other staff do?</span>
+      <span class="badge pass">✓ Correct document found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>In the event of a severe allergic reaction on a school trip, staff should take the following actions:</p>
+
+<ul>
+<li>  Immediately call emergency services (112), stating &quot;possible anaphylactic reaction due to sting&quot; <cite>[2.5, 8]</cite>.</li>
+<li>  Administer self-injectable adrenaline (if reported by the family and available at the school) <cite>[2.5]</cite>.</li>
+<li>  Place the child lying down with legs elevated (if conscious) <cite>[2.5]</cite>.</li>
+<li>  Do not leave the child unattended until medical assistance arrives <cite>[2.5]</cite>.</li>
+<li>  Notify the family/guardians immediately <cite>[2.5, 8]</cite>.</li>
+<li>  A member of the school staff will accompany the child to the hospital if necessary and remain with the child until the parent/guardian arrives <cite>[8]</cite>.</li>
+<li>  Record the incident (time, place, symptoms, and actions taken) <cite>[2.5]</cite>.</li>
+<li>  Monitor the student for at least 1 hour, even if symptoms improve, as delayed reactions may occur <cite>[2.5]</cite>.</li>
+<li>  Staff should be aware of any medical conditions or allergies of students and have an updated list of all allergies and specific conditions, as well as information on medication needed during the experience, including the location of auto-injectors <cite>[2.5, 7]</cite>.</li>
+</ul></div>
+      
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
+        <span>⏱ 13.1s</span><span>💰 $0.0021</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">MH5</span>
+      <span class="qa-question">Are parents allowed to take photos of students during the school&#x27;s sports day event?</span>
+      <span class="badge pass">✓ Correct document found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Parents are prohibited from photographing or recording pupils during events unless specified by the school <cite>[10.1]</cite>. While parents are permitted to use their personal mobiles during school festivities <cite>[general-policy-for-mobil]</cite>, the general policy states that taking photographs or recordings of pupils without explicit consent is prohibited <cite>[4.1, general-policy-for-mobil]</cite>. The provided sections do not explicitly specify that a sports day event is an exception where parental photography is permitted.</p></div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Consulted one extra document (<span class="doc-pill">Technology Policy</span><span class="doc-pill wrong">Family Manual 2024–25</span>) — answer still correct.</div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Technology Policy</span><span class="doc-pill wrong">Family Manual 2024–25</span></span>
+        <span>⏱ 12.2s</span><span>💰 $0.0014</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">MH6</span>
+      <span class="qa-question">What safety checks must be completed BEFORE a school trip departs?</span>
+      <span class="badge pass">✓ Correct document found</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Before a school trip departs, the following safety checks must be completed:</p>
+
+<ul>
+<li>  All experiences must be approved by the pedagogical coordinator to ensure they meet safety standards <cite>[5]</cite>.</li>
+<li>  A thorough risk assessment must be completed <cite>[5]</cite>.</li>
+<li>  A clear itinerary and learning objectives must be provided to parents and relevant staff prior to the trip <cite>[5]</cite>.</li>
+<li>  Family consent is required for all students attending, with consent forms detailing the purpose, location, itinerary, transportation, and costs <cite>[5]</cite>.</li>
+<li>  If external guides or instructors are involved, they must be vetted by the school, and their qualifications must align with the school&#x27;s standards for student safety <cite>[6]</cite>.</li>
+<li>  All transportation arrangements must meet safety regulations and be provided by licensed operators <cite>[7]</cite>.</li>
+<li>  Teachers must be aware of any medical conditions or allergies of students <cite>[7]</cite>.</li>
+<li>  A first aid kit must always be available, and at least one staff member trained in first aid must accompany the group <cite>[7]</cite>.</li>
+<li>  Staff will have an updated list of all allergies and specific conditions, as well as information on medication needed during the experience <cite>[7]</cite>.</li>
+<li>  All medication will require authorization from the family <cite>[7]</cite>.</li>
+<li>  Staff will have a list of emergency contacts for each student <cite>[7]</cite>.</li>
+<li>  Alternative arrangements must be planned for bad weather or unforeseen circumstances (contingency planning) <cite>[7]</cite>.</li>
+</ul></div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Consulted one extra document (<span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill wrong">Health &amp; Safety Policy</span>) — answer still correct.</div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill wrong">Health &amp; Safety Policy</span></span>
+        <span>⏱ 11.6s</span><span>💰 $0.0019</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Standard Questions — Child Protection Policy</h2>
+  <p class="section-intro">Everyday questions a parent or staff member might ask about child protection. Not automatically scored — shown for qualitative review. <span class="unscored-note">These questions do not have ground truth labels — no automatic score is shown.</span></p>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">1</span>
+      <span class="qa-question">How many consecutive days of unexplained absence triggers a referral to social services?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>10 consecutive school days of unexplained absence triggers a referral to social services <cite>[1.8]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 4.1s</span><span>💰 $0.0006</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">2</span>
+      <span class="qa-question">What must a staff member do when a student discloses they are being abused at home?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>When a student discloses they are being abused at home, a staff member must take the following actions:</p>
+
+<p>1.  Let the pupil know that they must pass the information on, as staff are not allowed to keep secrets <cite>[1.13]</cite>.</p>
+<p>2.  Allow the pupil to speak freely <cite>[1.13]</cite>.</p>
+<p>3.  Remain calm and not overreact <cite>[1.13]</cite>.</p>
+<p>4.  Give reassuring nods or words of comfort, such as &#x27;I&#x27;m so sorry this has happened&#x27;, &#x27;I want to help&#x27;, &#x27;This isn&#x27;t your fault&#x27;, &#x27;You are doing the right thing in talking to me&#x27; <cite>[1.13]</cite>.</p>
+<p>5.  Not be afraid of silences <cite>[1.13]</cite>.</p>
+<p>6.  Under no circumstances ask investigative questions, but it is reasonable to ask clarifying questions to support a meaningful referral (e.g., when and where it happened) <cite>[1.13]</cite>.</p>
+<p>7.  At an appropriate time, tell the pupil that in order to help them, the member of staff must pass the information on <cite>[1.13]</cite>.</p>
+<p>8.  Not automatically offer any physical touch as comfort <cite>[1.13]</cite>.</p>
+<p>9.  Avoid admonishing the child for not disclosing earlier <cite>[1.13]</cite>.</p>
+<p>10. Tell the pupil what will happen next <cite>[1.13]</cite>.</p>
+<p>11. Let them know that someone (either the staff member or another named person, e.g., the DSL) will come to see them before the end of the day <cite>[1.13]</cite>.</p>
+<p>12. Report verbally to the Designated Safeguarding Lead (DSL) <cite>[1.13]</cite>. It is the responsibility of staff to report their concerns, not to investigate or decide whether a child has been abused <cite>[1.11.L21]</cite>. All school staff are required to pass on information which gives rise to a concern about a child&#x27;s welfare <cite>[1.1]</cite>.</p>
+<p>13. Seek support if they feel distressed or need to debrief <cite>[1.13]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 30.9s</span><span>💰 $0.0014</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">3</span>
+      <span class="qa-question">A student has become withdrawn, started covering their arms, and is frequently late to school. What should staff do?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Staff should report their concerns to the Designated Safeguarding Lead (DSL) <cite>[1.11.L21]</cite>. The student&#x27;s behaviors are listed as indicators of abuse:</p>
+<ul>
+<li>  &quot;Keep arms and legs covered, even in warm weather&quot; <cite>[1.11.L21]</cite></li>
+<li>  &quot;Display a change in behaviour - from quiet to aggressive, or happy-go-lucky to withdrawn&quot; <cite>[1.11.L21]</cite></li>
+<li>  &quot;Frequently miss school or arrive late&quot; <cite>[1.11.L21]</cite></li>
+</ul>
+
+<p>It is the responsibility of staff to report their concerns, not to investigate or decide whether a child has been abused <cite>[1.11.L21]</cite>. All concerns, however minor, should be reported, as staff do not need &#x27;absolute proof&#x27; that the child is at risk <cite>[1.11.L21]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 140.3s</span><span>💰 $0.0010</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Standard Questions — Health &amp; Safety Policy</h2>
+  <p class="section-intro">Everyday questions about health, safety, and emergency procedures. <span class="unscored-note">These questions do not have ground truth labels — no automatic score is shown.</span></p>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">1</span>
+      <span class="qa-question">How often must firefighting equipment be inspected?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Firefighting equipment must be examined and tested at least once a year <cite>[1.8]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 7.3s</span><span>💰 $0.0011</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">2</span>
+      <span class="qa-question">What steps should be taken when a student shows signs of a severe allergic reaction to a wasp sting?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>When a student shows signs of a severe allergic reaction (anaphylaxis) to a wasp sting, the following steps should be taken:</p>
+
+<ul>
+<li>  Call 112 immediately, stating &quot;possible anaphylactic reaction due to sting&quot; <cite>[2.5]</cite>.</li>
+<li>  Administer self-injectable adrenaline if it has been reported by the family and is available at the school <cite>[2.5]</cite>.</li>
+<li>  To use an EpiPen: remove the safety cap, hold firmly and place against the outer thigh (can be over clothing), press until a click is heard, hold for 5–10 seconds, then massage the area gently <cite>[2.5]</cite>.</li>
+<li>  Place the child lying down with legs elevated, if they are conscious <cite>[2.5]</cite>.</li>
+<li>  Do not leave the child unattended until medical assistance arrives <cite>[2.5]</cite>.</li>
+<li>  After administering adrenaline, call 112 again and notify the family <cite>[2.5]</cite>.</li>
+<li>  Ensure the child is taken to the hospital, even if symptoms improve <cite>[2.5]</cite>.</li>
+</ul></div>
+      <div class="qa-meta">
+        <span>⏱ 25.3s</span><span>💰 $0.0013</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">3</span>
+      <span class="qa-question">What training are staff required to complete for health and medical emergencies?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Staff are required to complete the following training for health and medical emergencies:</p>
+<ul>
+<li>  School Health and Safety procedures are clearly explained as part of the induction process, and staff are given Health and Safety policies in their induction pack <cite>[2.3.s2]</cite>.</li>
+<li>  As part of a rolling programme, staff are trained in Health and Safety, including competence in risk assessment <cite>[2.3.s2]</cite>.</li>
+<li>  All new staff should be trained in evacuation procedures in the event of a fire or other emergency <cite>[2.3.s2]</cite>.</li>
+<li>  All members of staff should have first-aid training <cite>[2.3.s2]</cite>.</li>
+<li>  All Imagine’s staff have qualified first-aider status and are trained on an annual recurrent basis <cite>[2.4]</cite>.</li>
+<li>  All first aiders attend training courses biannually <cite>[2.4]</cite>.</li>
+<li>  All staff are to be kept aware of signs of illness such as meningitis, hepatitis B, AIDS <cite>[2.3.s2]</cite>.</li>
+<li>  Maintenance staff must know where to turn the water and electricity supplies off and must be trained to use electrical equipment correctly and safely <cite>[2.3.s2]</cite>.</li>
+<li>  Members of staff should be made aware of any hazards in the subjects that they teach or the activities that they supervise and should have appropriate training <cite>[2.4]</cite>.</li>
+<li>  All staff should be aware of pupils&#x27; medical conditions, such as epilepsy, asthma, or severe allergies, and alert to the need for prompt action <cite>[2.4]</cite>.</li>
+<li>  Staff should be aware of what levels of injury can be treated on-site and what levels automatically trigger an emergency ambulance call or visit to the hospital <cite>[2.4]</cite>.</li>
+<li>  Training of staff in the use of an EpiPen <cite>[2.5]</cite>.</li>
+<li>  Employees must wear disposable gloves and aprons when cleaning any bodily fluids, implying training on these hygiene procedures <cite>[2.4]</cite>.</li>
+</ul></div>
+      <div class="qa-meta">
+        <span>⏱ 9.8s</span><span>💰 $0.0016</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Standard Questions — Code of Conduct</h2>
+  <p class="section-intro">Questions about school rules, discipline, attendance, and behaviour. <span class="unscored-note">These questions do not have ground truth labels — no automatic score is shown.</span></p>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">1</span>
+      <span class="qa-question">What attendance percentage is required for secondary students?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The provided sections do not answer this question.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 9.6s</span><span>💰 $0.0019</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">2</span>
+      <span class="qa-question">What happens step-by-step when a bullying incident is reported to the school?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>When a bullying incident is reported to the school, the following steps are taken:</p>
+
+<p>1.  <strong>Reporting the Incident</strong></p>
+<ul>
+<li>  Students and families should report any suspicion of bullying immediately to a Tutor, Key Stage Manager, or Head teacher <cite>[6.10]</cite>.</li>
+<li>  Staff who observe or are told about bullying must pass their concerns to other staff working with the child and report these concerns to the Head Teacher <cite>[6.10]</cite>.</li>
+<li>  Pupils witnessing bullying should support the child being bullied and encourage them to speak out, or with their permission, speak to a trusted adult on their behalf <cite>[6.10]</cite>.</li>
+<li>  Parents should bring the issue to the attention of any member of staff, the Head of School, or the named person responsible for supporting good behaviour <cite>[6.10]</cite>.</li>
+</ul>
+
+<p>2.  <strong>Initial Staff Response and Recording</strong></p>
+<ul>
+<li>  If a staff member receives a report, they reassure and support the pupils involved <cite>[6.10]</cite>.</li>
+<li>  Staff advise pupils that details will be passed on to their Guide and/or the named person responsible for supporting good behaviour (Key Stage Coordinator/Head Teacher) <cite>[6.10]</cite>.</li>
+<li>  The named person keeps a log of all complaints or incidences of bullying and records how they were dealt with <cite>[6.10]</cite>.</li>
+<li>  Details of the incident are recorded by the welfare responsible (Lindsay &amp;/or Sheila) <cite>[6.12]</cite>.</li>
+<li>  The Guide discusses with the named person for behaviour support what the appropriate and most helpful course of action is <cite>[6.12]</cite>.</li>
+</ul>
+
+<p>3.  <strong>Interviewing Involved Parties</strong></p>
+<ul>
+<li>  The child who has been bullied is interviewed by their Guide, who may ask them to write an immediate account of events and discuss their reaction. The process for dealing with the incident is clearly explained, and further support and advice may be given <cite>[6.11.L0]</cite>.</li>
+<li>  Once it is clear that a bullying incident has occurred, the child responsible for the bullying and any others related to the incident are interviewed. Each is asked to write an immediate account of events, and the process for dealing with the incident is clearly explained to them <cite>[6.11.L0]</cite>.</li>
+</ul>
+
+<p>4.  <strong>Investigation and Decision on Actions/Consequences</strong></p>
+<ul>
+<li>  Before issuing a formal warning, the adult who witnesses the incident, the Guide, and the Head Teacher investigate the bullying incident to gather facts, speak with witnesses, and understand the context <cite>[6.11.L12]</cite>.</li>
+<li>  Sanctions may be applied in accordance with the school’s Behaviour Policy <cite>[6.11.L8]</cite>.</li>
+<li>  This may include a formal bullying warning, clearly stating what the bullying incident was and what would constitute a continuation <cite>[6.12]</cite>.</li>
+<li>  Clear strategies on what work would help both children (or groups of children) to be kind and loving towards each other may be developed <cite>[6.12]</cite>.</li>
+</ul>
+
+<p>5.  <strong>Formal School Warning Process (if applicable)</strong></p>
+<ul>
+<li>  <strong>Families Informed</strong>: Clear and timely communication with the families of both the bully and the victim occurs as soon as possible after the incident has been reported and investigated, typically via phone call, followed by a written notice <cite>[6.11.L12]</cite>. Meetings may be arranged to discuss the incident, share findings, and explain actions <cite>[6.11.L12]</cite>. Ongoing communication is maintained <cite>[6.11.L12]</cite>.</li>
+<li>  <strong>Warning Issued</strong>: The school issues the formal warning, which may include a written notice outlining the incident, suspension, or exclusion, and is documented in the student&#x27;s record <cite>[6.11.L12]</cite>.</li>
+<li>  <strong>Expectations and Consequences</strong>: The student is informed of the expectations for their future behaviour and the consequences they will face if they do not adhere to these expectations <cite>[6.11.L12]</cite>.</li>
+</ul>
+
+<p>6.  <strong>Ongoing Monitoring and Review</strong></p>
+<ul>
+<li>  The issue will be tackled within the year group/class <cite>[6.11.L37]</cite>.</li>
+<li>  Each incident will be discussed at the weekly staff meeting to inform other staff members about how it has been addressed and to prevent further incidents <cite>[6.11.L37]</cite>.</li>
+<li>  Records of bullying offences will be reviewed by the Management Team once a year <cite>[6.11.L37]</cite>.</li>
+<li>  The Anti-Bullying Policy will be reviewed annually by the school’s Leadership Team <cite>[6.12]</cite>.</li>
+<li>  Staff members will discuss the policy during designated professional development sessions, and records of bullying incidents will be analyzed for patterns, trends, and effectiveness of interventions <cite>[6.12]</cite>.</li>
+</ul>
+
+<p>7.  <strong>External Reporting (in very serious cases)</strong></p>
+<ul>
+<li>  In very serious cases, it may be necessary to make a report to the Police or Social Services, or to the local authority. However, the school&#x27;s policy is to attempt to resolve such issues internally using its own disciplinary sanctions, unless the matter is of such gravity that a criminal prosecution is likely <cite>[6.11.L37]</cite>.</li>
+</ul></div>
+      <div class="qa-meta">
+        <span>⏱ 19.9s</span><span>💰 $0.0027</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">3</span>
+      <span class="qa-question">Can teachers physically restrain students, and under what conditions is this allowed?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Yes, teachers can physically restrain students <cite>[4.17]</cite>.</p>
+
+<p>This is allowed under the following conditions:</p>
+<ul>
+<li>  In extreme cases where the safety of others is at stake <cite>[4.9]</cite>.</li>
+<li>  To prevent physical injury to the child themselves, other children/adults, or damage to property <cite>[4.17]</cite>.</li>
+<li>  If a child presents a danger to themselves or others <cite>[4.9]</cite>.</li>
+</ul>
+
+<p>When it is practically possible, the child should be informed beforehand what is going to happen <cite>[4.17]</cite>. Physical interventions are not used except in these extreme cases <cite>[4.9]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 10.5s</span><span>💰 $0.0021</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">4</span>
+      <span class="qa-question">What items are classified as weapons under school policy?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Under school policy, items classified as weapons include, but are not limited to:</p>
+<ul>
+<li>  Firearms, including starting pistols, air guns, pellet guns, BB guns, and replicas or toy guns <cite>[8.2]</cite>.</li>
+<li>  Bladed objects such as knives, craft knives, scissors, and razor blades <cite>[8.2]</cite>.</li>
+<li>  Explosives, including fireworks <cite>[8.2]</cite>.</li>
+<li>  Other objects like aerosol sprays, lighters, matches, laser pens, and martial arts equipment (e.g., nunchaku, death stars) <cite>[8.2]</cite>.</li>
+<li>  Tools such as screwdrivers, hammers, and chisels that can be offensively used <cite>[8.2]</cite>.</li>
+</ul></div>
+      <div class="qa-meta">
+        <span>⏱ 11.0s</span><span>💰 $0.0019</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">5</span>
+      <span class="qa-question">What are the specific dress code rules for PE days?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The specific dress code rules for PE days are:</p>
+<ul>
+<li>  Religious headwear must be removed for all PE lessons for health and safety reasons <cite>[2.3.p]</cite>.</li>
+<li>  For PE, long hair needs to be tied back for safety <cite>[2.3.p]</cite>.</li>
+<li>  On PE days, students must be able to remove their stud earrings or other items as required <cite>[2.3.p]</cite>.</li>
+<li>  Cycling shorts are permitted on PE days but must also cover the upper thighs <cite>[2.3.p]</cite>.</li>
+<li>  Students must wear appropriate sports underwear <cite>[2.3.p]</cite>.</li>
+<li>  Shorts/Leggings/Tracksuit bottoms may be worn on the bottom half <cite>[2.3.p]</cite>.</li>
+<li>  T-shirts and sweatshirts on the top half <cite>[2.3.p]</cite>.</li>
+<li>  Trainers <cite>[2.3.p]</cite>.</li>
+</ul></div>
+      <div class="qa-meta">
+        <span>⏱ 5.5s</span><span>💰 $0.0019</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">6</span>
+      <span class="qa-question">How does the school handle a situation where a student is found with drugs on school premises?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>When a student is found with drugs on school premises, the school will take the following actions:</p>
+
+<ul>
+<li>  Initially seek medical attention for the child if needed <cite>[7.8]</cite>.</li>
+<li>  Follow its Behaviour and Exclusion Policies <cite>[7.8]</cite>.</li>
+<li>  Apply sanctions as outlined in the Behaviour and Exclusion Policies <cite>[7.8]</cite>.</li>
+<li>  May use its power to search a pupil, with searches done by two members of staff <cite>[7.8, 7.14.p]</cite>.</li>
+<li>  Take temporary possession of suspected controlled drugs, ensuring a second adult witness is present throughout <cite>[7.14.p]</cite>.</li>
+<li>  Inform parents and carers of any drug-related incidents involving their child, unless it would heighten the risk to the child <cite>[7.12]</cite>.</li>
+<li>  May involve the police at the discretion of the Headteacher in consultation with the Director <cite>[7.9]</cite>. If substances are suspected of being sold on the premises, details will be automatically passed to the police <cite>[7.14.p]</cite>.</li>
+<li>  Share information with law enforcement and safeguarding agencies if there are concerns about a child&#x27;s safety <cite>[7.11]</cite>.</li>
+<li>  Staff cannot and should not promise confidentiality to the pupil <cite>[7.14.p]</cite>.</li>
+</ul></div>
+      <div class="qa-meta">
+        <span>⏱ 17.1s</span><span>💰 $0.0021</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">7</span>
+      <span class="qa-question">Is racist language treated differently from other forms of misconduct?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Yes, racist language is treated differently from other forms of misconduct.</p>
+
+<p>While alleged incidents of racism should be investigated in line with the general Behaviour Policy <cite>[5.7]</cite>, the document outlines specific and potentially more severe disciplinary actions for racist incidents. These include an official warning from the Headteacher, exclusion from certain areas of school premises and life, temporary exclusion from the school for a fixed term in serious or repeated cases, and permanent exclusion for continued racist behaviour <cite>[5.7]</cite>. The school also notes that the racist element must be explicitly recognised and dealt with <cite>[5.5]</cite>, and it is important that the victim of the racist incident is satisfied with the outcome of any disciplinary measures taken <cite>[5.7]</cite>. Furthermore, victims of racist incidents have the legal right to report it as a crime to the police <cite>[5.7]</cite>.</p>
+
+<p>In contrast, the general behaviour intervention process for minor and major incidents outlines consequences such as natural consequences, informing families, and a 1-day at home consequence after 5 minor or 3 major incidents <cite>[4.9]</cite>. While &quot;inappropriate verbal language&quot; is listed as an example of a minor behaviour <cite>[4.9]</cite>, racist language is addressed with a distinct set of potential disciplinary actions and considerations.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 21.3s</span><span>💰 $0.0023</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Standard Questions — Family Manual 2024–25</h2>
+  <p class="section-intro">Practical questions parents might ask about daily school life. <span class="unscored-note">These questions do not have ground truth labels — no automatic score is shown.</span></p>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">1</span>
+      <span class="qa-question">What time does the Early Bird programme start?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The Early-Bird service is available from 8:00 am <cite>[2.6]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 3.2s</span><span>💰 $0.0007</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">2</span>
+      <span class="qa-question">What is the process for authorising a new person to collect my child from school?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>To authorise a new person to collect your child from school, you must complete the “Tracking” section in Phidias <cite>[2.7]</cite>. The specific steps for this process are explained in the &quot;How to Authorise Student Pick-Up in Phidias&quot; resource <cite>[2.7]</cite>. Inquiries about new or exceptional authorized persons to collect children can be directed to María Luisa or Madhu, the Secretaries <cite>[1.3]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 8.0s</span><span>💰 $0.0008</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">3</span>
+      <span class="qa-question">Who is allowed to collect my child from school if they fall ill and I cannot be reached?</span>
+      <span class="badge neutral">Standard</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>If the family cannot be reached when a student falls ill at school, the school will contact the emergency person listed on the student&#x27;s file <cite>[9.1]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>⏱ 12.2s</span><span>💰 $0.0009</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>Standard Questions — Spanning Multiple Documents</h2>
+  <p class="section-intro">
+    Everyday questions that may touch more than one policy document.
+    The system automatically decides which documents to consult.
+    <span class="unscored-note">No ground truth labels — shown for qualitative review.</span>
+  </p>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">M1</span>
+      <span class="qa-question">Can my son bring a football to the school and play during breaks?</span>
+      <span class="badge neutral">Multi-doc</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Yes, your son can bring a football to school <cite>[en_family_manual_24_25:19]</cite>. Balls should only be used in outdoor spaces, such as the playground <cite>[en_family_manual_24_25:19]</cite>. If your son uses the bus, the ball must be kept in a bag and not loose <cite>[en_family_manual_24_25:19]</cite>. The school is not responsible for lost balls <cite>[en_family_manual_24_25:19]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Family Manual 2024–25</span><span class="doc-pill">Code of Conduct</span></span>
+        <span>⏱ 13.7s</span><span>💰 $0.0029</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">M2</span>
+      <span class="qa-question">What are the rules about taking photos of students during school trips?</span>
+      <span class="badge neutral">Multi-doc</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Parents or volunteers assisting on school trips or events must not use mobiles to take photos of pupils, their work, or any other potentially identifying information <cite>[en_policy2_technology:general-policy-for-mobil]</cite>.</p>
+
+<p>While families will receive photos of the experience daily when children are on overnight outings <cite>[en_policy4_trips_and_outings:10]</cite>, the specific rules governing staff taking photos of students during school trips are not explicitly detailed. Staff are generally allowed to use registered personal devices to take pictures to keep a record of students&#x27; learning progress during contact hours <cite>[en_policy2_technology:staff-mobile-phone-use]</cite>, and a school phone is always provided for outings <cite>[en_policy2_technology:staff-mobile-phone-use]</cite>.</p>
+
+<p>There are no specific rules provided regarding students taking photos of other students during school trips, although students from Year 9 upwards on trips abroad are allowed to use their own mobile to keep in touch with staff and parents <cite>[en_policy4_trips_and_outings:10]</cite>. The school&#x27;s privacy and data protection policy governs student data management, including consent forms for outings <cite>[en_policy4_trips_and_outings:13]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Trips &amp; Outings Policy</span></span>
+        <span>⏱ 23.8s</span><span>💰 $0.0011</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">M3</span>
+      <span class="qa-question">What should happen if a student is injured during a school trip?</span>
+      <span class="badge neutral">Multi-doc</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>If a student is injured during a school trip, the following procedures should be followed:</p>
+
+<p><strong>General Preparedness:</strong></p>
+<ul>
+<li>  At least one staff member trained in first aid must accompany the group <cite>[7]</cite>.</li>
+<li>  A first aid kit must always be available <cite>[7]</cite>.</li>
+<li>  Staff will have an updated list of all allergies and specific conditions, as well as information on medication needed <cite>[7]</cite>.</li>
+<li>  Staff will have a list of emergency contacts for each student <cite>[7]</cite>.</li>
+</ul>
+
+<p><strong>Minor Injuries:</strong></p>
+<ul>
+<li>  First aid will be administered by the staff member trained in first aid <cite>[8]</cite>.</li>
+<li>  Families will be notified about the incident at the end of the outing, unless further medical attention is required <cite>[8]</cite>.</li>
+</ul>
+
+<p><strong>Serious Injuries or Medical Emergencies:</strong></p>
+<ul>
+<li>  Staff will immediately call emergency services (112) and follow the instructions provided by the professionals <cite>[8]</cite>.</li>
+<li>  Family/guardians will be contacted as soon as possible by the designated staff member <cite>[8]</cite>.</li>
+<li>  A member of the school staff will accompany the child to the hospital if necessary and remain with the child until the parent/guardian arrives <cite>[8]</cite>.</li>
+<li>  A full report of the incident will be submitted to the school administration <cite>[8]</cite>.</li>
+</ul></div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
+        <span>⏱ 11.5s</span><span>💰 $0.0020</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">M4</span>
+      <span class="qa-question">Are students allowed to use mobile phones during PE lessons?</span>
+      <span class="badge neutral">Multi-doc</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>Mobile phone use is restricted to outside-school-hours, and phones are collected every day by 09:00 am <cite>[en_policy2_technology:use-policy-and-exception]</cite>. Therefore, students are not allowed to use mobile phones during PE lessons, as these occur during school hours.</p></div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Trips &amp; Outings Policy</span></span>
+        <span>⏱ 11.5s</span><span>💰 $0.0009</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">M5</span>
+      <span class="qa-question">What is the correct procedure when a student discloses abuse to a teacher?</span>
+      <span class="badge neutral">Multi-doc</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>When a student discloses abuse to a member of staff or volunteer, the following procedure should be followed:</p>
+
+<p>1.  The staff member must inform the pupil that they cannot keep secrets and must pass the information on, exercising professional judgment on the timing of this disclosure <cite>[1.13]</cite>.</p>
+<p>2.  During the conversation, the staff member should allow the pupil to speak freely, remain calm, and offer reassuring words such as &quot;I&#x27;m so sorry this has happened,&quot; &quot;I want to help,&quot; &quot;This isn&#x27;t your fault,&quot; or &quot;You are doing the right thing in talking to me&quot; <cite>[1.13]</cite>.</p>
+<p>3.  The staff member should not be afraid of silences and must under no circumstances ask investigative questions, though clarifying questions (e.g., &quot;when did this happen,&quot; &quot;where did this happen&quot;) are reasonable to support a meaningful referral <cite>[1.13]</cite>.</p>
+<p>4.  The staff member should not automatically offer physical touch as comfort and should avoid admonishing the child for not disclosing earlier <cite>[1.13]</cite>.</p>
+<p>5.  The staff member must tell the pupil what will happen next and let them know that someone (either the staff member or another named person, such as the DSL) will come to see them before the end of the day <cite>[1.13]</cite>.</p>
+<p>6.  The staff member must report verbally to the Designated Safeguarding Lead (DSL) <cite>[1.13]</cite>.</p>
+<p>7.  The staff member should seek support if they feel distressed or need to debrief <cite>[1.13]</cite>.</p>
+<p>8.  The school will normally seek to discuss any concerns with parents, with the DSL making contact. However, if the school believes that notifying parents could increase the risk to the child or exacerbate the problem, advice will be sought first from Children&#x27;s Social Care <cite>[1.13]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
+        <span>⏱ 18.8s</span><span>💰 $0.0027</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">M6</span>
+      <span class="qa-question">What should happen after a fire drill and who is responsible?</span>
+      <span class="badge neutral">Multi-doc</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The provided sections do not answer this question.</p></div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Health &amp; Safety Policy</span><span class="doc-pill">Child Protection Policy</span></span>
+        <span>⏱ 14.8s</span><span>💰 $0.0019</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="qa-card">
+    <div class="qa-header">
+      <span class="qa-qid">M7</span>
+      <span class="qa-question">What is the school&#x27;s position on students posting about school on social media?</span>
+      <span class="badge neutral">Multi-doc</span>
+    </div>
+    <div class="qa-body">
+      <div class="qa-answer"><p>The school restricts access to social media sites through its protection systems on school laptops and students&#x27; laptops enrolled under the Imagine domain <cite>[en_policy2_technology:9.p]</cite>. Students are expected to use mobile devices and technology responsibly and professionally, ensuring they do not compromise the safety or well-being of students or staff, and respecting privacy <cite>[en_policy2_technology:3]</cite>. Misuse of devices or incidents involving inappropriate content may lead to disciplinary measures <cite>[en_policy2_technology:3, en_policy2_technology:sanctions-for-misuse]</cite>.</p></div>
+      <div class="qa-meta">
+        <span>Documents consulted: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Family Manual 2024–25</span></span>
+        <span>⏱ 22.4s</span><span>💰 $0.0016</span>
+      </div>
+    </div>
+  </div>
+
+  <h2>What's next</h2>
+  <div class="explainer">
+    <p><strong>Precision improvement:</strong> On complex child-protection questions the system sometimes retrieves more sections than needed (up to 11 instead of 3). This does not affect correctness but increases cost. The next focus is reducing over-retrieval without losing any required content.</p>
+    <p><strong>Multi-document routing:</strong> One hard routing failure (student attacks teacher — system consulted the wrong second document). A fix is planned.</p>
+    <p><strong>Missing ground truth:</strong> Several standard queries and one hard query (P3H6) have no expected-answer labels. Labelling these would improve confidence in the overall score.</p>
+  </div>
+
+</div><!-- .page -->
+</body>
+</html>
