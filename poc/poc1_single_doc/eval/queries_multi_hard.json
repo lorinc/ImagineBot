@@ -1,0 +1,66 @@
+{
+  "document": "multi-document corpus (6 en_* school policy documents)",
+  "description": "Hard adversarial multi-doc tests. Focus: doc-routing misdirection, cross-reference chains that require two docs, compound scenarios where one obvious keyword forces wrong routing.",
+  "queries": [
+    {
+      "id": "MH1",
+      "type": "adversarial_redirect",
+      "question": "What happens if a student physically attacks a teacher?",
+      "expected_docs": ["en_policy5_code_of_conduct", "en_policy3_health_safety_reporting"],
+      "likely_wrong_routing": ["en_policy3_health_safety_reporting only"],
+      "failure_mode": "Cross-reference chain: policy3 §2.3.s5 contains 'Violence to staff policy' as a topic BUT its content says 'See separate policy: Behaviour Policy (Code of Conduct)'. The real answer lives in policy5. If the router selects only policy3, the synthesis gets a redirect placeholder, not actual content. The correct routing needs BOTH: policy3 to establish the redirect exists, and policy5 for the actual procedure.",
+      "correct_answer": "Policy3 §2.3.s5 defers to 'Code of Conduct' for violence-to-staff policy. Policy5 (Behaviour Policy §4.x) contains the actual response procedure and consequences for physical aggression toward staff.",
+      "note": "This tests the router's ability to recognise that a document containing a 'see other policy' reference is insufficient alone. The single-doc POC1 result for policy3 will be a cross-reference, not an answer — the multi-doc system must detect this and include policy5."
+    },
+    {
+      "id": "MH2",
+      "type": "adversarial_redirect",
+      "question": "A parent visiting the school witnesses a staff member shout aggressively at a student and push them. Who should the parent report this to?",
+      "expected_docs": ["en_policy1_child_protection"],
+      "likely_wrong_routing": ["en_policy3_health_safety_reporting"],
+      "failure_mode": "Keyword bait: 'visitor/parent' + 'on school premises' strongly activates policy3 (§1.4 Emergency Evacuation for Visitors, §1.6 Visitor Registration). But the question is about REPORTING STAFF MISCONDUCT / ABUSE BY A STAFF MEMBER — that lives entirely in policy1 (§1.13 Taking Action, §1.16 Appendix standard 5 on staff allegations). Policy3 has nothing on the reporting chain for staff-on-student misconduct.",
+      "correct_answer": "Policy1 §1.13 and §1.16 (standard 5) apply: concerns about staff behavior toward students should be reported to the Designated Safeguarding Lead (DSL). §1.5 gives the DSL's name. The visitor can also contact the head teacher per §1.10 (Complaints Procedure) if the incident does not reach the child protection threshold.",
+      "note": "The word 'visitor' is the bait. Any routing model trained on the document structure will associate 'visitor' with policy3's visitor safety sections. The correct document is policy1. This tests whether semantic content (staff abuse allegation) overrides surface keyword (visitor)."
+    },
+    {
+      "id": "MH3",
+      "type": "cross_section_compound",
+      "question": "A student hasn't come to school for two weeks and nobody can reach the family. A classmate also mentioned she had bruises last week. What should the school do?",
+      "expected_docs": ["en_policy1_child_protection"],
+      "likely_wrong_routing": ["en_policy5_code_of_conduct", "en_policy1_child_protection + en_policy5_code_of_conduct"],
+      "failure_mode": "Two interwoven threads: (1) Absence for 2 weeks (14 days > 10-day threshold) → §1.8 Children Missing Education, (2) Bruises last week → §1.11.L21 and §1.11.L3 Indicators of Abuse. Both are in policy1. The attendance aspect might trigger routing to policy5 (Attendance Policy), but §1.7 of policy1 explicitly says attendance monitoring is cross-referenced to policy5 — and policy5's attendance section has NOTHING about social services referral or abuse indicators. All relevant content is in policy1.",
+      "correct_answer": "Policy1 only: (1) 14 days unexplained absence exceeds the 10-day threshold — refer immediately to local social services [§1.8]; (2) Unexplained bruising is a physical indicator of abuse — DSL should be informed and the jigsaw approach applied [§1.11.L21, §1.11.L3]; (3) Reasonable steps for missing child should already have been taken and recorded [§1.8 list of 7 steps].",
+      "note": "This tests whether the router incorrectly splits the query across policy1 and policy5 (attendance). The compound scenario requires two different sections of policy1, not two documents. A correct single-doc policy1 result is sufficient."
+    },
+    {
+      "id": "MH4",
+      "type": "cross_section_compound",
+      "question": "A student has a severe allergic reaction on a school trip. What should the trip supervisor and other staff do?",
+      "expected_docs": ["en_policy3_health_safety_reporting", "en_policy4_trips_and_outings"],
+      "likely_wrong_routing": ["en_policy3_health_safety_reporting only", "en_policy4_trips_and_outings only"],
+      "failure_mode": "Genuine two-doc answer: policy3 §2.5 has the full anaphylaxis/EpiPen protocol (call 112, administer adrenaline, positioning, hospital). Policy4 §7/§8 has the general procedure for accidents/emergencies during school trips (communication chain, parent notification, incident reporting). Neither document alone gives a complete answer.",
+      "correct_answer": "Policy3 §2.5: immediate anaphylaxis protocol — move student from wasps, call 112, administer EpiPen if available, place lying with legs elevated, stay with student, notify family, take to hospital. Policy4 §8: accident on a trip — use first aid kit on trip, call 112, contact school, notify parents, complete incident report.",
+      "note": "The vocabulary trap from P3H3 applies here too: §2.5 is titled 'Wasp Sting Protocol' but contains the anaphylaxis response applicable to food allergy. The trip context adds §4 as a required second source. Both retrieval and routing must clear this double hurdle."
+    },
+    {
+      "id": "MH5",
+      "type": "document_gap",
+      "question": "Are parents allowed to take photos of students during the school's sports day event?",
+      "expected_docs": ["en_policy2_technology"],
+      "likely_wrong_routing": ["en_policy2_technology", "en_family_manual_24_25"],
+      "failure_mode": "Near-document-gap: technology policy covers student device use and school photography policies but may not explicitly address PARENT photography at school events. Family manual may address events without covering photography. The system should retrieve the closest relevant policy and honestly note whether parent photography at events is explicitly addressed.",
+      "correct_answer": "The technology policy (policy2) governs photography at school events. Check whether it explicitly restricts or permits parent photography — if not covered, the synthesis should say so rather than extrapolating from general photography rules.",
+      "note": "This tests synthesis honesty when the corpus has relevant-but-incomplete coverage. The failure mode is the synthesis extrapolating rules (e.g., 'no photos allowed') from student device policies to parent photography when no explicit rule exists. Compare with M2 which covers TRIP photography."
+    },
+    {
+      "id": "MH6",
+      "type": "temporal_semantics",
+      "question": "What safety checks must be completed BEFORE a school trip departs?",
+      "expected_docs": ["en_policy4_trips_and_outings"],
+      "likely_wrong_routing": ["en_policy3_health_safety_reporting", "en_policy4_trips_and_outings + en_policy3_health_safety_reporting"],
+      "failure_mode": "Temporal anchor 'BEFORE departure': the trips policy (§5 Planning and Preparation, §6 Supervision and Staff Responsibilities) covers pre-trip planning. Health & safety policy covers general safety checks but is not trip-specific. The routing must select policy4, not policy3 or a mix — and within policy4 must surface the PRE-trip sections, not the during-trip or post-trip sections.",
+      "correct_answer": "Policy4 §5 (Planning and Preparation) and §6 (Supervision and Staff Responsibilities) cover pre-departure requirements: risk assessment, staff ratios, first-aid kit, emergency contacts, parent consent, briefing supervisors.",
+      "note": "Temporal semantics probe: 'before departure' is the query anchor. The document structure doesn't label sections as 'pre-trip' — it's under 'Planning and Preparation'. This tests whether temporal language in the query correctly maps to the planning/preparation phase in the document."
+    }
+  ]
+}

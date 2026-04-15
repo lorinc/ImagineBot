@@ -73,44 +73,78 @@ def make_merge_prompt(a_title: str, a_repr: str, b_title: str, b_repr: str) -> s
 def make_select_prompt(outline: str, question: str) -> str:
     """Prompt for step 1 of query: selecting relevant leaf node IDs from the outline."""
     return (
-        "You are helping answer a question about a school policy document. "
-        "Below is an outline of the document: each line is [section_id] Title: topics.\n\n"
         f"OUTLINE:\n{outline}\n\n"
         f"QUESTION: {question}\n\n"
-        "Select the section IDs whose full text must be read to answer the question. "
-        "IMPORTANT: Only select LEAF nodes — those WITHOUT a '[+N children — do not select]' "
-        "annotation. Selecting a parent node delivers its entire subtree and wastes budget. "
-        "If a whole section is relevant, select the specific child nodes you need instead. "
-        "Be selective — only include sections directly relevant. "
-        "Return JSON with:\n"
-        "  selected_ids: array of section IDs (exactly as shown in the outline)\n"
-        "  reasoning: one sentence explaining why these sections were chosen"
+        "Select leaf section IDs needed to answer the question. "
+        "Leaf = no '[+N children]' annotation. "
+        "Return JSON: selected_ids (array), reasoning (one sentence)."
+    )
+
+
+def make_route_section_prompt(level1_outline: str, question: str) -> str:
+    """Stage 1 of hierarchical selection: route question to top-level sections.
+
+    Recall-oriented: false positive costs one extra call; false negative loses the answer.
+    """
+    return (
+        f"SECTIONS:\n{level1_outline}\n\n"
+        f"QUESTION: {question}\n\n"
+        "Select top-level section IDs likely to contain the answer. "
+        "Err inclusive: missing the right section is worse than one extra. "
+        "Return JSON: selected_ids (array), reasoning (one sentence)."
+    )
+
+
+def make_discriminate_prompt(
+    question: str,
+    parent_summaries: list,   # list of (id, title, topics) tuples
+    children_outline: str,
+    prior_reasoning: str,
+) -> str:
+    """Stage 2+ of hierarchical selection: select specific subsections within routed sections.
+
+    Recall-oriented: topic descriptions are lossy; err inclusive rather than miss content.
+    """
+    parent_block = "\n".join(
+        f"  [{pid}] {ptitle}: {ptopics}"
+        for pid, ptitle, ptopics in parent_summaries
+    )
+    return (
+        f"PARENT SECTION(S):\n{parent_block}\n"
+        f"Routing reasoning: {prior_reasoning}\n\n"
+        f"SUBSECTIONS:\n{children_outline}\n\n"
+        f"QUESTION: {question}\n\n"
+        "Skip items marked '[+N children]' — expanded in a later step.\n"
+        "Select subsections whose full text is needed to answer the question. "
+        "Err inclusive: missing relevant content is worse than one extra section. "
+        "Return JSON: selected_ids (array), reasoning (one sentence)."
     )
 
 
 def make_synthesize_prompt(question: str, sections_text: str) -> str:
-    """Prompt for step 2 of query: synthesising an answer from retrieved section text."""
+    """Prompt for step 2 of query: synthesising an answer from retrieved section text.
+
+    Three-step structure forces explicit extraction of conditional clauses before
+    producing the final answer, preventing silent drop of if/unless/except clauses.
+    """
     return (
-        "Answer the following question using ONLY the document sections provided. "
-        "For each claim, cite the section ID in square brackets, e.g. [3.4]. "
-        "If the sections do not contain a clear answer, respond: "
-        "'The provided sections do not answer this question.'\n\n"
         f"QUESTION: {question}\n\n"
-        f"SECTIONS:\n{sections_text}"
+        f"SECTIONS:\n{sections_text}\n\n"
+        "Answer using ONLY the sections above. Three labeled steps:\n\n"
+        "1. CORE RULE: Primary directive, 1-2 sentences. Cite [section_id].\n"
+        "2. EXCEPTIONS AND CONDITIONS: Every if/unless/except/provided-that/only-if clause, "
+        "one per bullet. 'None.' if absent.\n"
+        "3. FINAL ANSWER: Direct answer combining 1+2. Cite [section_id] per claim.\n\n"
+        "If no answer in sections: 'The provided sections do not answer this question.'"
     )
 
 
 def make_route_prompt(routing_outline: str, question: str) -> str:
     """Prompt for multi-doc routing: select which document(s) to search."""
     return (
-        "You are routing a question to the relevant school document(s). "
-        "Below is a compact outline of each document: L1 section titles and representative topics.\n\n"
         f"DOCUMENTS:\n{routing_outline}\n\n"
         f"QUESTION: {question}\n\n"
-        "Select the 1–2 document IDs (exactly as shown in the === header, "
-        "e.g. 'en_policy1_child_protection') most likely to contain the answer. "
-        "Select 2 only if the question clearly requires content from both. "
-        "Return JSON with:\n"
-        "  selected_doc_ids: array of document IDs\n"
-        "  reasoning: one sentence explaining the choice"
+        "Select 1–2 document IDs most likely to contain the answer. "
+        "Select 2 only if the question requires content from both. "
+        "Return JSON: selected_doc_ids (array), reasoning (one sentence)."
     )

@@ -389,7 +389,12 @@ Known gap: module-level globals in observability.py — ContextVar migration pen
 - Routing always selects 2 docs (conservative); no routing misses
 - avg latency: 16.6s  avg cost: $0.0019/query  (routing ~12% of total cost)
 
-**Status:** First eval pass complete. Q6 regression to diagnose next session.
+**Status:** Fix 1 (hierarchical node selection) implemented 2026-04-15.
+- Walk-until-leaves replaces flat outline call: stage 1 routes over 6 level-1 nodes, stage 2+ discriminates within children, recurses until all selected are leaves.
+- Distinct prompt types: make_route_section_prompt (recall-oriented) + make_discriminate_prompt (precision-oriented, with parent context).
+- P3H: 5/5 PASS. P1H: 6/6 PASS. P1H5 improved 11→7 nodes. P1H6 regressed 2→7 (dense-sibling problem).
+- Q6 (fire drill) acceptance not met — temporal vocabulary root cause persists.
+- Next decision: Fix 2 (temporal-explicit topic extraction, rebuild) vs Fix 3 (content-preview rerank, no rebuild). See poc/poc1_single_doc/TODO.md.
 
 ---
 

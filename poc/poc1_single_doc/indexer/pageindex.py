@@ -40,6 +40,7 @@ from .observability import (
     get_build_usage,
     init_build_context,
     log_cost_summary,
+    render_children_outline,
     render_outline,
     reset_build_context,
     track_usage,
@@ -48,13 +49,18 @@ from .observability import (
 )
 from .parser import make_breadcrumb, parse_tree, split_text_by_starts
 from .prompts import (
+    make_discriminate_prompt,
     make_intermediate_topics_prompt,
     make_merge_prompt,
+    make_route_section_prompt,
     make_select_prompt,
     make_split_prompt,
     make_synthesize_prompt,
     make_topics_prompt,
 )
+
+# Max total children shown in a single discrimination call before splitting per-parent
+_COMBINE_THRESHOLD = 20
 
 # ── Topic generation helpers ──────────────────────────────────────────────────
 
@@ -475,74 +481,195 @@ async def build_index(source_path: Path, output_path: Path) -> dict:
 
 # ── Query ─────────────────────────────────────────────────────────────────────
 
+async def _hierarchical_select(
+    question: str,
+    root: Node,
+    model: GenerativeModel,
+    nodes_by_id: dict,
+) -> tuple:
+    """
+    Top-down tree walk: route at level-1, then discriminate within selected
+    non-leaf nodes, repeating until all selected nodes are leaves.
+
+    Returns (leaf_nodes, stages) where stages is a list of per-call dicts
+    suitable for drill-down observability. Each stage records its outline,
+    selected IDs, reasoning, token counts, and latency.
+    """
+    stages: list[dict] = []
+
+    # ── Stage 1: routing — level-1 nodes only ────────────────────────────────
+    level1_nodes = root.children
+    level1_outline = render_children_outline(level1_nodes)
+    stage1_prompt = make_route_section_prompt(level1_outline, question)
+    raw, ms, usage = await llm_call(model, stage1_prompt, response_schema=NODE_SELECTION_SCHEMA)
+
+    try:
+        parsed = json.loads(raw)
+        selected_ids: list[str] = parsed.get("selected_ids", [])
+        reasoning: str = parsed.get("reasoning", "")
+    except json.JSONDecodeError as e:
+        selected_ids = []
+        reasoning = f"[JSON parse error: {e}]"
+
+    unresolved = [sid for sid in selected_ids if sid not in nodes_by_id]
+    selected_nodes: list[Node] = [nodes_by_id[sid] for sid in selected_ids if sid in nodes_by_id]
+
+    stages.append({
+        "stage": 1,
+        "type": "routing",
+        "parent_ids": [],
+        "outline": level1_outline,
+        "outline_node_count": len(level1_nodes),
+        "prompt_char_count": len(stage1_prompt),
+        "selected_ids": selected_ids,
+        "reasoning": reasoning,
+        "unresolved_ids": unresolved,
+        "input_tokens": usage.get("input_tokens", 0),
+        "output_tokens": usage.get("output_tokens", 0),
+        "latency_ms": ms,
+    })
+
+    # ── Stage 2+: discrimination loop — walk until all selected are leaves ───
+    stage_num = 2
+    prior_reasoning = reasoning
+
+    while True:
+        leaves = [n for n in selected_nodes if n.is_leaf()]
+        non_leaves = [n for n in selected_nodes if not n.is_leaf()]
+        if not non_leaves:
+            break
+
+        parent_groups: list[tuple] = [(p, p.children) for p in non_leaves]
+        all_children = [c for _, children in parent_groups for c in children]
+
+        if len(all_children) <= _COMBINE_THRESHOLD:
+            # One combined discrimination call for all children
+            parent_summaries = [(p.id, p.title, p.topics) for p, _ in parent_groups]
+            children_outline = render_children_outline(all_children)
+            prompt = make_discriminate_prompt(question, parent_summaries, children_outline, prior_reasoning)
+            raw, ms, usage = await llm_call(model, prompt, response_schema=NODE_SELECTION_SCHEMA)
+
+            try:
+                parsed = json.loads(raw)
+                new_ids: list[str] = parsed.get("selected_ids", [])
+                new_reasoning: str = parsed.get("reasoning", "")
+            except json.JSONDecodeError as e:
+                new_ids = []
+                new_reasoning = f"[JSON parse error: {e}]"
+
+            new_unresolved = [sid for sid in new_ids if sid not in nodes_by_id]
+            new_selected = [nodes_by_id[sid] for sid in new_ids if sid in nodes_by_id]
+
+            stages.append({
+                "stage": stage_num,
+                "type": "discrimination_combined",
+                "parent_ids": [p.id for p, _ in parent_groups],
+                "outline": children_outline,
+                "outline_node_count": len(all_children),
+                "prompt_char_count": len(prompt),
+                "selected_ids": new_ids,
+                "reasoning": new_reasoning,
+                "unresolved_ids": new_unresolved,
+                "input_tokens": usage.get("input_tokens", 0),
+                "output_tokens": usage.get("output_tokens", 0),
+                "latency_ms": ms,
+            })
+
+            selected_nodes = leaves + new_selected
+            prior_reasoning = new_reasoning
+
+        else:
+            # Per-parent parallel discrimination calls
+            async def _one(parent: Node, children: list, prior: str, snum: int) -> tuple:
+                ps = [(parent.id, parent.title, parent.topics)]
+                co = render_children_outline(children)
+                p = make_discriminate_prompt(question, ps, co, prior)
+                r, ms, u = await llm_call(model, p, response_schema=NODE_SELECTION_SCHEMA)
+                try:
+                    parsed = json.loads(r)
+                    nids: list[str] = parsed.get("selected_ids", [])
+                    nr: str = parsed.get("reasoning", "")
+                except json.JSONDecodeError as e:
+                    nids = []
+                    nr = f"[JSON parse error: {e}]"
+                nsel = [nodes_by_id[sid] for sid in nids if sid in nodes_by_id]
+                return nsel, {
+                    "stage": snum,
+                    "type": "discrimination_per_parent",
+                    "parent_ids": [parent.id],
+                    "outline": co,
+                    "outline_node_count": len(children),
+                    "prompt_char_count": len(p),
+                    "selected_ids": nids,
+                    "reasoning": nr,
+                    "unresolved_ids": [sid for sid in nids if sid not in nodes_by_id],
+                    "input_tokens": u.get("input_tokens", 0),
+                    "output_tokens": u.get("output_tokens", 0),
+                    "latency_ms": ms,
+                }
+
+            results = await asyncio.gather(*[
+                _one(parent, children, prior_reasoning, stage_num)
+                for parent, children in parent_groups
+            ])
+
+            new_selected = leaves[:]
+            reasonings: list[str] = []
+            for sel, stage_dict in results:
+                new_selected.extend(sel)
+                stages.append(stage_dict)
+                reasonings.append(stage_dict["reasoning"])
+
+            selected_nodes = new_selected
+            prior_reasoning = "; ".join(reasonings)
+
+        stage_num += 1
+
+    return selected_nodes, stages
+
+
 async def query_index(question: str, index: dict, model: GenerativeModel) -> dict:
     """
-    Two-step PageIndex query.
+    Hierarchical PageIndex query.
 
-    Step 1 — Node selection:
-      LLM sees full outline (all topics). Returns JSON with selected_ids + reasoning.
+    Selection — top-down tree walk:
+      Stage 1 (routing): show level-1 nodes only, select relevant sections.
+      Stage 2+ (discrimination): show children of selected non-leaf nodes,
+        select specific subsections. Repeat until all selected nodes are leaves.
+      Combined call when total children ≤ _COMBINE_THRESHOLD; per-parent parallel
+        calls otherwise.
 
-    Step 2 — Synthesis:
-      Full text of selected nodes sent to LLM. Free-text answer with inline section citations.
+    Synthesis — full text of leaf nodes sent to quality LLM for free-text answer.
 
     Returns a dict with every intermediate artefact for eval drill-down.
+    The top-level 'step1' key is an aggregated backward-compatible view of all
+    selection stages; 'selection_stages' has the full per-call detail.
     """
     root = Node.from_dict(index["tree"])
     all_nodes = root.all_nodes()
     nodes_by_id = {n.id: n for n in all_nodes}
 
-    # ── Step 1: Node selection ───────────────────────────────────────────────
+    # ── Hierarchical selection ───────────────────────────────────────────────
+    selected_nodes, stages = await _hierarchical_select(question, root, model, nodes_by_id)
 
-    outline = render_outline(root)
-    step1_prompt = make_select_prompt(outline, question)
-
-    step1_raw, step1_ms, step1_usage = await llm_call(
-        model, step1_prompt, response_schema=NODE_SELECTION_SCHEMA
+    # Aggregate across stages for backward-compatible step1 view
+    stage1 = stages[0]
+    last_stage = stages[-1]
+    final_selected_ids = [n.id for n in selected_nodes]
+    all_unresolved = [uid for s in stages for uid in s["unresolved_ids"]]
+    total_sel_input  = sum(s["input_tokens"] for s in stages)
+    total_sel_output = sum(s["output_tokens"] for s in stages)
+    # Wall-clock latency: stage 1 is sequential; per-parent stages within a stage
+    # run in parallel — use max latency per stage group, then sum across stages.
+    stage_nums = sorted({s["stage"] for s in stages})
+    total_sel_ms = sum(
+        max(s["latency_ms"] for s in stages if s["stage"] == sn)
+        for sn in stage_nums
     )
+    selected_depth = {n.id: "leaf" for n in selected_nodes}  # all are leaves by construction
 
-    try:
-        step1_parsed = json.loads(step1_raw)
-        selected_ids: list[str] = step1_parsed.get("selected_ids", [])
-        selection_reasoning: str = step1_parsed.get("reasoning", "")
-    except json.JSONDecodeError as e:
-        selected_ids = []
-        selection_reasoning = f"[JSON parse error: {e}] raw: {step1_raw[:300]}"
-
-    selected_nodes: list[Node] = []
-    unresolved_ids: list[str] = []
-    for sid in selected_ids:
-        if sid in nodes_by_id:
-            selected_nodes.append(nodes_by_id[sid])
-        else:
-            unresolved_ids.append(sid)
-
-    selected_depth = {n.id: ("leaf" if n.is_leaf() else "parent") for n in selected_nodes}
-    parent_selections = [nid for nid, depth in selected_depth.items() if depth == "parent"]
-
-    # ── Lever 2: expand parent selections to direct children ─────────────────
-    # Any parent the LLM selected is replaced by its direct children.
-    # This preserves intent ("I need §4") while avoiding full-subtree delivery.
-    expanded_ids: list[str] = []
-    if parent_selections:
-        expanded_nodes: list[Node] = []
-        seen_ids: set[str] = set()
-        for n in selected_nodes:
-            if n.is_leaf():
-                if n.id not in seen_ids:
-                    expanded_nodes.append(n)
-                    seen_ids.add(n.id)
-            else:
-                for child in n.children:
-                    if child.id not in seen_ids:
-                        expanded_nodes.append(child)
-                        seen_ids.add(child.id)
-                        expanded_ids.append(child.id)
-        selected_nodes = expanded_nodes
-        # Refresh depth map for the expanded set
-        selected_depth = {n.id: ("leaf" if n.is_leaf() else "parent") for n in selected_nodes}
-
-    # ── Step 2: Synthesis ────────────────────────────────────────────────────
-
+    # ── Synthesis ────────────────────────────────────────────────────────────
+    outline = render_outline(root)  # kept for fallback only
     if selected_nodes:
         sections_text = "\n\n---\n\n".join(
             f"[Section {n.id}: {n.title}]\n{n.full_text(include_heading=False)}"
@@ -557,33 +684,36 @@ async def query_index(question: str, index: dict, model: GenerativeModel) -> dic
 
     chars_to_synthesis = len(sections_text)
     model_name = getattr(model, "_name", MODEL_QUALITY)
-    total_input  = step1_usage.get("input_tokens", 0) + step2_usage.get("input_tokens", 0)
-    total_output = step1_usage.get("output_tokens", 0) + step2_usage.get("output_tokens", 0)
+    total_input  = total_sel_input  + step2_usage.get("input_tokens", 0)
+    total_output = total_sel_output + step2_usage.get("output_tokens", 0)
     query_cost   = cost_usd(model_name, total_input, total_output)
 
     return {
         "question": question,
-        "node_ids_selected": selected_ids,
+        "node_ids_selected": final_selected_ids,
         "chars_to_synthesis": chars_to_synthesis,
         "total_input_tokens": total_input,
         "total_output_tokens": total_output,
         "cost_usd": query_cost,
+        # Backward-compatible aggregated view (run_eval.py reads this)
         "step1": {
-            "outline_line_count": len(outline.splitlines()),
-            "outline_char_count": len(outline),
-            "outline": outline,
-            "prompt_char_count": len(step1_prompt),
-            "raw_response": step1_raw,
-            "selected_ids": selected_ids,
-            "selection_reasoning": selection_reasoning,
-            "unresolved_ids": unresolved_ids,
+            "outline_line_count": stage1["outline_node_count"],
+            "outline_char_count": len(stage1["outline"]),
+            "outline": stage1["outline"],
+            "prompt_char_count": stage1["prompt_char_count"],
+            "raw_response": "",  # not meaningful across stages
+            "selected_ids": final_selected_ids,
+            "selection_reasoning": last_stage["reasoning"],
+            "unresolved_ids": all_unresolved,
             "selected_depth": selected_depth,
-            "parent_selections": parent_selections,
-            "expanded_ids": expanded_ids,
-            "input_tokens": step1_usage.get("input_tokens", 0),
-            "output_tokens": step1_usage.get("output_tokens", 0),
-            "latency_ms": step1_ms,
+            "parent_selections": [],   # hierarchical walk never leaks parents to synthesis
+            "expanded_ids": [],
+            "input_tokens": total_sel_input,
+            "output_tokens": total_sel_output,
+            "latency_ms": total_sel_ms,
         },
+        # Full per-stage detail for drill-down
+        "selection_stages": stages,
         "step2": {
             "selected_nodes": [
                 {
@@ -605,7 +735,7 @@ async def query_index(question: str, index: dict, model: GenerativeModel) -> dic
             "output_tokens": step2_usage.get("output_tokens", 0),
             "latency_ms": step2_ms,
         },
-        "total_latency_ms": step1_ms + step2_ms,
+        "total_latency_ms": total_sel_ms + step2_ms,
     }
 
 
@@ -614,34 +744,37 @@ async def query_index(question: str, index: dict, model: GenerativeModel) -> dic
 def _print_query_result(result: dict) -> None:
     """Human-readable drill-down printout of a single query result."""
     bar = "━" * 72
-    s1 = result["step1"]
     s2 = result["step2"]
 
     print(f"\n{bar}")
     print(f"Question: {result['question']}")
 
-    print(f"\n── Step 1: Node Selection ──────────────────────────────────────────")
-    print(f"Outline shown to LLM: {s1['outline_line_count']} nodes, "
-          f"{s1['outline_char_count']} chars")
-    print()
-    print(s1["outline"])
-    print()
-    print(f"Reasoning: {s1['selection_reasoning']}")
-    print(f"Selected IDs: {s1['selected_ids']}")
-    if s1.get("parent_selections"):
-        print(f"⚠  Parent selections (may over-fetch): {s1['parent_selections']}")
-    if s1["unresolved_ids"]:
-        print(f"⚠  Unresolved IDs (not in index): {s1['unresolved_ids']}")
-    print(f"Latency: {s1['latency_ms']}ms")
+    for stage in result.get("selection_stages", []):
+        stype = stage["type"]
+        label = {
+            "routing": "Stage 1 — Routing",
+            "discrimination_combined": f"Stage {stage['stage']} — Discrimination (combined)",
+            "discrimination_per_parent": f"Stage {stage['stage']} — Discrimination [{stage['parent_ids']}]",
+        }.get(stype, f"Stage {stage['stage']}")
+        print(f"\n── {label} ({stage['latency_ms']}ms) ─────────────────────────────────")
+        print(f"Shown: {stage['outline_node_count']} nodes")
+        print(stage["outline"])
+        print(f"\nSelected: {stage['selected_ids']}")
+        print(f"Reasoning: {stage['reasoning']}")
+        if stage["unresolved_ids"]:
+            print(f"⚠  Unresolved: {stage['unresolved_ids']}")
 
-    print(f"\n── Step 2: Synthesis ───────────────────────────────────────────────")
+    s1 = result["step1"]
+    print(f"\n── Final selection ({s1['latency_ms']}ms total selection) ──────────────")
+    print(f"Leaf IDs: {s1['selected_ids']}")
+
+    print(f"\n── Synthesis ({s2['latency_ms']}ms) ────────────────────────────────────")
     if s2["selected_nodes"]:
-        print("Nodes selected for full-text read:")
+        print("Nodes fetched:")
         for n in s2["selected_nodes"]:
-            depth = s1["selected_depth"].get(n["id"], "?")
-            print(f"  [{n['id']}] {n['title']}  ({depth})")
+            print(f"  [{n['id']}] {n['title']}")
             print(f"         direct={n['direct_content_chars']}c  "
-                  f"with-children={n['full_text_chars']}c")
+                  f"full={n['full_text_chars']}c")
             print(f"         preview: {n['content_preview'][:180]}")
         print(f"Total text sent: {s2['sections_text_char_count']} chars")
     else:

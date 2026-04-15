@@ -146,3 +146,13 @@ def render_outline(root: Node) -> str:
                   if not n.is_leaf() else "")
         lines.append(f"{indent}[{n.id}] {n.title}: {n.topics}{suffix}")
     return "\n".join(lines)
+
+
+def render_children_outline(nodes: list) -> str:
+    """Flat outline of a specific node list, for hierarchical selection calls."""
+    lines = []
+    for n in nodes:
+        suffix = (f"  [+{len(n.children)} children — do not select]"
+                  if not n.is_leaf() else "")
+        lines.append(f"[{n.id}] {n.title}: {n.topics}{suffix}")
+    return "\n".join(lines)

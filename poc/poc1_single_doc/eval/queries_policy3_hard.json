@@ -1,0 +1,66 @@
+{
+  "document": "en_policy3_health_safety_reporting.md",
+  "description": "Hard adversarial tests for policy3. Each query probes a specific failure mode identified in RETRIEVAL_ANALYSIS.md or derived from deep document analysis. Expected nodes and failure modes are documented to make regressions observable.",
+  "queries": [
+    {
+      "id": "P3H1",
+      "type": "vocabulary_alias",
+      "question": "Do supply teachers have any duties during a fire evacuation that permanent staff do not?",
+      "expected_nodes": ["1.5"],
+      "likely_wrong_nodes": ["1.1", "1.4"],
+      "failure_mode": "Vocabulary alias: query says 'supply teachers', document says 'supply staff'. Index topic is 'Supply staff sweep; Personnel check' — the alias must survive selection.",
+      "correct_answer": "Yes. Section 1.5 states supply staff are required to sweep any areas they pass through for personnel as they exit the building, in addition to the standard duty of evacuating children in their care.",
+      "note": "Title 'Staff absences evacuation duties' sounds unrelated to supply teachers. The one relevant sentence is 'Supply staff will also be required to sweep any areas they pass through.' If the model dismisses §1.5 as an 'absences' section, it misses the only supply-specific instruction."
+    },
+    {
+      "id": "P3H2",
+      "type": "responsibility_referent",
+      "question": "Who has the authority to decide whether to close the school during a severe weather emergency?",
+      "expected_nodes": ["3.3", "3.7"],
+      "likely_wrong_nodes": ["1.1", "1.10", "2.6"],
+      "failure_mode": "Responsibility referent: 'Leadership Team Responsibility' appears in §1.10 (biennial policy review) and §2.6 (same). §3.7 names 'Head of the Emergency Plan' for weather emergencies. §3.3 says GVA/local authorities have primary authority. Query 'authority to decide' may match wrong responsibility node.",
+      "correct_answer": "Two actors: (1) GVA and local authorities give the formal closure order [3.3]; (2) school Management may also close as a precautionary measure if they perceive evident risk [3.4]. The Head of the Emergency Plan (§3.7) supervises implementation of the measures, but does not unilaterally close the school.",
+      "note": "Four nodes contain 'responsible/responsibility' language. Only §3.3 and §3.7 answer the question. Nodes §1.10 and §2.6 are about biennial policy review — correct subject (Leadership Team) but completely wrong predicate."
+    },
+    {
+      "id": "P3H3",
+      "type": "vocabulary_alias",
+      "question": "A student collapses after eating lunch and is showing signs of a severe allergic reaction. What should staff do?",
+      "expected_nodes": ["2.5", "2.4"],
+      "likely_wrong_nodes": ["2.3.s2", "2.3.s1"],
+      "failure_mode": "Semantic label mismatch: §2.5 is titled 'Wasp Sting Protocol for Students' but contains the full anaphylaxis/EpiPen protocol applicable to any severe allergic reaction. Query cause ('eating lunch') does not appear in §2.5 at all. Model must recognise that the medical response is the same regardless of cause.",
+      "correct_answer": "§2.5 applies: call 112 immediately stating 'possible anaphylactic reaction', administer self-injectable adrenaline (EpiPen) if available, place the child lying with legs elevated, do not leave unattended until medical help arrives, notify family, take the child to hospital even if symptoms improve. §2.4 notes the EpiPen location (office/Reception) and that staff should know which students have auto-injectors.",
+      "note": "This tests whether topic-label bias ('wasp stings') causes the model to skip the only section that contains the correct protocol. If §2.5 is not retrieved, the synthesised answer will be dangerously incomplete."
+    },
+    {
+      "id": "P3H4",
+      "type": "cross_section_compound",
+      "question": "How often are fire drills held compared to firefighting equipment inspections?",
+      "expected_nodes": ["1.1", "1.8"],
+      "likely_wrong_nodes": ["1.3", "1.10"],
+      "failure_mode": "Compound comparison requiring two disparate nodes: §1.1 has drill frequency ('every term'), §1.8 has equipment inspection frequency ('at least once a year'). Note §1.8 is a MERGED node (originally 1.8 fire alarm + 1.9 equipment). Single-node selection will give an incomplete answer.",
+      "correct_answer": "Fire drills: every term [1.1]. Firefighting equipment inspections: at least once a year by a competent service engineer [1.8]. Fire alarm testing is done regularly by a certified agent [1.8].",
+      "note": "The merge of original §1.8 and §1.9 into a single node [1.8] is an intentional design choice. The compound query probes whether both drill frequency AND equipment frequency are retrieved — a human would answer both parts confidently."
+    },
+    {
+      "id": "P3H5",
+      "type": "vocabulary_alias",
+      "question": "What training do visiting contractors receive before they start working at the school?",
+      "expected_nodes": ["1.6"],
+      "likely_wrong_nodes": ["2.3.s2", "2.3.s3"],
+      "failure_mode": "Two vocabulary traps: (1) query says 'training' but document says 'brief summary of emergency procedures upon arrival'; (2) §2.3.s3 is about contractor SELECTION criteria, not safety instructions. §2.3.s2 is about STAFF training. §1.6 contains the actual contractor-on-arrival instruction but uses 'brief summary' not 'training'.",
+      "correct_answer": "Non-recurrent contractors receive a brief summary of emergency procedures upon arrival [1.6], covering: location of emergency exits, location of the fire assembly point, and instruction to join the nearest evacuation team and follow their guidance. Recurrent contractors (e.g. cleaning/kitchen) receive basic fire safety training and are informed of alarm procedures, evacuation routes, assembly points, and equipment locations.",
+      "note": "Correct section is §1.6 (Visitor/Contractor Safety). Wrong but tempting sections: §2.3.s3 (contractor selection — has topics 'Contractor selection criteria' but not contractor safety briefing) and §2.3.s2 (has 'Training of staff' but is about employee training, not contractor briefing)."
+    },
+    {
+      "id": "P3H6",
+      "type": "document_gap",
+      "question": "What specific checks should staff carry out once the all-clear is given and everyone returns to the building after a fire drill?",
+      "expected_nodes": [],
+      "likely_wrong_nodes": ["1.1", "1.5", "1.7"],
+      "failure_mode": "Document gap: this is Q6's sibling. The policy documents evacuation procedures and drill frequency but contains NO post-drill re-entry or all-clear procedure. The synthesis step should explicitly say so. This tests whether the system confabulates an answer from partial matches (§1.1 scope, §1.5 supply staff duties) rather than admitting the gap.",
+      "correct_answer": "The document does not describe a post-drill re-entry checklist or all-clear procedure. The closest content is: §1.1 describes how the emergency plan is 'validated and practised'; §1.5 describes personnel checks during evacuation. None of these address what happens after the all-clear.",
+      "note": "This is a sister query to the original Q6 miss. Instead of asking about 'after a drill' (who is responsible), it asks specifically about re-entry checks. The gap is genuine — the school policy focuses on the evacuation phase, not the return phase."
+    }
+  ]
+}
