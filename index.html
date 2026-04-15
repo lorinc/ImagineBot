@@ -6,103 +6,154 @@
 <title>ImagineBot — Evaluation Report</title>
 <style>
   :root {
-    --bg: #f8f9fa;
-    --card: #ffffff;
-    --border: #e0e4ea;
-    --text: #1a1a2e;
-    --muted: #6b7280;
-    --accent: #3b5bdb;
-    --pass: #2d6a4f;
-    --pass-bg: #d8f3dc;
-    --fail: #9b2226;
-    --fail-bg: #ffe3e3;
-    --warn: #7c4700;
-    --warn-bg: #fff3bf;
-    --radius: 12px;
-    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --bg: #f8f9fa; --card: #ffffff; --border: #e0e4ea;
+    --text: #1a1a2e; --muted: #6b7280; --accent: #3b5bdb;
+    --pass: #2d6a4f; --pass-bg: #d8f3dc;
+    --fail: #9b2226; --fail-bg: #ffe3e3;
+    --warn: #7c4700; --warn-bg: #fff3bf;
+    --radius: 12px; --shadow: 0 2px 12px rgba(0,0,0,0.07);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
           background: var(--bg); color: var(--text); line-height: 1.6; }
-  .page { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+  .page { max-width: 980px; margin: 0 auto; padding: 40px 24px 80px; }
   h1 { font-size: 2rem; font-weight: 700; margin-bottom: 4px; }
-  .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 40px; }
-  h2 { font-size: 1.35rem; font-weight: 700; margin: 48px 0 6px; border-bottom: 2px solid var(--border); padding-bottom: 8px; }
-  h3 { font-size: 1.05rem; font-weight: 600; color: var(--muted); margin: 28px 0 12px; text-transform: uppercase; letter-spacing: .05em; font-size: .8rem; }
+  .subtitle { color: var(--muted); font-size: 1rem; margin-bottom: 0; }
+  h2 { font-size: 1.35rem; font-weight: 700; margin: 48px 0 6px;
+        border-bottom: 2px solid var(--border); padding-bottom: 8px; }
+  h3 { font-size: .8rem; font-weight: 700; color: var(--muted); margin: 28px 0 12px;
+        text-transform: uppercase; letter-spacing: .05em; }
   .section-intro { color: var(--muted); font-size: .95rem; margin-bottom: 20px; line-height: 1.7; }
 
-  /* Summary cards */
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap: 16px; margin: 24px 0 40px; }
-  .summary-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+  /* ── Tabs ── */
+  .tabs { display: flex; gap: 0; margin: 32px 0 0; border-bottom: 2px solid var(--border); }
+  .tab-btn { padding: 12px 28px; font-size: .95rem; font-weight: 600; cursor: pointer;
+              background: none; border: none; border-bottom: 3px solid transparent;
+              margin-bottom: -2px; color: var(--muted); transition: color .15s; }
+  .tab-btn:hover { color: var(--accent); }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-pane { display: none; padding-top: 8px; }
+  .tab-pane.active { display: block; }
+
+  /* ── Summary ── */
+  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr));
+                   gap: 16px; margin: 24px 0 40px; }
+  .summary-card { background: var(--card); border: 1px solid var(--border);
+                   border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
   .summary-card .big { font-size: 2.2rem; font-weight: 700; color: var(--accent); line-height: 1; }
   .summary-card .label { font-size: .82rem; color: var(--muted); margin-top: 6px; }
 
-  /* QA cards */
-  .qa-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius);
-              margin-bottom: 20px; box-shadow: var(--shadow); overflow: hidden; }
-  .qa-header { padding: 16px 20px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--border); background: #fafbfc; }
-  .qa-qid { font-size: .75rem; font-weight: 700; color: var(--accent); background: #e8edff; border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
-  .qa-question { font-size: 1rem; font-weight: 600; flex: 1; }
+  /* ── QA cards ── */
+  .qa-card { background: var(--card); border: 1px solid var(--border);
+              border-radius: var(--radius); margin-bottom: 20px;
+              box-shadow: var(--shadow); overflow: hidden; }
+  .qa-header { padding: 16px 20px; display: flex; justify-content: space-between;
+                align-items: flex-start; gap: 12px; border-bottom: 1px solid var(--border);
+                background: #fafbfc; flex-wrap: wrap; }
+  .qa-qid { font-size: .75rem; font-weight: 700; color: var(--accent);
+             background: #e8edff; border-radius: 6px; padding: 2px 8px; white-space: nowrap; }
+  .qa-question { font-size: 1rem; font-weight: 600; flex: 1; min-width: 200px; }
   .qa-body { padding: 20px; }
   .qa-answer { font-size: .95rem; color: #222; }
   .qa-answer p { margin-bottom: .7em; }
   .qa-answer ul { margin: .4em 0 .7em 1.4em; }
   .qa-answer li { margin-bottom: .3em; }
   .qa-answer strong { color: #111; }
-  .qa-answer cite { font-style: normal; background: #eef2ff; color: var(--accent); border-radius: 4px; padding: 0 4px; font-size: .82em; }
-  .qa-meta { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px; align-items: center; font-size: .8rem; color: var(--muted); border-top: 1px solid var(--border); padding-top: 12px; }
-
-  /* Score bars */
-  .scores { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
-  .score-item { display: flex; align-items: center; gap: 6px; font-size: .82rem; }
-  .score-label { color: var(--muted); white-space: nowrap; }
-  .score-bar-wrap { width: 80px; background: #e9ecef; border-radius: 999px; height: 8px; position: relative; display: inline-flex; align-items: center; }
+  .qa-answer cite { font-style: normal; background: #eef2ff; color: var(--accent);
+                     border-radius: 4px; padding: 0 4px; font-size: .82em; }
+  .qa-meta { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 10px;
+              align-items: center; font-size: .8rem; color: var(--muted);
+              border-top: 1px solid var(--border); padding-top: 12px; }
+  .scores { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .score-label { color: var(--muted); white-space: nowrap; font-size: .82rem; }
+  .score-bar-wrap { width: 80px; background: #e9ecef; border-radius: 999px; height: 8px;
+                     display: inline-flex; align-items: center; }
   .score-bar { height: 8px; border-radius: 999px; }
   .score-val { font-weight: 700; font-size: .82rem; margin-left: 6px; }
   .no-score { color: var(--muted); }
-
-  /* Badges */
   .badge { font-size: .78rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
   .badge.pass { background: var(--pass-bg); color: var(--pass); }
   .badge.fail { background: var(--fail-bg); color: var(--fail); }
-  .badge.warn { background: var(--warn-bg); color: var(--warn); }
   .badge.neutral { background: #e9ecef; color: var(--muted); }
-
-  /* Doc pills */
-  .doc-pill { font-size: .75rem; background: #e8edff; color: var(--accent); border-radius: 6px; padding: 2px 8px; display: inline-block; margin: 2px 2px; }
+  .doc-pill { font-size: .75rem; background: #e8edff; color: var(--accent);
+               border-radius: 6px; padding: 2px 8px; display: inline-block; margin: 2px; }
   .doc-pill.wrong { background: var(--fail-bg); color: var(--fail); }
-
-  /* Explainer box */
-  .explainer { background: #f0f4ff; border-left: 4px solid var(--accent); border-radius: 0 var(--radius) var(--radius) 0; padding: 16px 20px; margin: 24px 0; font-size: .9rem; color: #333; }
-  .explainer strong { color: var(--accent); }
+  .explainer { background: #f0f4ff; border-left: 4px solid var(--accent);
+                border-radius: 0 var(--radius) var(--radius) 0;
+                padding: 16px 20px; margin: 24px 0; font-size: .9rem; color: #333; }
   .explainer p { margin-bottom: .5em; }
   .explainer p:last-child { margin-bottom: 0; }
-
-  /* Glossary */
   .glossary { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 24px; margin: 16px 0 32px; }
-  @media (max-width: 600px) { .glossary { grid-template-columns: 1fr; } }
+  @media (max-width: 600px) { .glossary { grid-template-columns: 1fr; } .tabs { overflow-x: auto; } }
   .glossary dt { font-weight: 700; font-size: .88rem; color: var(--accent); }
   .glossary dd { font-size: .88rem; color: var(--muted); margin-bottom: 8px; }
-
-  /* Unscored note */
   .unscored-note { font-size: .82rem; color: var(--muted); font-style: italic; }
-  .section-tag { font-size: .72rem; background: #e9ecef; color: var(--muted); border-radius: 4px; padding: 1px 6px; }
+  .over-warn { background: var(--warn-bg); border-radius: 8px; padding: 8px 12px;
+                font-size: .82rem; color: var(--warn); margin-top: 10px; }
 
-  /* Overretrieval warning */
-  .over-warn { background: var(--warn-bg); border-radius: 8px; padding: 8px 12px; font-size: .82rem; color: var(--warn); margin-top: 10px; }
+  /* ── Heuristics tab ── */
+  .h-intro { color: var(--muted); font-size: .95rem; line-height: 1.7;
+              margin: 24px 0 32px; max-width: 680px; }
+  .h-filters { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 28px; }
+  .h-filter-btn { padding: 5px 14px; border-radius: 999px; border: 1px solid var(--border);
+                   background: var(--card); font-size: .82rem; cursor: pointer;
+                   color: var(--muted); transition: all .15s; }
+  .h-filter-btn:hover, .h-filter-btn.active { background: var(--accent);
+                   color: #fff; border-color: var(--accent); }
+  .h-timeline { position: relative; padding-left: 24px; }
+  .h-timeline::before { content:''; position: absolute; left: 7px; top: 0; bottom: 0;
+                          width: 2px; background: var(--border); }
+  .h-card { background: var(--card); border: 1px solid var(--border);
+             border-radius: var(--radius); margin-bottom: 16px; box-shadow: var(--shadow);
+             position: relative; }
+  .h-card::before { content:''; position: absolute; left: -20px; top: 20px;
+                     width: 10px; height: 10px; border-radius: 50%;
+                     background: var(--accent); border: 2px solid var(--bg); }
+  .h-card-header { display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+                    padding: 12px 16px 8px; border-bottom: 1px solid var(--border); }
+  .h-date { font-size: .78rem; font-weight: 700; color: var(--muted);
+             font-family: monospace; white-space: nowrap; }
+  .h-badge { font-size: .72rem; font-weight: 700; padding: 2px 9px;
+              border-radius: 999px; white-space: nowrap; }
+  .h-service { font-size: .78rem; color: var(--muted); }
+  .h-task { font-size: .95rem; font-weight: 600; padding: 10px 16px 0; }
+  .h-field { display: grid; grid-template-columns: 160px 1fr; gap: 8px;
+              padding: 6px 16px; font-size: .88rem; border-top: 1px solid #f0f2f5; }
+  .h-field:first-of-type { margin-top: 8px; }
+  .h-field-label { color: var(--muted); font-weight: 600; font-size: .78rem;
+                    text-transform: uppercase; letter-spacing: .03em; padding-top: 1px; }
+  .h-field-val { color: var(--text); white-space: pre-wrap; line-height: 1.6; }
+  .h-note { font-size: .82rem; color: var(--muted); background: #fafbfc;
+             padding: 8px 16px; border-top: 1px dashed var(--border);
+             font-style: italic; white-space: pre-wrap; }
+  .h-card.hidden { display: none; }
+  @media (max-width: 600px) {
+    .h-field { grid-template-columns: 1fr; gap: 2px; }
+    .h-timeline { padding-left: 16px; }
+  }
 </style>
 </head>
 <body>
 <div class="page">
+  <h1>ImagineBot</h1>
+  <div class="subtitle" style="margin-bottom:4px">School policy Q&amp;A system · Evaluation Report · 2026-04-15</div>
 
-  <h1>ImagineBot — Evaluation Report</h1>
-  <div class="subtitle">How well does the system answer questions from school policy documents? · 2026-04-15</div>
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('eval', this)">📊 Evaluation Results</button>
+    <button class="tab-btn" onclick="switchTab('heuristics', this)">🔬 Development Log</button>
+  </div>
 
+  <!-- TAB 1: Eval -->
+  <div class="tab-pane active" id="tab-eval">
+    
   <div class="explainer">
     <p><strong>What this system does:</strong> ImagineBot reads school policy documents and answers questions about them.
     When a question arrives, the system first figures out <em>which sections</em> of the relevant document are needed,
-    then retrieves exactly those sections and passes them to an AI to write the answer. Nothing is guessed from memory — every answer is grounded in the actual document text.</p>
-    <p><strong>What this report shows:</strong> We ran the system against a set of test questions where we already knew the correct answers and which document sections were needed. We then measured how accurately the system found the right sections and how well the answers matched the expected content.</p>
+    then retrieves exactly those sections and passes them to an AI to write the answer.
+    Nothing is guessed from memory — every answer is grounded in the actual document text.</p>
+    <p><strong>What this report shows:</strong> We ran the system against a set of test questions where we already knew
+    the correct answers and which sections were needed. We measured how accurately the system found the right sections
+    and how well the answers matched expected content.</p>
   </div>
 
   <h3>Glossary — terms used in this report</h3>
@@ -110,14 +161,13 @@
     <dt>Section retrieval</dt><dd>Finding the right part of a document to answer a question.</dd>
     <dt>Recall (completeness)</dt><dd>Did the system find <em>all</em> the sections needed? 100% = nothing missed.</dd>
     <dt>Precision (efficiency)</dt><dd>Of the sections retrieved, how many were actually needed? 100% = no unnecessary sections fetched.</dd>
-    <dt>F1 score</dt><dd>A single number combining recall and precision. 100% = perfect on both. We care more about recall — missing a section is worse than fetching one extra.</dd>
-    <dt>Document routing</dt><dd>For questions that might span multiple documents, the system first decides <em>which document(s)</em> to look in. This step is tested separately.</dd>
-    <dt>Hard queries</dt><dd>Test questions specifically designed to be tricky — requiring cross-section reasoning, rare vocabulary, or information spread across multiple parts of a document.</dd>
-    <dt>Standard queries</dt><dd>Everyday questions a parent or staff member might ask. Simpler, but still representative of real usage.</dd>
-    <dt>Ground truth</dt><dd>The known-correct answer used to evaluate the system. Only the hard queries have ground truth labels; standard queries are shown for review but not automatically scored.</dd>
+    <dt>F1 score</dt><dd>A single number combining recall and precision. 100% = perfect on both.</dd>
+    <dt>Document routing</dt><dd>For questions spanning multiple documents, the system first decides <em>which documents</em> to look in.</dd>
+    <dt>Hard queries</dt><dd>Specifically designed tricky questions — cross-section reasoning, rare vocabulary, or information spread across the document.</dd>
+    <dt>Standard queries</dt><dd>Everyday questions a parent or staff member might ask.</dd>
+    <dt>Ground truth</dt><dd>The known-correct answer used to evaluate the system. Only hard queries have ground truth labels.</dd>
   </dl>
 
-  <h2>Summary</h2>
   <div class="summary-grid">
     <div class="summary-card">
       <div class="big">100%</div>
@@ -140,17 +190,9 @@
   <div class="explainer">
     <p><strong>The key finding:</strong> The system never misses required content — recall is perfect across all scored tests.
     The main weakness is <em>over-retrieval</em>: on complex questions it sometimes fetches more document sections than strictly needed.
-    This does not affect answer correctness, but increases cost and processing time. Fixing precision is the next priority.</p>
+    This does not affect answer correctness, but increases cost and processing time.</p>
   </div>
-
-  <h2>Hard Questions — Child Protection Policy</h2>
-  <p class="section-intro">
-    Six questions designed to be difficult: they require finding information spread across multiple
-    sections, or where the question uses different vocabulary than the document.
-    Each question has a known ground truth — we know exactly which sections are needed.
-  </p>
-
-  <div class="qa-card">
+<h2>Hard Questions — Child Protection Policy</h2><p class="section-intro">Six questions designed to be difficult: cross-section reasoning, rare vocabulary, information spread across the document. Each has a known ground truth.</p><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P1H1</span>
       <span class="qa-question">Will the school always inform parents when it has a concern about their child&#x27;s safety?</span>
@@ -160,9 +202,17 @@
       <div class="qa-answer"><p>No, the school will not always inform parents. If the school believes that notifying parents could increase the risk to the child or exacerbate the problem, advice will be sought first from Children&#x27;s Social Care <cite>[2]</cite>.</p></div>
       
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 7.6s</span><span>💰 $0.0007</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+        </div>
+        
+        <span>⏱ 7.6s</span>
+        <span>💰 $0.0007</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P1H2</span>
       <span class="qa-question">A student has been absent with no explanation for 8 days. What action should the school take?</span>
@@ -172,9 +222,17 @@
       <div class="qa-answer"><p>The provided sections do not answer this question. While Section 1.8 states that DSLs will monitor unauthorised absences and take appropriate action <cite>[1.8]</cite>, and outlines procedures for 10 consecutive days of unexplained absence <cite>[1.8]</cite>, it does not specify the action to be taken for exactly 8 days of unexplained absence.</p></div>
       <div class="over-warn">ℹ️ Retrieved 2 sections; only 1 were needed. Extra sections do not affect the answer but increase cost.</div>
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:66%;background:#ff9800"></div><span class="score-val">66%</span></div></div><span>⏱ 8.0s</span><span>💰 $0.0007</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:66%;background:#ff9800"></div><span class="score-val">66%</span></div>
+        </div>
+        
+        <span>⏱ 8.0s</span>
+        <span>💰 $0.0007</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P1H3</span>
       <span class="qa-question">In what circumstances can a staff member keep what a student has told them confidential?</span>
@@ -184,9 +242,17 @@
       <div class="qa-answer"><p>The provided sections do not answer this question. In fact, Section 1.13 states that if a pupil discloses risks to their safety or wellbeing, &quot;the staff member will need to let the pupil know that they must pass the information on - staff are not allowed to keep secrets&quot; <cite>[1.13]</cite>.</p></div>
       <div class="over-warn">ℹ️ Retrieved 3 sections; only 1 were needed. Extra sections do not affect the answer but increase cost.</div>
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:33%;background:#f44336"></div><span class="score-val">33%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div></div><span>⏱ 7.5s</span><span>💰 $0.0008</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:33%;background:#f44336"></div><span class="score-val">33%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div>
+        </div>
+        
+        <span>⏱ 7.5s</span>
+        <span>💰 $0.0008</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P1H4</span>
       <span class="qa-question">A parent says their child&#x27;s teacher has been repeatedly humiliating and picking on the child. What is the correct process?</span>
@@ -194,13 +260,20 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>When a parent raises a concern about a teacher repeatedly humiliating and picking on their child, the school&#x27;s complaints procedure will be followed <cite>[1.10]</cite>. This type of concern, which includes unfairly singling out a pupil or attempting to humiliate them, bullying, or belittling a pupil, is considered &quot;poor practice&quot; that initially does not reach the threshold for child protection action <cite>[1.10]</cite>.</p>
-
 <p>The complaints are managed by the head teacher or other members of the senior leadership team <cite>[1.10]</cite>. All complaints will be dealt with within 28 days <cite>[1.10]</cite>. If the complaint escalates into a child protection concern, it will automatically be managed under the school&#x27;s child protection procedures <cite>[1.10]</cite>.</p></div>
       <div class="over-warn">ℹ️ Retrieved 3 sections; only 1 were needed. Extra sections do not affect the answer but increase cost.</div>
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:33%;background:#f44336"></div><span class="score-val">33%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div></div><span>⏱ 10.4s</span><span>💰 $0.0009</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:33%;background:#f44336"></div><span class="score-val">33%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:50%;background:#ff9800"></div><span class="score-val">50%</span></div>
+        </div>
+        
+        <span>⏱ 10.4s</span>
+        <span>💰 $0.0009</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P1H5</span>
       <span class="qa-question">Staff are concerned about a student — she seems withdrawn, has unexplained bruising, and hasn&#x27;t been eating. What should they do and what specific signs are they looking for?</span>
@@ -209,11 +282,8 @@
     <div class="qa-body">
       <div class="qa-answer"><p>Staff should take the following actions:</p>
 <p>Staff have a moral and statutory responsibility to safeguard and promote the welfare of all pupils <cite>[1.3]</cite>. They must be alert to the signs of abuse and neglect and follow the school&#x27;s procedures <cite>[1.3, 1.4]</cite>. All staff have an equal responsibility to act on any suspicion that a child is at risk of harm <cite>[1.3]</cite>. When concerned about a child&#x27;s welfare, staff members should always act in the interests of the child <cite>[1.3]</cite>.</p>
-
 <p>It is the responsibility of staff to report their concerns, and they do not need &#x27;absolute proof&#x27; that the child is at risk <cite>[1.11.L21]</cite>. They should report all concerns, however minor or insignificant they may seem <cite>[1.11.L21]</cite>. Staff must report their concerns to the Designated Safeguarding Lead (DSL) <cite>[1.11.L21, 1.13, 1.16]</cite> or, in their absence, the deputy Designated Safeguarding Lead <cite>[1.16]</cite>. It is not their responsibility to investigate or decide whether a child has been abused <cite>[1.11.L21]</cite>.</p>
-
 <p>The school will normally seek to discuss concerns with parents, but if notifying parents could increase the risk to the child, advice will be sought first from Children&#x27;s Social Care <cite>[1.13]</cite>. The school will also seek advice from Children&#x27;s Social Care when they have reasonable cause to suspect a child may be suffering or likely to suffer significant harm <cite>[1.1]</cite>.</p>
-
 <p>The specific signs staff are looking for, based on the student&#x27;s presentation, include:</p>
 <ul>
 <li>  <strong>Withdrawn:</strong> This is an indicator of abuse, specifically a &quot;change in behaviour - from quiet to aggressive, or happy-go-lucky to withdrawn&quot; <cite>[1.11.L21]</cite>.</li>
@@ -222,9 +292,17 @@
 </ul></div>
       <div class="over-warn">ℹ️ Retrieved 11 sections; only 3 were needed. Extra sections do not affect the answer but increase cost.</div>
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:27%;background:#f44336"></div><span class="score-val">27%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:42%;background:#f44336"></div><span class="score-val">42%</span></div></div><span>⏱ 24.3s</span><span>💰 $0.0017</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:27%;background:#f44336"></div><span class="score-val">27%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:42%;background:#f44336"></div><span class="score-val">42%</span></div>
+        </div>
+        
+        <span>⏱ 24.3s</span>
+        <span>💰 $0.0017</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P1H6</span>
       <span class="qa-question">What is the difference between how the school responds when a student actively discloses abuse versus when staff only suspect it based on signs?</span>
@@ -232,21 +310,21 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>When a student actively discloses abuse, the staff member engages directly with the student by allowing them to speak freely, remaining calm, offering reassuring words, and explaining that the information must be passed on (as staff cannot keep secrets) <cite>[1.13]</cite>. The staff member should avoid asking investigative questions but can ask clarifying ones, and should not offer physical touch as comfort or admonish the child for not disclosing earlier <cite>[1.13]</cite>. The staff member must tell the pupil what will happen next and that someone (staff or DSL) will see them before the end of the day, then report verbally to the Designated Safeguarding Lead (DSL) <cite>[1.13]</cite>.</p>
-
 <p>When staff only suspect abuse based on signs, their responsibility is to report their concerns to the Designated Safeguarding Lead (DSL); they are explicitly told not to investigate or decide whether a child has been abused <cite>[1.11.L21]</cite>. Staff should report all concerns, however minor, without needing &quot;absolute proof&quot; that the child is at risk <cite>[1.11.L21]</cite>.</p>
-
 <p>In both situations (disclosure or suspicion), the DSL will normally seek to discuss concerns with parents, but will first seek advice from Children&#x27;s Social Care if notifying parents could increase the risk to the child <cite>[1.13]</cite>.</p></div>
       
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 18.0s</span><span>💰 $0.0010</span></div></div></div>
-
-  <h2>Hard Questions — Health &amp; Safety Policy</h2>
-  <p class="section-intro">
-    Six questions, five with ground truth. One question (P3H6) has no ground truth label yet —
-    it is shown for review only.
-  </p>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+        </div>
+        
+        <span>⏱ 18.0s</span>
+        <span>💰 $0.0010</span>
+      </div>
+    </div>
+  </div><h2>Hard Questions — Health &amp; Safety Policy</h2><p class="section-intro">Six questions, five with ground truth. P3H6 has no ground truth label yet — shown for review only.</p><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P3H1</span>
       <span class="qa-question">Do supply teachers have any duties during a fire evacuation that permanent staff do not?</span>
@@ -256,9 +334,17 @@
       <div class="qa-answer"><p>Yes, supply teachers have an additional duty to sweep any areas they pass through for personnel as they exit the building <cite>[1.5]</cite>.</p></div>
       
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 5.2s</span><span>💰 $0.0011</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+        </div>
+        
+        <span>⏱ 5.2s</span>
+        <span>💰 $0.0011</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P3H2</span>
       <span class="qa-question">Who has the authority to decide whether to close the school during a severe weather emergency?</span>
@@ -266,11 +352,19 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>The Generalitat Valenciana (GVA) or the town council can order the closure of the school <cite>[3.4]</cite>. The instructions of the GVA and local authorities will be followed regarding any decision on the closure <cite>[3.3]</cite>. If there is no closure order from these authorities but an evident risk exists, the school may decide to close as a precautionary measure <cite>[3.4]</cite>.</p></div>
-      <div class="over-warn">ℹ️ Retrieved 3 sections; only 2 were needed.</div>
+      <div class="over-warn">ℹ️ Retrieved 3 sections; only 2 were needed. Extra sections do not affect the answer but increase cost.</div>
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:66%;background:#ff9800"></div><span class="score-val">66%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:80%;background:#4caf50"></div><span class="score-val">80%</span></div></div><span>⏱ 9.1s</span><span>💰 $0.0012</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:66%;background:#ff9800"></div><span class="score-val">66%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:80%;background:#4caf50"></div><span class="score-val">80%</span></div>
+        </div>
+        
+        <span>⏱ 9.1s</span>
+        <span>💰 $0.0012</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P3H3</span>
       <span class="qa-question">A student collapses after eating lunch and is showing signs of a severe allergic reaction. What should staff do?</span>
@@ -278,7 +372,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>In the event of a student collapsing after eating lunch and showing signs of a severe allergic reaction, staff should take the following actions:</p>
-
 <p>1.  The person who finds the child should deal with it immediately <cite>[2.4]</cite>.</p>
 <p>2.  Only trained first aiders should administer first aid <cite>[2.4]</cite>.</p>
 <p>3.  Staff should be alert to the need for prompt action for pupils with severe allergies <cite>[2.4]</cite>.</p>
@@ -293,9 +386,17 @@
 <p>12. Staff should be aware of students with known allergies and the location of their auto-injectors <cite>[2.5]</cite>.</p></div>
       
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 20.0s</span><span>💰 $0.0014</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+        </div>
+        
+        <span>⏱ 20.0s</span>
+        <span>💰 $0.0014</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P3H4</span>
       <span class="qa-question">How often are fire drills held compared to firefighting equipment inspections?</span>
@@ -305,9 +406,17 @@
       <div class="qa-answer"><p>Emergency drills are carried out every term <cite>[1.1]</cite>. Firefighting equipment will be examined and tested at least once a year <cite>[1.8]</cite>.</p></div>
       
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 4.3s</span><span>💰 $0.0011</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+        </div>
+        
+        <span>⏱ 4.3s</span>
+        <span>💰 $0.0011</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P3H5</span>
       <span class="qa-question">What training do visiting contractors receive before they start working at the school?</span>
@@ -315,16 +424,23 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Visiting contractors receive different training depending on whether they are recurrent or non-recurrent:</p>
-
 <ul>
 <li>  <strong>Recurrent contractors</strong> (e.g., cleaning or kitchen staff) receive basic fire safety training. This training covers the action to be taken on hearing the fire alarm or discovering a fire, evacuation procedures including means of escape, location of fire assembly points, the name of the person in charge of evacuation procedures, and the location of firefighting equipment and fire alarm call points in relation to their work area <cite>[1.6]</cite>.</li>
 <li>  <strong>Non-recurrent contractors</strong> receive a brief summary of emergency procedures upon arrival, which includes the location of emergency exits and the fire assembly point <cite>[1.6]</cite>.</li>
 </ul></div>
       
       <div class="qa-meta">
-<div class="scores"><span class="score-label">Completeness (Recall):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Efficiency (Precision):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div><span class="score-label" style="margin-left:12px">Overall (F1):</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div></div><span>⏱ 5.9s</span><span>💰 $0.0012</span></div></div></div>
-
-  <div class="qa-card">
+        <div class="scores">
+          <span class="score-label">Completeness:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Efficiency:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+          <span class="score-label" style="margin-left:12px">Overall F1:</span><div class="score-bar-wrap"><div class="score-bar" style="width:100%;background:#4caf50"></div><span class="score-val">100%</span></div>
+        </div>
+        
+        <span>⏱ 5.9s</span>
+        <span>💰 $0.0012</span>
+      </div>
+    </div>
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">P3H6</span>
       <span class="qa-question">What specific checks should staff carry out once the all-clear is given and everyone returns to the building after a fire drill?</span>
@@ -334,16 +450,13 @@
       <div class="qa-answer"><p>The provided sections do not answer this question.</p></div>
       
       <div class="qa-meta">
-<span>⏱ 21.0s</span><span>💰 $0.0011</span></div></div></div>
-
-  <h2>Hard Questions — Spanning Multiple Documents</h2>
-  <p class="section-intro">
-    Six questions where the answer may require looking in more than one policy document.
-    The system must first decide <em>which documents</em> to consult before searching within them.
-    Ground truth records which documents are actually needed.
-  </p>
-
-  <div class="qa-card">
+        
+        
+        <span>⏱ 21.0s</span>
+        <span>💰 $0.0011</span>
+      </div>
+    </div>
+  </div><h2>Hard Questions — Spanning Multiple Documents</h2><p class="section-intro">Six questions where the answer may require looking in more than one policy document. The system must first decide which documents to consult.</p><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">MH1</span>
       <span class="qa-question">What happens if a student physically attacks a teacher?</span>
@@ -351,17 +464,16 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>If a student physically attacks a teacher, the school may avoid the standard behaviour flowchart and go straight to &quot;STEP 4&quot; <cite>[4.9]</cite>. This involves the Student Support Team contacting the family to communicate the consequence, and the student being picked up from school to stay home for one day <cite>[4.9]</cite>.</p>
-
 <p>Additionally, if the risk is clear and the intent is obvious, a fixed-term exclusion and a disciplinary hearing may follow, or the decision to permanently exclude may be made, which could involve reporting to the police and social services <cite>[8.5]</cite>. The student may also be removed from the situation if they present a danger to themselves or others <cite>[4.9, 4.13]</cite>. Any measure applied should be approved by the Head Teacher, and each case will be judged on an individual basis <cite>[4.9, 8.5]</cite>.</p></div>
-      <div class="over-warn">⚠️ Expected to look in: <span class="doc-pill">Code of Conduct</span><span class="doc-pill">Health &amp; Safety Policy</span> — but looked in: <span class="doc-pill">Code of Conduct</span><span class="doc-pill wrong">Child Protection Policy</span><br>Missing: <span class="doc-pill">Health &amp; Safety Policy</span></div>
+      <div class="over-warn">⚠️ Expected: <span class="doc-pill">Code of Conduct</span><span class="doc-pill">Health &amp; Safety Policy</span> — consulted: <span class="doc-pill">Code of Conduct</span><span class="doc-pill wrong">Child Protection Policy</span></div>
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Code of Conduct</span><span class="doc-pill wrong">Child Protection Policy</span></span>
-        <span>⏱ 20.6s</span><span>💰 $0.0032</span>
+        
+        <span>Documents: <span class="doc-pill">Code of Conduct</span><span class="doc-pill">Child Protection Policy</span></span>
+        <span>⏱ 20.6s</span>
+        <span>💰 $0.0032</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">MH2</span>
       <span class="qa-question">A parent visiting the school witnesses a staff member shout aggressively at a student and push them. Who should the parent report this to?</span>
@@ -369,15 +481,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>A parent should report this to the Head Teacher <cite>[1.10, 4.5, 6.10]</cite>. The Head Teachers are also the Designated Safeguarding Leads (DSLs) <cite>[1.5]</cite>, who take lead responsibility for safeguarding and child protection <cite>[1.5]</cite>. Alternatively, the parent could report to any member of staff <cite>[6.10]</cite> or other members of the senior leadership team <cite>[1.10]</cite>. The Key Stage Manager or the named person responsible for supporting good behaviour are also designated people to report to <cite>[6.10]</cite>.</p></div>
-      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Consulted one extra document (<span class="doc-pill">Child Protection Policy</span><span class="doc-pill wrong">Code of Conduct</span>) — answer still correct.</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Also consulted: <span class="doc-pill">Code of Conduct</span> (answer still correct)</div>
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill wrong">Code of Conduct</span></span>
-        <span>⏱ 29.7s</span><span>💰 $0.0029</span>
+        
+        <span>Documents: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill">Code of Conduct</span></span>
+        <span>⏱ 29.7s</span>
+        <span>💰 $0.0029</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">MH3</span>
       <span class="qa-question">A student hasn&#x27;t come to school for two weeks and nobody can reach the family. A classmate also mentioned she had bruises last week. What should the school do?</span>
@@ -385,7 +497,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>The school should take the following actions:</p>
-
 <p><strong>1.  <strong>Report Concerns to DSL:</strong></strong> Any staff member aware of the classmate&#x27;s mention of bruises should report this concern to the Designated Safeguarding Lead (DSL) <cite>[1.11.L21, 1.16]</cite>. It is the responsibility of staff to report concerns, not to investigate or decide if abuse has occurred <cite>[1.11.L21]</cite>. Bruises are a physical sign that defines a type of abuse <cite>[1.11.L21, 1.11.L3]</cite>.</p>
 <p><strong>2.  <strong>Address Unexplained Absence:</strong></strong> The student&#x27;s absence for two weeks (10 consecutive school days) with an unreachable family falls under &quot;Children Missing Education Procedures&quot; <cite>[1.8]</cite>. Frequent missing of school is also an indicator of abuse <cite>[1.11.L21]</cite>.</p>
 <p><strong>3.  <strong>Take Reasonable Steps to Locate the Child:</strong></strong> The school must take &quot;all reasonable steps&quot; to establish the child&#x27;s whereabouts. These steps include:</p>
@@ -397,19 +508,19 @@
 <li>  Enquiries with any other service known to be involved with the pupil/family <cite>[1.8]</cite>.</li>
 <li>  Possible home visits where safe to do so <cite>[1.8]</cite>.</li>
 </ul>
-<p>4.  <strong>Record All Actions:</strong> All contacts and outcomes from these steps must be recorded on the pupil&#x27;s file <cite>[1.8]</cite>. The DSL is responsible for keeping detailed written records of all concerns <cite>[1.5]</cite>.</p>
-<p>5.  <strong>Immediate Referral to Social Services:</strong> Since the pupil has 10 consecutive school days of unexplained absence and all reasonable steps to establish their whereabouts have been taken without success, the school must make an immediate referral to the appropriate local social services <cite>[1.8]</cite>. The DSL is responsible for referring cases of suspected abuse to Children&#x27;s Social Care or the Police as appropriate <cite>[1.5]</cite>.</p>
-<p>6.  <strong>Consider Notifying Parents:</strong> While the school would normally seek to discuss concerns with parents, if notifying them could increase the risk to the child or exacerbate the problem, advice should be sought first from Children&#x27;s Social Care <cite>[1.13]</cite>. Information sharing should be on a &quot;need-to-know&quot; basis and in accordance with legal obligations, and consent from parents is sought unless otherwise required by law <cite>[2.3]</cite>.</p>
-<p>7.  <strong>Utilize Local Contacts:</strong> The school can use local emergency contacts such as Servicios Sociales de Paterna (Children&#x27;s Social Care) or the Police for guidance and action in cases of child vulnerability <cite>[1.15]</cite>.</p></div>
-      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Consulted one extra document (<span class="doc-pill">Child Protection Policy</span><span class="doc-pill wrong">Health &amp; Safety Policy</span>) — answer still correct.</div>
+<p><strong>4.  <strong>Record All Actions:</strong></strong> All contacts and outcomes from these steps must be recorded on the pupil&#x27;s file <cite>[1.8]</cite>. The DSL is responsible for keeping detailed written records of all concerns <cite>[1.5]</cite>.</p>
+<p><strong>5.  <strong>Immediate Referral to Social Services:</strong></strong> Since the pupil has 10 consecutive school days of unexplained absence and all reasonable steps to establish their whereabouts have been taken without success, the school must make an immediate referral to the appropriate local social services <cite>[1.8]</cite>. The DSL is responsible for referring cases of suspected abuse to Children&#x27;s Social Care or the Police as appropriate <cite>[1.5]</cite>.</p>
+<p><strong>6.  <strong>Consider Notifying Parents:</strong></strong> While the school would normally seek to discuss concerns with parents, if notifying them could increase the risk to the child or exacerbate the problem, advice should be sought first from Children&#x27;s Social Care <cite>[1.13]</cite>. Information sharing should be on a &quot;need-to-know&quot; basis and in accordance with legal obligations, and consent from parents is sought unless otherwise required by law <cite>[2.3]</cite>.</p>
+<p><strong>7.  <strong>Utilize Local Contacts:</strong></strong> The school can use local emergency contacts such as Servicios Sociales de Paterna (Children&#x27;s Social Care) or the Police for guidance and action in cases of child vulnerability <cite>[1.15]</cite>.</p></div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Also consulted: <span class="doc-pill">Health &amp; Safety Policy</span> (answer still correct)</div>
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill wrong">Health &amp; Safety Policy</span></span>
-        <span>⏱ 26.8s</span><span>💰 $0.0037</span>
+        
+        <span>Documents: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
+        <span>⏱ 26.8s</span>
+        <span>💰 $0.0037</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">MH4</span>
       <span class="qa-question">A student has a severe allergic reaction on a school trip. What should the trip supervisor and other staff do?</span>
@@ -417,7 +528,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>In the event of a severe allergic reaction on a school trip, staff should take the following actions:</p>
-
 <ul>
 <li>  Immediately call emergency services (112), stating &quot;possible anaphylactic reaction due to sting&quot; <cite>[2.5, 8]</cite>.</li>
 <li>  Administer self-injectable adrenaline (if reported by the family and available at the school) <cite>[2.5]</cite>.</li>
@@ -431,13 +541,13 @@
 </ul></div>
       
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
-        <span>⏱ 13.1s</span><span>💰 $0.0021</span>
+        
+        <span>Documents: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
+        <span>⏱ 13.1s</span>
+        <span>💰 $0.0021</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">MH5</span>
       <span class="qa-question">Are parents allowed to take photos of students during the school&#x27;s sports day event?</span>
@@ -445,15 +555,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Parents are prohibited from photographing or recording pupils during events unless specified by the school <cite>[10.1]</cite>. While parents are permitted to use their personal mobiles during school festivities <cite>[general-policy-for-mobil]</cite>, the general policy states that taking photographs or recordings of pupils without explicit consent is prohibited <cite>[4.1, general-policy-for-mobil]</cite>. The provided sections do not explicitly specify that a sports day event is an exception where parental photography is permitted.</p></div>
-      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Consulted one extra document (<span class="doc-pill">Technology Policy</span><span class="doc-pill wrong">Family Manual 2024–25</span>) — answer still correct.</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Also consulted: <span class="doc-pill">Family Manual 2024–25</span> (answer still correct)</div>
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Technology Policy</span><span class="doc-pill wrong">Family Manual 2024–25</span></span>
-        <span>⏱ 12.2s</span><span>💰 $0.0014</span>
+        
+        <span>Documents: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Family Manual 2024–25</span></span>
+        <span>⏱ 12.2s</span>
+        <span>💰 $0.0014</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">MH6</span>
       <span class="qa-question">What safety checks must be completed BEFORE a school trip departs?</span>
@@ -461,7 +571,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Before a school trip departs, the following safety checks must be completed:</p>
-
 <ul>
 <li>  All experiences must be approved by the pedagogical coordinator to ensure they meet safety standards <cite>[5]</cite>.</li>
 <li>  A thorough risk assessment must be completed <cite>[5]</cite>.</li>
@@ -476,18 +585,15 @@
 <li>  Staff will have a list of emergency contacts for each student <cite>[7]</cite>.</li>
 <li>  Alternative arrangements must be planned for bad weather or unforeseen circumstances (contingency planning) <cite>[7]</cite>.</li>
 </ul></div>
-      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Consulted one extra document (<span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill wrong">Health &amp; Safety Policy</span>) — answer still correct.</div>
+      <div style="font-size:.82rem;color:var(--muted);margin-top:8px">Also consulted: <span class="doc-pill">Health &amp; Safety Policy</span> (answer still correct)</div>
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill wrong">Health &amp; Safety Policy</span></span>
-        <span>⏱ 11.6s</span><span>💰 $0.0019</span>
+        
+        <span>Documents: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
+        <span>⏱ 11.6s</span>
+        <span>💰 $0.0019</span>
       </div>
     </div>
-  </div>
-
-  <h2>Standard Questions — Child Protection Policy</h2>
-  <p class="section-intro">Everyday questions a parent or staff member might ask about child protection. Not automatically scored — shown for qualitative review. <span class="unscored-note">These questions do not have ground truth labels — no automatic score is shown.</span></p>
-
-  <div class="qa-card">
+  </div><h2>Standard Questions — Child Protection Policy</h2><p class="section-intro">Everyday questions about child protection. Not automatically scored — shown for review. <span class="unscored-note">No ground truth labels — not automatically scored.</span></p><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">1</span>
       <span class="qa-question">How many consecutive days of unexplained absence triggers a referral to social services?</span>
@@ -495,13 +601,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>10 consecutive school days of unexplained absence triggers a referral to social services <cite>[1.8]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 4.1s</span><span>💰 $0.0006</span>
+        
+        
+        <span>⏱ 4.1s</span>
+        <span>💰 $0.0006</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">2</span>
       <span class="qa-question">What must a staff member do when a student discloses they are being abused at home?</span>
@@ -509,7 +617,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>When a student discloses they are being abused at home, a staff member must take the following actions:</p>
-
 <p>1.  Let the pupil know that they must pass the information on, as staff are not allowed to keep secrets <cite>[1.13]</cite>.</p>
 <p>2.  Allow the pupil to speak freely <cite>[1.13]</cite>.</p>
 <p>3.  Remain calm and not overreact <cite>[1.13]</cite>.</p>
@@ -523,13 +630,15 @@
 <p>11. Let them know that someone (either the staff member or another named person, e.g., the DSL) will come to see them before the end of the day <cite>[1.13]</cite>.</p>
 <p>12. Report verbally to the Designated Safeguarding Lead (DSL) <cite>[1.13]</cite>. It is the responsibility of staff to report their concerns, not to investigate or decide whether a child has been abused <cite>[1.11.L21]</cite>. All school staff are required to pass on information which gives rise to a concern about a child&#x27;s welfare <cite>[1.1]</cite>.</p>
 <p>13. Seek support if they feel distressed or need to debrief <cite>[1.13]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 30.9s</span><span>💰 $0.0014</span>
+        
+        
+        <span>⏱ 30.9s</span>
+        <span>💰 $0.0014</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">3</span>
       <span class="qa-question">A student has become withdrawn, started covering their arms, and is frequently late to school. What should staff do?</span>
@@ -542,18 +651,16 @@
 <li>  &quot;Display a change in behaviour - from quiet to aggressive, or happy-go-lucky to withdrawn&quot; <cite>[1.11.L21]</cite></li>
 <li>  &quot;Frequently miss school or arrive late&quot; <cite>[1.11.L21]</cite></li>
 </ul>
-
 <p>It is the responsibility of staff to report their concerns, not to investigate or decide whether a child has been abused <cite>[1.11.L21]</cite>. All concerns, however minor, should be reported, as staff do not need &#x27;absolute proof&#x27; that the child is at risk <cite>[1.11.L21]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 140.3s</span><span>💰 $0.0010</span>
+        
+        
+        <span>⏱ 140.3s</span>
+        <span>💰 $0.0010</span>
       </div>
     </div>
-  </div>
-
-  <h2>Standard Questions — Health &amp; Safety Policy</h2>
-  <p class="section-intro">Everyday questions about health, safety, and emergency procedures. <span class="unscored-note">These questions do not have ground truth labels — no automatic score is shown.</span></p>
-
-  <div class="qa-card">
+  </div><h2>Standard Questions — Health &amp; Safety Policy</h2><p class="section-intro">Everyday questions about health, safety, and emergency procedures. <span class="unscored-note">No ground truth labels — not automatically scored.</span></p><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">1</span>
       <span class="qa-question">How often must firefighting equipment be inspected?</span>
@@ -561,13 +668,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Firefighting equipment must be examined and tested at least once a year <cite>[1.8]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 7.3s</span><span>💰 $0.0011</span>
+        
+        
+        <span>⏱ 7.3s</span>
+        <span>💰 $0.0011</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">2</span>
       <span class="qa-question">What steps should be taken when a student shows signs of a severe allergic reaction to a wasp sting?</span>
@@ -575,7 +684,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>When a student shows signs of a severe allergic reaction (anaphylaxis) to a wasp sting, the following steps should be taken:</p>
-
 <ul>
 <li>  Call 112 immediately, stating &quot;possible anaphylactic reaction due to sting&quot; <cite>[2.5]</cite>.</li>
 <li>  Administer self-injectable adrenaline if it has been reported by the family and is available at the school <cite>[2.5]</cite>.</li>
@@ -585,13 +693,15 @@
 <li>  After administering adrenaline, call 112 again and notify the family <cite>[2.5]</cite>.</li>
 <li>  Ensure the child is taken to the hospital, even if symptoms improve <cite>[2.5]</cite>.</li>
 </ul></div>
+      
       <div class="qa-meta">
-        <span>⏱ 25.3s</span><span>💰 $0.0013</span>
+        
+        
+        <span>⏱ 25.3s</span>
+        <span>💰 $0.0013</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">3</span>
       <span class="qa-question">What training are staff required to complete for health and medical emergencies?</span>
@@ -614,16 +724,15 @@
 <li>  Training of staff in the use of an EpiPen <cite>[2.5]</cite>.</li>
 <li>  Employees must wear disposable gloves and aprons when cleaning any bodily fluids, implying training on these hygiene procedures <cite>[2.4]</cite>.</li>
 </ul></div>
+      
       <div class="qa-meta">
-        <span>⏱ 9.8s</span><span>💰 $0.0016</span>
+        
+        
+        <span>⏱ 9.8s</span>
+        <span>💰 $0.0016</span>
       </div>
     </div>
-  </div>
-
-  <h2>Standard Questions — Code of Conduct</h2>
-  <p class="section-intro">Questions about school rules, discipline, attendance, and behaviour. <span class="unscored-note">These questions do not have ground truth labels — no automatic score is shown.</span></p>
-
-  <div class="qa-card">
+  </div><h2>Standard Questions — Code of Conduct</h2><p class="section-intro">Questions about school rules, discipline, attendance, and behaviour. <span class="unscored-note">No ground truth labels — not automatically scored.</span></p><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">1</span>
       <span class="qa-question">What attendance percentage is required for secondary students?</span>
@@ -631,13 +740,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>The provided sections do not answer this question.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 9.6s</span><span>💰 $0.0019</span>
+        
+        
+        <span>⏱ 9.6s</span>
+        <span>💰 $0.0019</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">2</span>
       <span class="qa-question">What happens step-by-step when a bullying incident is reported to the school?</span>
@@ -645,7 +756,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>When a bullying incident is reported to the school, the following steps are taken:</p>
-
 <p>1.  <strong>Reporting the Incident</strong></p>
 <ul>
 <li>  Students and families should report any suspicion of bullying immediately to a Tutor, Key Stage Manager, or Head teacher <cite>[6.10]</cite>.</li>
@@ -653,7 +763,6 @@
 <li>  Pupils witnessing bullying should support the child being bullied and encourage them to speak out, or with their permission, speak to a trusted adult on their behalf <cite>[6.10]</cite>.</li>
 <li>  Parents should bring the issue to the attention of any member of staff, the Head of School, or the named person responsible for supporting good behaviour <cite>[6.10]</cite>.</li>
 </ul>
-
 <p>2.  <strong>Initial Staff Response and Recording</strong></p>
 <ul>
 <li>  If a staff member receives a report, they reassure and support the pupils involved <cite>[6.10]</cite>.</li>
@@ -662,13 +771,11 @@
 <li>  Details of the incident are recorded by the welfare responsible (Lindsay &amp;/or Sheila) <cite>[6.12]</cite>.</li>
 <li>  The Guide discusses with the named person for behaviour support what the appropriate and most helpful course of action is <cite>[6.12]</cite>.</li>
 </ul>
-
 <p>3.  <strong>Interviewing Involved Parties</strong></p>
 <ul>
 <li>  The child who has been bullied is interviewed by their Guide, who may ask them to write an immediate account of events and discuss their reaction. The process for dealing with the incident is clearly explained, and further support and advice may be given <cite>[6.11.L0]</cite>.</li>
 <li>  Once it is clear that a bullying incident has occurred, the child responsible for the bullying and any others related to the incident are interviewed. Each is asked to write an immediate account of events, and the process for dealing with the incident is clearly explained to them <cite>[6.11.L0]</cite>.</li>
 </ul>
-
 <p>4.  <strong>Investigation and Decision on Actions/Consequences</strong></p>
 <ul>
 <li>  Before issuing a formal warning, the adult who witnesses the incident, the Guide, and the Head Teacher investigate the bullying incident to gather facts, speak with witnesses, and understand the context <cite>[6.11.L12]</cite>.</li>
@@ -676,14 +783,12 @@
 <li>  This may include a formal bullying warning, clearly stating what the bullying incident was and what would constitute a continuation <cite>[6.12]</cite>.</li>
 <li>  Clear strategies on what work would help both children (or groups of children) to be kind and loving towards each other may be developed <cite>[6.12]</cite>.</li>
 </ul>
-
 <p>5.  <strong>Formal School Warning Process (if applicable)</strong></p>
 <ul>
 <li>  <strong>Families Informed</strong>: Clear and timely communication with the families of both the bully and the victim occurs as soon as possible after the incident has been reported and investigated, typically via phone call, followed by a written notice <cite>[6.11.L12]</cite>. Meetings may be arranged to discuss the incident, share findings, and explain actions <cite>[6.11.L12]</cite>. Ongoing communication is maintained <cite>[6.11.L12]</cite>.</li>
 <li>  <strong>Warning Issued</strong>: The school issues the formal warning, which may include a written notice outlining the incident, suspension, or exclusion, and is documented in the student&#x27;s record <cite>[6.11.L12]</cite>.</li>
 <li>  <strong>Expectations and Consequences</strong>: The student is informed of the expectations for their future behaviour and the consequences they will face if they do not adhere to these expectations <cite>[6.11.L12]</cite>.</li>
 </ul>
-
 <p>6.  <strong>Ongoing Monitoring and Review</strong></p>
 <ul>
 <li>  The issue will be tackled within the year group/class <cite>[6.11.L37]</cite>.</li>
@@ -692,18 +797,19 @@
 <li>  The Anti-Bullying Policy will be reviewed annually by the school’s Leadership Team <cite>[6.12]</cite>.</li>
 <li>  Staff members will discuss the policy during designated professional development sessions, and records of bullying incidents will be analyzed for patterns, trends, and effectiveness of interventions <cite>[6.12]</cite>.</li>
 </ul>
-
 <p>7.  <strong>External Reporting (in very serious cases)</strong></p>
 <ul>
 <li>  In very serious cases, it may be necessary to make a report to the Police or Social Services, or to the local authority. However, the school&#x27;s policy is to attempt to resolve such issues internally using its own disciplinary sanctions, unless the matter is of such gravity that a criminal prosecution is likely <cite>[6.11.L37]</cite>.</li>
 </ul></div>
+      
       <div class="qa-meta">
-        <span>⏱ 19.9s</span><span>💰 $0.0027</span>
+        
+        
+        <span>⏱ 19.9s</span>
+        <span>💰 $0.0027</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">3</span>
       <span class="qa-question">Can teachers physically restrain students, and under what conditions is this allowed?</span>
@@ -711,22 +817,22 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Yes, teachers can physically restrain students <cite>[4.17]</cite>.</p>
-
 <p>This is allowed under the following conditions:</p>
 <ul>
 <li>  In extreme cases where the safety of others is at stake <cite>[4.9]</cite>.</li>
 <li>  To prevent physical injury to the child themselves, other children/adults, or damage to property <cite>[4.17]</cite>.</li>
 <li>  If a child presents a danger to themselves or others <cite>[4.9]</cite>.</li>
 </ul>
-
 <p>When it is practically possible, the child should be informed beforehand what is going to happen <cite>[4.17]</cite>. Physical interventions are not used except in these extreme cases <cite>[4.9]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 10.5s</span><span>💰 $0.0021</span>
+        
+        
+        <span>⏱ 10.5s</span>
+        <span>💰 $0.0021</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">4</span>
       <span class="qa-question">What items are classified as weapons under school policy?</span>
@@ -741,13 +847,15 @@
 <li>  Other objects like aerosol sprays, lighters, matches, laser pens, and martial arts equipment (e.g., nunchaku, death stars) <cite>[8.2]</cite>.</li>
 <li>  Tools such as screwdrivers, hammers, and chisels that can be offensively used <cite>[8.2]</cite>.</li>
 </ul></div>
+      
       <div class="qa-meta">
-        <span>⏱ 11.0s</span><span>💰 $0.0019</span>
+        
+        
+        <span>⏱ 11.0s</span>
+        <span>💰 $0.0019</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">5</span>
       <span class="qa-question">What are the specific dress code rules for PE days?</span>
@@ -765,13 +873,15 @@
 <li>  T-shirts and sweatshirts on the top half <cite>[2.3.p]</cite>.</li>
 <li>  Trainers <cite>[2.3.p]</cite>.</li>
 </ul></div>
+      
       <div class="qa-meta">
-        <span>⏱ 5.5s</span><span>💰 $0.0019</span>
+        
+        
+        <span>⏱ 5.5s</span>
+        <span>💰 $0.0019</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">6</span>
       <span class="qa-question">How does the school handle a situation where a student is found with drugs on school premises?</span>
@@ -779,7 +889,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>When a student is found with drugs on school premises, the school will take the following actions:</p>
-
 <ul>
 <li>  Initially seek medical attention for the child if needed <cite>[7.8]</cite>.</li>
 <li>  Follow its Behaviour and Exclusion Policies <cite>[7.8]</cite>.</li>
@@ -791,13 +900,15 @@
 <li>  Share information with law enforcement and safeguarding agencies if there are concerns about a child&#x27;s safety <cite>[7.11]</cite>.</li>
 <li>  Staff cannot and should not promise confidentiality to the pupil <cite>[7.14.p]</cite>.</li>
 </ul></div>
+      
       <div class="qa-meta">
-        <span>⏱ 17.1s</span><span>💰 $0.0021</span>
+        
+        
+        <span>⏱ 17.1s</span>
+        <span>💰 $0.0021</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">7</span>
       <span class="qa-question">Is racist language treated differently from other forms of misconduct?</span>
@@ -805,20 +916,17 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Yes, racist language is treated differently from other forms of misconduct.</p>
-
 <p>While alleged incidents of racism should be investigated in line with the general Behaviour Policy <cite>[5.7]</cite>, the document outlines specific and potentially more severe disciplinary actions for racist incidents. These include an official warning from the Headteacher, exclusion from certain areas of school premises and life, temporary exclusion from the school for a fixed term in serious or repeated cases, and permanent exclusion for continued racist behaviour <cite>[5.7]</cite>. The school also notes that the racist element must be explicitly recognised and dealt with <cite>[5.5]</cite>, and it is important that the victim of the racist incident is satisfied with the outcome of any disciplinary measures taken <cite>[5.7]</cite>. Furthermore, victims of racist incidents have the legal right to report it as a crime to the police <cite>[5.7]</cite>.</p>
-
 <p>In contrast, the general behaviour intervention process for minor and major incidents outlines consequences such as natural consequences, informing families, and a 1-day at home consequence after 5 minor or 3 major incidents <cite>[4.9]</cite>. While &quot;inappropriate verbal language&quot; is listed as an example of a minor behaviour <cite>[4.9]</cite>, racist language is addressed with a distinct set of potential disciplinary actions and considerations.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 21.3s</span><span>💰 $0.0023</span>
+        
+        
+        <span>⏱ 21.3s</span>
+        <span>💰 $0.0023</span>
       </div>
     </div>
-  </div>
-
-  <h2>Standard Questions — Family Manual 2024–25</h2>
-  <p class="section-intro">Practical questions parents might ask about daily school life. <span class="unscored-note">These questions do not have ground truth labels — no automatic score is shown.</span></p>
-
-  <div class="qa-card">
+  </div><h2>Standard Questions — Family Manual 2024–25</h2><p class="section-intro">Practical questions parents might ask about daily school life. <span class="unscored-note">No ground truth labels — not automatically scored.</span></p><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">1</span>
       <span class="qa-question">What time does the Early Bird programme start?</span>
@@ -826,13 +934,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>The Early-Bird service is available from 8:00 am <cite>[2.6]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 3.2s</span><span>💰 $0.0007</span>
+        
+        
+        <span>⏱ 3.2s</span>
+        <span>💰 $0.0007</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">2</span>
       <span class="qa-question">What is the process for authorising a new person to collect my child from school?</span>
@@ -840,13 +950,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>To authorise a new person to collect your child from school, you must complete the “Tracking” section in Phidias <cite>[2.7]</cite>. The specific steps for this process are explained in the &quot;How to Authorise Student Pick-Up in Phidias&quot; resource <cite>[2.7]</cite>. Inquiries about new or exceptional authorized persons to collect children can be directed to María Luisa or Madhu, the Secretaries <cite>[1.3]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 8.0s</span><span>💰 $0.0008</span>
+        
+        
+        <span>⏱ 8.0s</span>
+        <span>💰 $0.0008</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">3</span>
       <span class="qa-question">Who is allowed to collect my child from school if they fall ill and I cannot be reached?</span>
@@ -854,20 +966,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>If the family cannot be reached when a student falls ill at school, the school will contact the emergency person listed on the student&#x27;s file <cite>[9.1]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>⏱ 12.2s</span><span>💰 $0.0009</span>
+        
+        
+        <span>⏱ 12.2s</span>
+        <span>💰 $0.0009</span>
       </div>
     </div>
-  </div>
-
-  <h2>Standard Questions — Spanning Multiple Documents</h2>
-  <p class="section-intro">
-    Everyday questions that may touch more than one policy document.
-    The system automatically decides which documents to consult.
-    <span class="unscored-note">No ground truth labels — shown for qualitative review.</span>
-  </p>
-
-  <div class="qa-card">
+  </div><h2>Standard Questions — Spanning Multiple Documents</h2><p class="section-intro">Everyday questions touching more than one document. <span class="unscored-note">No ground truth — shown for review.</span></p><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">M1</span>
       <span class="qa-question">Can my son bring a football to the school and play during breaks?</span>
@@ -875,14 +982,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Yes, your son can bring a football to school <cite>[en_family_manual_24_25:19]</cite>. Balls should only be used in outdoor spaces, such as the playground <cite>[en_family_manual_24_25:19]</cite>. If your son uses the bus, the ball must be kept in a bag and not loose <cite>[en_family_manual_24_25:19]</cite>. The school is not responsible for lost balls <cite>[en_family_manual_24_25:19]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Family Manual 2024–25</span><span class="doc-pill">Code of Conduct</span></span>
-        <span>⏱ 13.7s</span><span>💰 $0.0029</span>
+        
+        <span>Documents: <span class="doc-pill">Family Manual 2024–25</span><span class="doc-pill">Code of Conduct</span></span>
+        <span>⏱ 13.7s</span>
+        <span>💰 $0.0029</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">M2</span>
       <span class="qa-question">What are the rules about taking photos of students during school trips?</span>
@@ -890,18 +998,17 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Parents or volunteers assisting on school trips or events must not use mobiles to take photos of pupils, their work, or any other potentially identifying information <cite>[en_policy2_technology:general-policy-for-mobil]</cite>.</p>
-
 <p>While families will receive photos of the experience daily when children are on overnight outings <cite>[en_policy4_trips_and_outings:10]</cite>, the specific rules governing staff taking photos of students during school trips are not explicitly detailed. Staff are generally allowed to use registered personal devices to take pictures to keep a record of students&#x27; learning progress during contact hours <cite>[en_policy2_technology:staff-mobile-phone-use]</cite>, and a school phone is always provided for outings <cite>[en_policy2_technology:staff-mobile-phone-use]</cite>.</p>
-
 <p>There are no specific rules provided regarding students taking photos of other students during school trips, although students from Year 9 upwards on trips abroad are allowed to use their own mobile to keep in touch with staff and parents <cite>[en_policy4_trips_and_outings:10]</cite>. The school&#x27;s privacy and data protection policy governs student data management, including consent forms for outings <cite>[en_policy4_trips_and_outings:13]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Trips &amp; Outings Policy</span></span>
-        <span>⏱ 23.8s</span><span>💰 $0.0011</span>
+        
+        <span>Documents: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Trips &amp; Outings Policy</span></span>
+        <span>⏱ 23.8s</span>
+        <span>💰 $0.0011</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">M3</span>
       <span class="qa-question">What should happen if a student is injured during a school trip?</span>
@@ -909,7 +1016,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>If a student is injured during a school trip, the following procedures should be followed:</p>
-
 <p><strong>General Preparedness:</strong></p>
 <ul>
 <li>  At least one staff member trained in first aid must accompany the group <cite>[7]</cite>.</li>
@@ -917,13 +1023,11 @@
 <li>  Staff will have an updated list of all allergies and specific conditions, as well as information on medication needed <cite>[7]</cite>.</li>
 <li>  Staff will have a list of emergency contacts for each student <cite>[7]</cite>.</li>
 </ul>
-
 <p><strong>Minor Injuries:</strong></p>
 <ul>
 <li>  First aid will be administered by the staff member trained in first aid <cite>[8]</cite>.</li>
 <li>  Families will be notified about the incident at the end of the outing, unless further medical attention is required <cite>[8]</cite>.</li>
 </ul>
-
 <p><strong>Serious Injuries or Medical Emergencies:</strong></p>
 <ul>
 <li>  Staff will immediately call emergency services (112) and follow the instructions provided by the professionals <cite>[8]</cite>.</li>
@@ -931,14 +1035,15 @@
 <li>  A member of the school staff will accompany the child to the hospital if necessary and remain with the child until the parent/guardian arrives <cite>[8]</cite>.</li>
 <li>  A full report of the incident will be submitted to the school administration <cite>[8]</cite>.</li>
 </ul></div>
+      
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
-        <span>⏱ 11.5s</span><span>💰 $0.0020</span>
+        
+        <span>Documents: <span class="doc-pill">Trips &amp; Outings Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
+        <span>⏱ 11.5s</span>
+        <span>💰 $0.0020</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">M4</span>
       <span class="qa-question">Are students allowed to use mobile phones during PE lessons?</span>
@@ -946,14 +1051,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>Mobile phone use is restricted to outside-school-hours, and phones are collected every day by 09:00 am <cite>[en_policy2_technology:use-policy-and-exception]</cite>. Therefore, students are not allowed to use mobile phones during PE lessons, as these occur during school hours.</p></div>
+      
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Trips &amp; Outings Policy</span></span>
-        <span>⏱ 11.5s</span><span>💰 $0.0009</span>
+        
+        <span>Documents: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Trips &amp; Outings Policy</span></span>
+        <span>⏱ 11.5s</span>
+        <span>💰 $0.0009</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">M5</span>
       <span class="qa-question">What is the correct procedure when a student discloses abuse to a teacher?</span>
@@ -961,7 +1067,6 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>When a student discloses abuse to a member of staff or volunteer, the following procedure should be followed:</p>
-
 <p>1.  The staff member must inform the pupil that they cannot keep secrets and must pass the information on, exercising professional judgment on the timing of this disclosure <cite>[1.13]</cite>.</p>
 <p>2.  During the conversation, the staff member should allow the pupil to speak freely, remain calm, and offer reassuring words such as &quot;I&#x27;m so sorry this has happened,&quot; &quot;I want to help,&quot; &quot;This isn&#x27;t your fault,&quot; or &quot;You are doing the right thing in talking to me&quot; <cite>[1.13]</cite>.</p>
 <p>3.  The staff member should not be afraid of silences and must under no circumstances ask investigative questions, though clarifying questions (e.g., &quot;when did this happen,&quot; &quot;where did this happen&quot;) are reasonable to support a meaningful referral <cite>[1.13]</cite>.</p>
@@ -970,14 +1075,15 @@
 <p>6.  The staff member must report verbally to the Designated Safeguarding Lead (DSL) <cite>[1.13]</cite>.</p>
 <p>7.  The staff member should seek support if they feel distressed or need to debrief <cite>[1.13]</cite>.</p>
 <p>8.  The school will normally seek to discuss any concerns with parents, with the DSL making contact. However, if the school believes that notifying parents could increase the risk to the child or exacerbate the problem, advice will be sought first from Children&#x27;s Social Care <cite>[1.13]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
-        <span>⏱ 18.8s</span><span>💰 $0.0027</span>
+        
+        <span>Documents: <span class="doc-pill">Child Protection Policy</span><span class="doc-pill">Health &amp; Safety Policy</span></span>
+        <span>⏱ 18.8s</span>
+        <span>💰 $0.0027</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">M6</span>
       <span class="qa-question">What should happen after a fire drill and who is responsible?</span>
@@ -985,14 +1091,15 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>The provided sections do not answer this question.</p></div>
+      
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Health &amp; Safety Policy</span><span class="doc-pill">Child Protection Policy</span></span>
-        <span>⏱ 14.8s</span><span>💰 $0.0019</span>
+        
+        <span>Documents: <span class="doc-pill">Health &amp; Safety Policy</span><span class="doc-pill">Child Protection Policy</span></span>
+        <span>⏱ 14.8s</span>
+        <span>💰 $0.0019</span>
       </div>
     </div>
-  </div>
-
-  <div class="qa-card">
+  </div><div class="qa-card">
     <div class="qa-header">
       <span class="qa-qid">M7</span>
       <span class="qa-question">What is the school&#x27;s position on students posting about school on social media?</span>
@@ -1000,20 +1107,795 @@
     </div>
     <div class="qa-body">
       <div class="qa-answer"><p>The school restricts access to social media sites through its protection systems on school laptops and students&#x27; laptops enrolled under the Imagine domain <cite>[en_policy2_technology:9.p]</cite>. Students are expected to use mobile devices and technology responsibly and professionally, ensuring they do not compromise the safety or well-being of students or staff, and respecting privacy <cite>[en_policy2_technology:3]</cite>. Misuse of devices or incidents involving inappropriate content may lead to disciplinary measures <cite>[en_policy2_technology:3, en_policy2_technology:sanctions-for-misuse]</cite>.</p></div>
+      
       <div class="qa-meta">
-        <span>Documents consulted: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Family Manual 2024–25</span></span>
-        <span>⏱ 22.4s</span><span>💰 $0.0016</span>
+        
+        <span>Documents: <span class="doc-pill">Technology Policy</span><span class="doc-pill">Family Manual 2024–25</span></span>
+        <span>⏱ 22.4s</span>
+        <span>💰 $0.0016</span>
       </div>
     </div>
-  </div>
-
-  <h2>What's next</h2>
+  </div><h2>What's next</h2>
   <div class="explainer">
-    <p><strong>Precision improvement:</strong> On complex child-protection questions the system sometimes retrieves more sections than needed (up to 11 instead of 3). This does not affect correctness but increases cost. The next focus is reducing over-retrieval without losing any required content.</p>
-    <p><strong>Multi-document routing:</strong> One hard routing failure (student attacks teacher — system consulted the wrong second document). A fix is planned.</p>
-    <p><strong>Missing ground truth:</strong> Several standard queries and one hard query (P3H6) have no expected-answer labels. Labelling these would improve confidence in the overall score.</p>
+    <p><strong>Precision improvement:</strong> On complex child-protection questions the system sometimes retrieves more sections than needed. This does not affect correctness but increases cost. Reducing over-retrieval without losing required content is the next priority.</p>
+    <p><strong>Multi-document routing:</strong> One hard routing failure (student attacks teacher — wrong second document consulted). A fix is planned.</p>
+    <p><strong>Missing ground truth:</strong> Several standard queries and one hard query (P3H6) have no expected-answer labels yet.</p>
+  </div>
   </div>
 
-</div><!-- .page -->
+  <!-- TAB 2: Heuristics -->
+  <div class="tab-pane" id="tab-heuristics">
+    <p class="h-intro">
+      Every significant decision, failure, and lesson learned during development is recorded here in chronological order.
+      This is the project's institutional memory — an honest account of what was tried, what worked, what didn't, and why.
+      Each entry records a real event: a bug discovered, an approach validated, or an assumption overturned.
+      <br><br>
+      Use the filters to focus on a particular type of entry, or scroll through the full timeline.
+    </p>
+
+    <div class="h-filters">
+      <button class="h-filter-btn active" onclick="filterH('ALL', this)">All (43)</button>
+      <button class="h-filter-btn" onclick="filterH('RETRIEVAL', this)">Retrieval</button>
+      <button class="h-filter-btn" onclick="filterH('ARCHITECTURE', this)">Architecture</button>
+      <button class="h-filter-btn" onclick="filterH('CONFIG_BUG', this)">Config</button>
+      <button class="h-filter-btn" onclick="filterH('ACCESS_BUG', this)">Access</button>
+      <button class="h-filter-btn" onclick="filterH('OTHER', this)">Other</button>
+    </div>
+
+    <div class="h-timeline" id="h-timeline">
+      
+<div class="h-card" data-cat="OTHER">
+  <div class="h-card-header">
+    <span class="h-date"># HEURISTICS.log</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">Other</span>
+    <span class="h-service"></span>
+  </div>
+  <div class="h-task"># HEURISTICS.log — append-only institutional memory for ImagineBot</div>
+  
+</div>
+
+<div class="h-card" data-cat="OTHER">
+  <div class="h-card-header">
+    <span class="h-date">Project start</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">Other</span>
+    <span class="h-service">cross-cutting</span>
+  </div>
+  <div class="h-task">Initial scaffold setup</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">cross-cutting</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Initial scaffold setup</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">The entire scaffold — this log is the prevention system</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — first entry, no dead ends yet</span></div>
+</div>
+
+<div class="h-card" data-cat="ACCESS_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21 00:00</span>
+    <span class="h-badge" style="background:#7048e822;color:#7048e8;border:1px solid #7048e844">Bug: Access</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Spike — retrieval mechanism</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Spike — retrieval mechanism</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">n/a (spike, no production code yet)</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Post-filtering on source_id after vector retrieval silently degrades recall — if top_k candidates are mostly from non-permitted sources, the caller receives fewer results than requested with no indication why.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Enforce source_id as a Firestore pre-filter (where clause) before find_nearest(), never post-filter. Contract test should assert response chunks contain only permitted source_ids.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Always pre-filter. See docs/spikes/retrieval.md.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">pgvector (adds second DB), Vertex AI Vector Search (ops overhead at this scale), post-filter access control (recall degradation), hybrid dense+sparse in Sprint 0 (premature).</span></div><div class="h-note">LESSON — ENTRY ABOVE WAS PREMATURE AND WRONG:
+The above entry was written before the corpus characteristics, query patterns, and scale
+were known. The decision (Firestore vector search) was made without consulting the user
+and without asking the required questions. The spike was written start-to-finish before
+gathering inputs, producing a structurally incorrect answer (vector search cannot handle
+temporal entity resolution). The entry was not edited (append-only rule), but its
+conclusions should be treated as void. See the correct entry below.</div>
+</div>
+
+<div class="h-card" data-cat="OTHER">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">Other</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Spike — retrieval mechanism (corrected after user input)</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Spike — retrieval mechanism (corrected after user input)</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">n/a (spike, no production code yet)</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Chunk-based retrieval (vector or BM25) cannot structurally represent &quot;newsletter X overrides policy Y for date Z&quot; — the LLM must infer the override from unstructured context, which is untestable and fragile for a citation-mandatory system. This root cause was only identifiable after understanding the corpus (school policies + newsletters with date-specific exceptions) and query pattern (multi-hop temporal reasoning).</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">In a spike, gather corpus characteristics, query patterns, scale, and ops constraints BEFORE researching or evaluating any option. The spike questions in the service CLAUDE.md are a checklist, not optional. Do not write the spike document until those questions are answered by the user.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Graphiti with Neo4j Aura Free. See docs/spikes/retrieval.md.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Pure vector search (structurally mismatched to temporal entity resolution); Pageindex (no access control, paid-only); R2R (collection permissioning unstable); Graphiti-as-MCP for access control (behavioral enforcement, not structural — deferred); post-filter on source_id (access control must be pre-filter).</span></div>
+</div>
+
+<div class="h-card" data-cat="CONFIG_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Bug: Config</span>
+    <span class="h-service">cross-cutting</span>
+  </div>
+  <div class="h-task">Add PreToolUse hook to enforce heuristics.log append-only rule</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">cross-cutting</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Add PreToolUse hook to enforce heuristics.log append-only rule</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Hook fired silently (no block, no error) when Edit was called on heuristics.log</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Two compounding issues: (1) Claude Code hooks run with /bin/sh, not bash — &lt;&lt;&lt; here-string syntax is bash-specific and fails silently in sh. (2) Tool input is NOT available as $TOOL_INPUT_* environment variables; it is passed as JSON via stdin to the hook process.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">When writing hooks, always parse stdin JSON with `python3 -c &quot;import sys,json; d=json.load(sys.stdin); ...&quot;` to access tool input. Never use &lt;&lt;&lt; or bash-specific syntax. Test hooks by capturing stdin to a file first before adding logic.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Rewrote all hooks to use python3 JSON stdin parsing. All pre-existing hooks using &lt;&lt;&lt; were also broken and were fixed in the same pass.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">$TOOL_INPUT_FILE_PATH env var (does not exist); &lt;&lt;&lt; here-string (sh incompatible); grep on env vars (nothing to grep).</span></div>
+</div>
+
+<div class="h-card" data-cat="RETRIEVAL_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21</span>
+    <span class="h-badge" style="background:#3b5bdb22;color:#3b5bdb;border:1px solid #3b5bdb44">Bug: Retrieval</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Local Graphiti validation — confirm retrieval against markdown corpus</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Local Graphiti validation — confirm retrieval against markdown corpus</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Query &quot;What time does school start and end each day?&quot; (group_id: family-manual)
+         returned staff names (Sandra, Louise, Jack) — no timetable facts in top 5.
+         Graph has 277 nodes but 0 facts mentioning school hours, start times, or pickup times.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Graphiti entity extraction (GPT-4o) does not produce RELATES_TO edges for
+            data presented in markdown table format. The timetable is a markdown table
+            (| Early Bird | 8h-9h | Morning | 9h-12h | Full Day | 9h-16:40h |).
+            Prose sections (staff bios, Phidias process, policies) were extracted correctly.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Post-ingestion entity coverage assertion — after ingesting a document,
+              assert that facts containing expected keywords exist (e.g. &quot;9h&quot; for timetable).
+              See TODO.md section O2. Would catch this without a query round-trip.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Will be fixed in the corpus pre-processing phase (DOCX2MD pipeline).
+          Tables must be converted to prose before Graphiti ingestion.
+          This is a pre-processing responsibility, not a Graphiti configuration issue.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — root cause identified immediately from graph inspection.</span></div>
+</div>
+
+<div class="h-card" data-cat="TRANSACTION_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21</span>
+    <span class="h-badge" style="background:#e0313122;color:#e03131;border:1px solid #e0313144">Bug: Transaction</span>
+    <span class="h-service">cross-cutting (any service using Firestore transactions)</span>
+  </div>
+  <div class="h-task">Any Firestore transaction involving multiple document reads and writes</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">cross-cutting (any service using Firestore transactions)</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Any Firestore transaction involving multiple document reads and writes</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">google.cloud.firestore_v1._helpers.ReadAfterWriteError — 500 on endpoints that use transactions</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Firestore requires ALL reads to occur BEFORE ANY writes within a transaction.
+            Logically structured code (write A, read B to get count, write B) violates this.
+            Firestore uses optimistic concurrency — reads establish a snapshot; writes are buffered
+            and committed atomically. Reading after writing breaks snapshot isolation.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Code review rule: every transaction function must have all get() calls before any
+              set()/update()/delete() calls. When fixing one transaction bug, grep for ALL
+              @firestore.transactional functions and audit each — the same pattern repeats.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Move all doc_ref.get() to the top of the transaction body before any
+          transaction.set() / transaction.update() / transaction.delete() calls.
+          Pattern: read → read → ... → write → write → ...</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">&quot;Fix&quot; committed and deployed but code not actually changed — always verify the
+           deployed revision reflects the intended diff before closing the bug.</span></div>
+</div>
+
+<div class="h-card" data-cat="ENV_PARITY">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Env Parity</span>
+    <span class="h-service">cross-cutting (any service with Firestore integration tests)</span>
+  </div>
+  <div class="h-task">Integration tests using the Firestore emulator</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">cross-cutting (any service with Firestore integration tests)</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Integration tests using the Firestore emulator</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Tests pass locally against the emulator; 500 errors appear in staging/production
+          for the same code paths (e.g., ReadAfterWriteError in transactions).</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">The Firestore emulator does not enforce all production constraints.
+            Read-after-write in transactions passes in the emulator but throws in production.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Run at least a smoke suite against real Firestore (staging project) in CI,
+              separate from the emulator suite. Document which constraints the emulator skips
+              and audit those code paths manually before first production deploy.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Fix the code to comply with production constraints; emulator pass is not sufficient
+          evidence of production correctness for transaction ordering.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — identified by comparing emulator vs. staging behaviour.</span></div>
+</div>
+
+<div class="h-card" data-cat="PATH_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21</span>
+    <span class="h-badge" style="background:#e0313122;color:#e03131;border:1px solid #e0313144">Bug: Path</span>
+    <span class="h-service">cross-cutting (any service with static files or templates)</span>
+  </div>
+  <div class="h-task">First Cloud Run deployment of a service that mounts static files / templates</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">cross-cutting (any service with static files or templates)</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">First Cloud Run deployment of a service that mounts static files / templates</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">RuntimeError: Directory &#x27;../../public&#x27; does not exist — container fails to start;
+          or static files 404 in Cloud Run but work locally.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Relative paths resolve from the working directory at runtime. In Docker/Cloud Run,
+            the working directory is /app and the layout is flat (main.py and assets are
+            siblings under /app). Locally, the working directory may be a nested path, making
+            ../../assets resolve to a completely different location.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Always anchor paths to Path(__file__).parent, never to relative strings.
+              Add a startup assertion that the resolved path exists — fail fast with a clear
+              message rather than serving 404s silently.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Path(__file__).parent / &quot;templates&quot; (or equivalent). Count directory levels by
+          inspecting the Dockerfile COPY targets, not by guessing from local layout.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Path(__file__).parent.parent.parent resolves differently than expected depending
+           on where main.py sits in the Docker image.</span></div>
+</div>
+
+<div class="h-card" data-cat="CONTRACT_VIOLATION">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21</span>
+    <span class="h-badge" style="background:#e0313122;color:#e03131;border:1px solid #e0313144">Contract Violation</span>
+    <span class="h-service">gateway (and any service boundary)</span>
+  </div>
+  <div class="h-task">Connecting a client (channel_web or external) to a service endpoint for the first time</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">gateway (and any service boundary)</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Connecting a client (channel_web or external) to a service endpoint for the first time</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Silent failures or data not displaying — all 200s, but wrong data. OR server 422
+          Unprocessable Entity on a POST/PUT. OR &quot;[object Object]&quot; / None in response.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Field name mismatch between caller and callee — e.g., caller sends {text: &quot;...&quot;}
+            but endpoint expects {body: &quot;...&quot;}; or response returns {items: [...]} but caller
+            iterates the root object as if it were an array.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Contract tests on every request and response shape at every service boundary,
+              written before wiring up the client. See /contract-test skill.
+              These are independent of business logic — they assert exact field names only.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Read the actual Pydantic model or OpenAPI schema before writing client code.
+          When debugging silent data failures, log the raw response before parsing.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Fixing the rendering/display logic when the actual bug is the field name —
+           check the wire format first (curl or devtools network tab) before touching
+           display code.</span></div>
+</div>
+
+<div class="h-card" data-cat="CONFIG_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21 21:30</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Bug: Config</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Phase 1.2 — deploy knowledge service to Cloud Run</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Phase 1.2 — deploy knowledge service to Cloud Run</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">gcloud run deploy failed with &quot;Cannot update secret at [/secrets/NEO4J_URI] because a different secret is already mounted in the same directory.&quot;</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Cloud Run treats the parent directory of each volume-mounted secret path as a volume mount point. A volume can hold only one secret. Mounting three secrets under the same /secrets/ parent (e.g. /secrets/OPENAI_API_KEY, /secrets/NEO4J_URI) creates three volumes all trying to mount at /secrets/ — which Cloud Run rejects.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">A deploy-time validation rule or a note in the service CLAUDE.md. The correct pattern (one unique parent dir per secret) is not obvious from the gcloud docs.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Give each secret its own unique parent directory:
+  /secrets/openai/OPENAI_API_KEY=OPENAI_API_KEY:latest
+  /secrets/neo4j_uri/NEO4J_URI=NEO4J_URI:latest
+  /secrets/neo4j_pass/NEO4J_PASSWORD=NEO4J_PASSWORD:latest
+  Python reads Path(&quot;/secrets/openai/OPENAI_API_KEY&quot;).read_text().strip() etc.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Tried --update-secrets with comma-separated paths sharing /secrets/ parent — rejected. Tried a single flat path per secret at /secrets/NAME — same conflict. Volume mounts with a shared parent are not supported.</span></div>
+</div>
+
+<div class="h-card" data-cat="CONTRACT_VIOLATION">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21 21:35</span>
+    <span class="h-badge" style="background:#e0313122;color:#e03131;border:1px solid #e0313144">Contract Violation</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Phase 1.2 — store OPENAI_API_KEY in Secret Manager</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Phase 1.2 — store OPENAI_API_KEY in Secret Manager</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">POST /search returned 401 from OpenAI: &quot;Incorrect API key provided: sk-proj-...oiRM&quot; — key truncated at 86 chars instead of 164.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">The credentials file stores the OpenAI key split across two lines (a continuation-line format parsed by validate.py&#x27;s _load_creds_file). The store command used `grep OPENAI_API_KEY credentials | cut -d= -f2-` which returns only the grep-matched line — the continuation line on the next row is silently dropped.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Always use the project&#x27;s own credential parser (_load_creds_file in validate.py) when reading from the credentials file. Never use grep/cut to extract multi-line values.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Replaced the secret version using a Python script that replicates _load_creds_file&#x27;s continuation-line logic, piped to `gcloud secrets versions add`.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Noticed the truncation only after the first live /search call returned a 401. The secret stored successfully with no error — Secret Manager has no notion of &quot;valid API key&quot;.</span></div>
+</div>
+
+<div class="h-card" data-cat="ENV_PARITY">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21 21:40</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Env Parity</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Phase 1.2 — acceptance test of deployed knowledge service</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Phase 1.2 — acceptance test of deployed knowledge service</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">gcloud run services proxy started successfully but every curl to localhost returned a 404 HTML page from Cloud Run infrastructure. Background proxy process exited with code 144 when run inside the Claude Code bash environment.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Two separate issues: (1) Cloud Run --ingress=internal blocks all traffic that does not originate from within the GCP project VPC — including gcloud proxy tunnels from a developer laptop. (2) Background processes started with &amp; inside Claude Code bash tool calls are killed when the tool call exits (no persistent shell), so `nohup` and subshell approaches also failed.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Note in deploy.sh and/or service CLAUDE.md: internal-ingress services cannot be tested from a local machine via proxy. Testing options: (a) temporarily set --ingress=all (service still requires auth token), (b) use Cloud Shell, (c) test end-to-end after the calling service is deployed.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Temporarily changed knowledge service ingress to `all` for acceptance testing. Service still requires valid identity token (--no-allow-unauthenticated). Restore to internal after channel_web E2E is validated. Noted in TODO.md (E0) and PROJECT_PLAN.md cleanup table.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">gcloud run services proxy — unreliable in environments without a persistent shell. nohup did not prevent background process termination. Port conflict errors when retrying on the same port.</span></div>
+</div>
+
+<div class="h-card" data-cat="CONFIG_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21 23:30</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Bug: Config</span>
+    <span class="h-service">channel_web</span>
+  </div>
+  <div class="h-task">Phase 1.3 — deploy channel_web to Cloud Run</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">channel_web</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Phase 1.3 — deploy channel_web to Cloud Run</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">CSS and JS silently not applied on deployed page — page rendered as unstyled HTML despite assets returning 200 locally</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Starlette&#x27;s url_for() generates absolute URLs using the internal request scheme (http://), not the public scheme (https://). Cloud Run terminates TLS at the load balancer; the container receives plain HTTP on port 8080. url_for() produced http://...run.app/static/style.css — blocked by browser as mixed content on the HTTPS page.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Never use url_for() for static file paths in templates. Use root-relative paths (/static/style.css) directly. url_for() is appropriate for dynamic routes (e.g. redirects in Python code), not for asset hrefs/srcs in HTML.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Replaced {{ url_for(&#x27;static&#x27;, path=&#x27;style.css&#x27;) }} with /static/style.css (and same for app.js and the logo img src) in index.html.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Initially assumed CSS was loading but JS was broken (subtitle appeared brownish). Root cause was mixed content blocking, not a code error.</span></div>
+</div>
+
+<div class="h-card" data-cat="CONFIG_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-21 23:00</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Bug: Config</span>
+    <span class="h-service">channel_web</span>
+  </div>
+  <div class="h-task">Phase 1.3 / 1.4 — channel_web calling knowledge service with service-account identity token</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">channel_web</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Phase 1.3 / 1.4 — channel_web calling knowledge service with service-account identity token</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">POST /chat returned 500 &quot;Service temporarily unavailable&quot; on every request. Logs: &quot;The requests library is not installed from please install the requests package to use the requests transport.&quot;</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">google.auth.transport.requests.Request() requires the `requests` package as a separate install. google-auth==2.35.0 does NOT declare requests as a hard dependency — it is optional. requirements.txt included google-auth but not requests, so the transport was unavailable at runtime.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">A startup smoke test that calls _get_identity_token() against a test audience and fails fast if the transport is broken. Alternatively: always pin `requests` alongside `google-auth` in requirements.txt — they are always needed together when using the requests transport.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Added requests==2.32.3 to src/channel_web/requirements.txt and redeployed.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — root cause was immediately visible in Cloud Run logs once auth was live and /chat was reachable.</span></div>
+</div>
+
+<div class="h-card" data-cat="UI_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-22 00:10</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Bug: UI</span>
+    <span class="h-service">channel_web</span>
+  </div>
+  <div class="h-task">Phase 1.4 — login overlay logo</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">channel_web</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Phase 1.4 — login overlay logo</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Logo appeared squashed (width reduced, height unchanged) on the login overlay.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">HTML img tag had both width=&quot;140&quot; and height=&quot;140&quot; set. The logo is not square, so forcing both dimensions distorts the aspect ratio.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Never set both width and height on an img tag unless the image is known to be square. Set only the constraining dimension (width or height) and let the browser scale the other naturally. The chatbot logo in the main UI (width=&quot;180&quot; only, no height) was correct — the login overlay copy introduced the regression.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Removed height=&quot;140&quot;, set width=&quot;180&quot; to match the main UI logo.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — immediately visible on first browser check.</span></div>
+</div>
+
+<div class="h-card" data-cat="RETRIEVAL_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-22 00:30</span>
+    <span class="h-badge" style="background:#3b5bdb22;color:#3b5bdb;border:1px solid #3b5bdb44">Bug: Retrieval</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Sprint 1 E2E — chatbot returns answers to user questions</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Sprint 1 E2E — chatbot returns answers to user questions</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Every question returns &quot;I don&#x27;t have that information in the school documents.&quot;
+         UI shows 5 facts from policy docs (child-protection, technology-policy, etc.)
+         regardless of question asked. Staff queries (&quot;What is Sandra&#x27;s role?&quot;) work.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Each document was ingested as a single large episode. GPT-4o entity
+            extraction on a long document fixates on the most prominent structured
+            content (staff directory — dense with named entities) and misses operational
+            content (school hours, uniform, attendance, contact info). Result: 149 total
+            edges across 6 documents, family-manual has only 28 edges, all staff names.
+            No facts about hours, holidays, or general school operations exist in the graph.
+            Retrieval is working correctly — the facts simply were not extracted.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Post-ingestion coverage assertion per document. After ingesting a document,
+              assert that facts containing topic-representative keywords exist
+              (e.g. assert any &quot;9h&quot; or &quot;hours&quot; fact exists after ingesting family-manual).
+              This would have caught zero operational facts immediately and blocked the
+              ingestion from being marked as complete.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Re-ingest with section-level chunking — split each markdown by ## headers before
+          calling add_episode so each section is its own episode with focused context.
+          Also: DOCX2MD pipeline with table-to-prose preprocessing (Sprint 3).</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — root cause identified by querying Neo4j directly for edge count per group_id.</span></div>
+</div>
+
+<div class="h-card" data-cat="OTHER">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-22 01:00</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">Other</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Graphiti API audit — verifying correct usage of graphiti-core==0.28.2</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Graphiti API audit — verifying correct usage of graphiti-core==0.28.2</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Chatbot returns &quot;I don&#x27;t have that information&quot; for policy questions despite facts
+         being indexed. Investigation raised: are we calling Graphiti wrong?</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Two separate issues found:
+  (1) WRONG ASSUMPTION IN DOCS: reference_time is NOT a parameter of graphiti.search().
+      It only exists on add_episode(). The spike doc and knowledge/CLAUDE.md both claimed
+      the knowledge service must inject reference_time=now() into every search call.
+      That API does not exist. Temporal filtering in search requires SearchFilters with
+      DateFilter objects passed via the search_filter parameter — not reference_time.
+      Current search() calls without temporal filters are correct for this corpus
+      (all facts have the same valid_at=2024-09-01, so temporal filtering adds nothing yet).
+  (2) EXTRACTION ARCHITECTURE MISMATCH: Graphiti&#x27;s edge extraction requires BOTH a source
+      entity AND a target entity node. Facts like &quot;school starts at 9:00 AM&quot; may not be
+      extracted because &quot;school&quot; and &quot;9:00 AM&quot; don&#x27;t form a clear named-entity pair.
+      The LLM extracts what fits the entity-relationship model (person→role, org→policy)
+      and silently skips operational attribute facts. This is why family-manual produced
+      only staff name/role edges despite containing school hours, uniform, and contact info.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">(1) API contract test against graphiti.search() signature before writing docs.
+              (2) Post-ingestion coverage assertion (see earlier entry) would have caught
+              missing operational facts immediately.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">(1) Correct the spike doc and knowledge/CLAUDE.md — remove false reference_time claim.
+          (2) Use custom_extraction_instructions in add_episode() to guide the LLM toward
+          extracting implicit-entity facts. Example: &quot;Extract temporal and operational
+          facts even when they involve abstract entities (e.g. &#x27;School Day&#x27;, &#x27;Drop-off Time&#x27;).
+          Do not skip facts that lack prominent named entities.&quot;
+          (3) Table-to-prose + section-level chunking (planned) remains necessary — this
+          finding is additive, not a replacement.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — audit of installed graphiti-core source + GitHub repo gave clear answers.</span></div>
+</div>
+
+<div class="h-card" data-cat="RETRIEVAL_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-22</span>
+    <span class="h-badge" style="background:#3b5bdb22;color:#3b5bdb;border:1px solid #3b5bdb44">Bug: Retrieval</span>
+    <span class="h-service">ingestion</span>
+  </div>
+  <div class="h-task">table_to_prose — convert markdown tables to prose for Graphiti ingestion</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">ingestion</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">table_to_prose — convert markdown tables to prose for Graphiti ingestion</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Not a runtime bug — a design ambiguity caught at test-writing time.
+         Two table shapes look identical in markdown but mean opposite things:
+         (A) | Monday | Morning | Maths |     ← Monday is a new record
+             |        | Afternoon | PE |      ← empty Day = &quot;same as Monday&quot; (inherit)
+         (B) | Monday | 101 |           |     ← Monday is a new record, Teacher absent
+             | Tuesday |    | Smith |   |     ← Tuesday is a new record, Room absent (NOT inherit)
+         In both cases the empty cell is &quot;| |&quot; or &quot;|  |&quot;. Syntactically identical.
+         Without an explicit rule, either &quot;always inherit&quot; or &quot;never inherit&quot; silently
+         corrupts one of the two cases. &quot;Always inherit&quot; assigns Room 101 to Tuesday
+         (wrong); &quot;never inherit&quot; drops Monday from the Afternoon/PE row (wrong).</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Markdown table syntax has no representation for &quot;merged cell&quot; vs &quot;absent value&quot;.
+            Both are rendered as empty cells. The distinction is semantic, not syntactic.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">The test suite covers both cases explicitly — tests would catch a regression
+              if the inheritance rule is changed. The rule itself must be documented in the
+              module docstring and CLAUDE.md so future developers don&#x27;t re-litigate it.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Inheritance heuristic: inherit empty cells ONLY when the first column in the
+          current row is also empty. An empty first column signals a &quot;continuation&quot; row
+          (the timetable merged-cell pattern). A non-empty first column signals a new
+          record — empty subsequent cells are absent, not inherited.
+          Implemented in src/ingestion/table_to_prose.py. 19 tests, all passing.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">&quot;Always inherit&quot; — assigns Room 101 to Tuesday incorrectly (test catches it).
+           &quot;Never inherit&quot; — drops the Day value from continuation rows (test catches it).
+           &quot;Inherit only column 0&quot; — not quite right; continuation rows need ALL columns
+           inherited, not just the anchor column.</span></div>
+</div>
+
+<div class="h-card" data-cat="OTHER">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-23</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">Other</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Architecture decision — retrieval mechanism for knowledge service</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Architecture decision — retrieval mechanism for knowledge service</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Not a bug — a strategic decision recorded for future reference.
+         Graphiti + Neo4j was the chosen retrieval architecture after the Sprint 1 spike.
+         Before Sprint 2 implementation began, the approach was re-evaluated and replaced.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">The corpus (~100K tokens across 7 documents) is small enough to fit in a single
+            Vertex AI context cache. Full-context retrieval over the whole corpus is strictly
+            superior to RAG at this scale: no chunking errors, no missed cross-document
+            relationships, no embedding drift, no graph extraction failures (as observed
+            in Sprint 1 with Graphiti fixating on staff names instead of operational facts).
+            RAG adds complexity (chunking, embedding, graph, retrieval tuning) without
+            providing any benefit when the corpus fits in one cache.
+            At 500 queries/day max and ~100K tokens, cost is acceptable.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">A scale-vs-complexity decision framework in CLAUDE.md would surface this
+              earlier: &quot;If corpus fits in context cache, prefer full-context over RAG.
+              Re-evaluate only when corpus exceeds cache limits or cost becomes prohibitive.&quot;</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Replace Graphiti + Neo4j + OpenAI with Vertex AI Context Caching + Gemini 2.5 Flash.
+          Cache ID persisted in Firestore (config/context_cache). API contract unchanged:
+          POST /search → { answer, facts: [{ fact, source_id, valid_at }] }.
+          Citations returned as structured JSON via response_schema. Ingestion pipeline
+          simplified to Steps 1–4 only (no chunking, no graph ingestion).</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Graphiti (chosen in Sprint 1 spike): works, but over-engineered for this corpus
+           size. Extraction quality problems observed (staff-name fixation, missing
+           operational facts) would require significant prompt tuning that full-context
+           retrieval avoids entirely.
+           Pageindex (open-source): evaluated and rejected. The open-source version supports
+           single-document discovery only — cross-document retrieval requires the commercial
+           tier. This makes it unsuitable for a multi-document corpus where queries must
+           span all sources. Not a workaround-able limitation; it is a product boundary.</span></div>
+</div>
+
+<div class="h-card" data-cat="RETRIEVAL_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-25 10:15</span>
+    <span class="h-badge" style="background:#3b5bdb22;color:#3b5bdb;border:1px solid #3b5bdb44">Bug: Retrieval</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Make LLM answer in the same language as the question was asked.</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Make LLM answer in the same language as the question was asked.</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Spanish question received English answer even after adding &quot;answer in the same language&quot;
+         to the system prompt and recreating the Vertex AI context cache.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Vertex AI&#x27;s constrained JSON decoding mode (response_mime_type=&quot;application/json&quot;
+            + response_schema) overrides the language instruction in the system_instruction.
+            When generating tokens into a JSON structure, Gemini defaults to English for string
+            field values regardless of what the system prompt says. The same instruction in
+            free-text mode (no response_schema) works correctly — verified by testing both
+            modes locally against the live cache.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">A smoke test that POSTs a Spanish question and asserts the returned `answer`
+              field contains at least one Spanish word (e.g. matches
+              /\b(el|la|los|las|es|son|en|de|del|que|se|un|una)\b/i).
+              This would have caught the regression immediately after cache recreation and
+              before the question was put to the user.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Append the language instruction to the user query at request time:
+            query += &quot;\n\nIMPORTANT: Write your answer in the same language as the question above.&quot;
+          This instruction in the user turn is respected by the constrained decoder.
+          System prompt update (create_cache.py) retained for correctness but is insufficient alone.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Updating system_instruction in create_cache.py + recreating cache: the instruction
+           IS stored and IS followed in free-text mode, but is silently ignored by the
+           constrained JSON decoder. Constrained decoding is schema-guided, not semantics-guided.</span></div>
+</div>
+
+<div class="h-card" data-cat="CONFIG_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-03-25 10:30</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Bug: Config</span>
+    <span class="h-service">knowledge</span>
+  </div>
+  <div class="h-task">Deploy knowledge service after code change.</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">knowledge</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Deploy knowledge service after code change.</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">gcloud builds submit failed — Cloud Build API not enabled on project img-dev-490919.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Cloud Build was never enabled. Previous deploys used local Docker build + push +
+            gcloud run deploy. The CI/CD workflow templates in .github/workflows/ still have
+            placeholder values ([PROJECT_ID], [REGION]) and have never been wired up.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Nothing structural — CI/CD is in the external enforcement checklist (unchecked).
+              Add to CLAUDE.md: deploy path is local Docker, not gcloud builds submit.
+              Artifact Registry repo name is &quot;services&quot; (not &quot;imaginebot&quot;) — only one repo exists.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">docker build → docker tag europe-west1-docker.pkg.dev/img-dev-490919/services/&lt;svc&gt;:latest
+          → docker push → gcloud run deploy.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">gcloud builds submit: Cloud Build API not enabled; enabling adds delay and dependency
+           when local Docker already works.</span></div>
+</div>
+
+<div class="h-card" data-cat="ENV_PARITY">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-12</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Env Parity</span>
+    <span class="h-service">cross-cutting (local dev / poc)</span>
+  </div>
+  <div class="h-task">POC1 smoke test — verify parser imports work before running LLM build step</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">cross-cutting (local dev / poc)</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">POC1 smoke test — verify parser imports work before running LLM build step</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">`source .venv/bin/activate &amp;&amp; python -c &quot;import vertexai&quot;` → ModuleNotFoundError.
+         `.venv/bin/python -c &quot;import vertexai&quot;` → same. `python3 -c &quot;import vertexai&quot;` → works.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">google-cloud-aiplatform (and therefore vertexai) is installed at user level
+            (~/.local/lib/python3.12/site-packages) via a bare `pip install`, not into the
+            project&#x27;s .venv. The venv is isolated — it does not inherit user site-packages.
+            Bare `python3` picks up ~/.local; venv python does not.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Before writing run instructions for any script, run
+            `pip show &lt;package&gt; | grep Location`. If Location is ~/.local/..., the package
+            is user-level and venv python will not find it. Either install into the venv
+            or document that bare `python3` must be used. A startup assertion
+            (`python3 -c &quot;import vertexai&quot;`) in the POC README would surface this
+            immediately rather than mid-way through a smoke test.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Use bare `python3` (not `.venv/bin/python`) for all poc/ scripts.
+          Updated poc/README.md and SESSION.md next-session instructions accordingly.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">`source .venv/bin/activate &amp;&amp; python` — venv isolation excludes user site-packages.
+           `.venv/bin/python` — same isolation, same failure.</span></div>
+</div>
+
+<div class="h-card" data-cat="OTHER">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-12</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">Other</span>
+    <span class="h-service"></span>
+  </div>
+  <div class="h-task">2026-04-12 — ARCHIVE, NON-STANDARD FORMAT</div>
+  <div class="h-note">ARCHIVE_END</div>
+</div>
+
+<div class="h-card" data-cat="CONFIG_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-12</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Bug: Config</span>
+    <span class="h-service">cross-cutting</span>
+  </div>
+  <div class="h-task">Migrate heuristics.log and SESSION.md to .claude/; recreate settings.json hooks</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">cross-cutting</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Migrate heuristics.log and SESSION.md to .claude/; recreate settings.json hooks</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">settings.json was deleted (D in git status) — all hooks lost. Hooks referenced old
+         paths (heuristics.log, SESSION.md at repo root) which would have silently failed
+         after the file moves even if settings.json had been present.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">settings.json was not committed (or was deleted without recreation). Hook paths
+            were hardcoded to root-level filenames and not updated when files moved.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">After any file rename/move that hooks reference, grep settings.json for the
+              old path immediately. Treat hook path updates as part of the rename checklist,
+              not a follow-up task.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Recreated settings.json with all hook paths updated to .claude/HEURISTICS.log
+          and .claude/SESSION.md. Updated /wrap skill to instruct Bash-append only.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — caught by reviewing git status before closing session.</span></div>
+</div>
+
+<div class="h-card" data-cat="CONFIG_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-12</span>
+    <span class="h-badge" style="background:#f7670722;color:#f76707;border:1px solid #f7670744">Bug: Config</span>
+    <span class="h-service">poc</span>
+  </div>
+  <div class="h-task">poc1 build pipeline design</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">poc1 build pipeline design</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">pageindex.py is in poc/poc1_single_doc/build/ — covered by the
+         .gitignore rule `build/`. The file is completely invisible to git.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">The `build/` gitignore rule exists to exclude compiled artefacts.
+            It silently excludes any source directory named build/ as well.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Before placing source files in any directory, check .gitignore
+              for name collisions: `git check-ignore -v &lt;path&gt;` is the exact
+              command. Add this to the checklist whenever creating a new dir.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Rename poc/poc1_single_doc/build/ to a non-gitignored name
+          (e.g. indexer/). Update the sys.path.insert line in run_eval.py.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">n/a — caught at wrap time before any work was lost.</span></div>
+</div>
+
+<div class="h-card" data-cat="EVAL_DESIGN">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-13</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">EVAL_DESIGN</span>
+    <span class="h-service">poc</span>
+  </div>
+  <div class="h-task">poc1 iteration 2 — post-mortem analysis</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">poc1 iteration 2 — post-mortem analysis</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">family_manual Q3 (&quot;fasting for religious reasons adjustments&quot;) scored as a
+         retrieval failure. The eval query was attributed to en_family_manual_24_25.md
+         but the correct answer (§4.4 &quot;Considerations for Fasting for Religious Reasons&quot;)
+         lives in en_policy3_health_safety_reporting.md. The retriever correctly returned
+         &quot;The provided sections do not answer this question.&quot;</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Query written without verifying which document actually contains the answer.
+            The family manual tree has no fasting section — §7 Nutrition covers general
+            eating guidance only.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Before finalising a query JSON file, grep the target document for the
+              key terms in the expected answer. If grep returns nothing, the query
+              belongs to a different document or the answer doesn&#x27;t exist.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Remove or reassign family_manual Q3. Either move it to policy3 queries
+          (fasting rules are there) or replace it with a cross-section query that
+          actually spans content within the family manual.</span></div>
+</div>
+
+<div class="h-card" data-cat="BUILD_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-13</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">BUILD_BUG</span>
+    <span class="h-service">poc</span>
+  </div>
+  <div class="h-task">poc1 iter3 — split boundary detection</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">poc1 iter3 — split boundary detection</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">_split_text_by_starts returned [] despite LLM correctly identifying section
+         boundaries. &quot;split FAILED (boundary detection: got 0 slices for N sections)&quot;</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Two independent LLM copy-paste failure modes for &quot;start&quot; strings:
+         1. Whitespace normalisation: source has &#x27;1.  **text&#x27; (two spaces), LLM
+            returns &#x27;1. **text&#x27; (one space). str.find() is exact-byte — no match.
+         2. Markdown stripping: source has &#x27;**c. Procedures**&#x27;, LLM returns
+            &#x27;c. Procedures&#x27; (bold markers dropped). Still no match after whitespace fix.
+         Both occur even at temperature=0 and with explicit &quot;copy verbatim&quot; instructions.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Any verbatim-text boundary matching against LLM output must normalise
+              both needle and haystack: strip inline markdown markers (*_`#) AND
+              collapse whitespace runs before str.find(). _norm_map() in pageindex.py
+              is the reference implementation.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Updated _norm_map to strip _MARKDOWN_INLINE chars in addition to collapsing
+          whitespace; updated _find_norm needle path identically. Both failure modes
+          resolved in one pass.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Whitespace-only fix caught case 1 but not case 2. Needed a second diagnostic
+           run (with failure detail logging) to surface the markdown stripping mode.</span></div>
+</div>
+
+<div class="h-card" data-cat="INFRA">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-13</span>
+    <span class="h-badge" style="background:#0ca67822;color:#0ca678;border:1px solid #0ca67844">Infrastructure</span>
+    <span class="h-service">poc</span>
+  </div>
+  <div class="h-task">poc1 iter3 — build pipeline</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">poc1 iter3 — build pipeline</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Build crashes mid-run on large documents (107KB) with ResourceExhausted 429.
+         Happens consistently at step 6 or 7.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">asyncio.gather fires all concurrent LLM calls simultaneously. No backoff.
+            Small documents complete before quota window resets; large ones exceed it.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Any asyncio.gather over LLM calls needs retry+backoff on 429.
+              Five attempts at 5s/10s/20s/40s covers typical Vertex quota reset windows.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Added try/except ResourceExhausted with exponential backoff in _llm_call.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Manual retries (running build again) failed repeatedly before backoff was added.</span></div>
+</div>
+
+<div class="h-card" data-cat="BUILD_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-13</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">BUILD_BUG</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">pageindex monolith → package refactor</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">pageindex monolith → package refactor</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">`python3 indexer/pageindex.py build ...` fails with ImportError after converting
+         to a package with relative imports. Previously ran as a script; now fails.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Relative imports (`from .config import X`) require the file to be loaded
+            as part of a package. Direct script execution sets __name__ = &quot;__main__&quot;
+            before package context is established.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">When adding relative imports to any Python file, update all call sites
+              to use `python3 -m package.module`, not `python3 path/to/module.py`.
+              Do this at the same time as the refactor, not after.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Updated all build commands to `python3 -m indexer.pageindex build ...`</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">None; caught on first test run.</span></div>
+</div>
+
+<div class="h-card" data-cat="BUILD_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-13</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">BUILD_BUG</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">pageindex monolith → package refactor</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">pageindex monolith → package refactor</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">`python3 -m indexer.pageindex` emits RuntimeWarning: &quot;module found in
+         sys.modules after import of package, but prior to execution as __main__&quot;</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">__init__.py imported from `pageindex` (re-exporting build_index). When
+            Python runs indexer.pageindex as __main__ it imports the package first,
+            putting pageindex in sys.modules before it runs as __main__.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Keep __init__.py shallow — never import from a submodule that may be
+              run as __main__. Re-export only from leaf modules (config, llm).
+              Consumers of the orchestrator import from indexer.pageindex directly.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Removed build_index/query_index from __init__.py.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">None; fixed in one pass.</span></div>
+</div>
+
+<div class="h-card" data-cat="CONCURRENCY_BUG">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-13</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">CONCURRENCY_BUG</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">pageindex hardening for multi-tenant use</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">pageindex hardening for multi-tenant use</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">(latent — not yet triggered) Concurrent build_index calls interleave log
+         entries in _BUILD_LOG and mix cost attribution in _BUILD_USAGE.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Module-level mutable globals used as per-call state. reset_build_log()
+            originally used `= []` (reassignment) — callers that imported the list
+            before reset held a stale binding to the old object.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Never reassign module-level mutable containers in reset functions.
+              Use .clear() + .update() to mutate in place. Next: ContextVar migration
+              so concurrent calls each get isolated state automatically.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Changed to _BUILD_LOG.clear() / _BUILD_USAGE.clear(). Full fix (ContextVar)
+          deferred to next session.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">None.</span></div>
+</div>
+
+<div class="h-card" data-cat="QUERY_QUALITY">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-14</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">QUERY_QUALITY</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">multi-doc eval — fire drill query (Q6)</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">multi-doc eval — fire drill query (Q6)</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">&quot;What should happen after a fire drill and who is responsible?&quot; answers
+         &quot;The provided sections do not answer this question.&quot; despite routing correctly
+         to en_policy3_health_safety_reporting (83 nodes, 58K char outline).
+         Per-doc selection picked 1.1 (scope) and 1.10 (policy review) instead of
+         the fire drill procedure nodes.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Not yet isolated. Two hypotheses: (A) the 83-node outline overloads the
+            selection LLM and it falls back to summary/header nodes; (B) this is a
+            pre-existing single-doc quality issue unrelated to multi-doc context.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Before diagnosing a multi-doc pipeline regression, first run the same
+              query single-doc against the affected index. If single-doc also fails,
+              the root cause is in the index, not the pipeline.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Not yet investigated.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">None yet — first eval run.</span></div>
+</div>
+
+<div class="h-card" data-cat="EVAL_OBSERVATION">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-14</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">EVAL_OBSERVATION</span>
+    <span class="h-service">poc/indexer/multi</span>
+  </div>
+  <div class="h-task">multi-doc routing eval (7 queries, 6 docs)</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer/multi</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">multi-doc routing eval (7 queries, 6 docs)</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Routing model selected 2 documents for all 7 queries, including 2 queries
+         that only require 1 document (child protection, health &amp; safety). No query
+         routed to a single document only.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">gemini-2.5-flash-lite is conservative — it interprets adjacent topics as
+            potentially overlapping. The routing prompt says &quot;select 2 only if question
+            clearly spans both&quot; but the model selects 2 by default.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Accepted cost (routing is $0.00023/query; extra doc adds one concurrent
+              LLM call). Monitor whether false-positive docs pollute synthesis answers.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Accepted as-is for this eval iteration.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">None.</span></div>
+</div>
+
+<div class="h-card" data-cat="QUERY_QUALITY">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">QUERY_QUALITY</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">Q6 fire drill miss — root cause complete</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Q6 fire drill miss — root cause complete</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">(see [2026-04-14] Q6 entry) Single-doc query fails identically — multi-doc
+         pipeline innocent. Selection chose 1.1 (scope) + 1.10 (biennial review)
+         instead of 1.1 + 1.5 (personnel check / evacuation sweep).</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Three compounding factors: (A) Document gap — policy has no post-drill
+            procedure section; &quot;what happens after a drill&quot; is genuinely absent.
+            (B) Semantic substitution — &quot;who is responsible&quot; matched &quot;Leadership Team
+            Responsibility&quot; in 1.10 topics (policy review), wrong referent entirely.
+            (C) 83-node flat outline forces coarse-grained (which section?) and
+            fine-grained (which subsection?) reasoning in a single LLM call; model
+            degrades under this load and makes plausible-but-wrong sub-selections.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">For &quot;who is responsible&quot; queries, check that the matched node&#x27;s content
+              is responsible for the query subject, not just any subject. Topic label
+              &quot;X Responsibility&quot; does not imply responsibility for the queried topic.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Fix directions in poc/RETRIEVAL_ANALYSIS.md. Priority: hierarchical
+          selection (walk tree top-down, O(10) nodes/call vs O(83) flat).</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">None.</span></div>
+</div>
+
+<div class="h-card" data-cat="ARCHITECTURE">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#7048e822;color:#7048e8;border:1px solid #7048e844">Architecture</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">node selection at scale</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">node selection at scale</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Selection quality degrades when outline &gt; ~20 nodes because the model must
+         simultaneously resolve coarse routing (which section?) and fine discrimination
+         (which subsection?) in one call.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Flat outline presentation discards the tree structure the index already
+            encodes. O(83) siblings overwhelms working memory; late nodes are
+            under-weighted vs early nodes.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Cap any single selection call to O(10-15) siblings. Walk the tree
+              top-down: select level-1 sections → select children within winner.
+              Same two-stage pattern already validated in POC2 doc-level routing.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Hierarchical selection — design in poc/RETRIEVAL_ANALYSIS.md.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Hard node cap (truncate flat outline) — treats symptom, not cause;
+           may silently drop relevant nodes positioned late in the list.</span></div>
+</div>
+
+<div class="h-card" data-cat="QUERY_QUALITY">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">QUERY_QUALITY</span>
+    <span class="h-service">poc/multi</span>
+  </div>
+  <div class="h-task">MH1 — &quot;student physically attacks teacher&quot; routing failure</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/multi</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">MH1 — &quot;student physically attacks teacher&quot; routing failure</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Router selected policy1 (Child Protection) + policy5 (Code of Conduct)
+         instead of policy3 (H&amp;S) + policy5. policy3 §2.3.s5 contains the
+         &quot;Violence to staff — see Code of Conduct&quot; cross-reference that makes
+         policy3 a required source for this query.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">&quot;Harm to staff&quot; in routing context maps to safeguarding (policy1) not
+            health &amp; safety (policy3). policy3&#x27;s routing summary does not surface
+            its staff-violence cross-reference prominently enough to compete.
+            The semantic gravity of &quot;physical attack&quot; pulls toward child protection
+            framing before H&amp;S framing.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">When routing for violence/injury incidents, check whether any H&amp;S
+              policy contains a cross-reference to the behaviour policy — if so,
+              include it. Alternatively, Fix 3 (content-preview rerank) would
+              surface §2.3.s5&#x27;s redirect text directly.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Enrich policy3&#x27;s routing summary to mention &quot;staff violence cross-reference
+          to Code of Conduct&quot;. Document in poc/RETRIEVAL_ANALYSIS.md MH1 section.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">None.</span></div>
+</div>
+
+<div class="h-card" data-cat="QUERY_QUALITY">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#868e9622;color:#868e96;border:1px solid #868e9644">QUERY_QUALITY</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">hierarchical node selection (Fix 1) — results</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">hierarchical node selection (Fix 1) — results</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Q6 (fire drill) still fails to select 1.5 after Fix 1. P1H6 regressed from
+         exact (2 nodes) to noisy (7 nodes) post-hierarchical selection.
+ROOT_CAUSE (Q6): Fix 1 reduces outline size (83→17 nodes at discrimination stage) but
+         does not change topic vocabulary. &quot;Personnel check&quot; in 1.5 still doesn&#x27;t match
+         &quot;what happens after a drill&quot;. Root cause #3 (temporal semantics) is unchanged.
+ROOT_CAUSE (P1H6): 1.11.L* siblings (6 nodes) have near-identical topic content — all
+         sub-items of the same long policy section. Discrimination call can&#x27;t distinguish
+         which 1-2 answer the specific question; selects most of them.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Fix 1 addresses scale (breadth overload) but not vocabulary precision.
+         Dense-sibling discrimination needs either (a) more distinctive labels per node
+         (Fix 2 — temporal/phase-aware topic extraction), or (b) content-preview rerank
+         (Fix 3 — show first 200c of each candidate before committing).</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Decision needed: Fix 2 (rebuild, better labels) vs Fix 3 (no rebuild, extra call).
+         See poc/poc1_single_doc/TODO.md.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Fix 1 alone is insufficient for Q6.</span></div>
+</div>
+
+<div class="h-card" data-cat="ARCHITECTURE">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#7048e822;color:#7048e8;border:1px solid #7048e844">Architecture</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">hierarchical selection prompt design</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">hierarchical selection prompt design</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Using the same selection prompt for routing (stage 1) and discrimination (stage 2+)
+         conflates two different cognitive tasks.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Stage 1 is recall-oriented routing (which section?). Stage 2+ is precision-
+         oriented discrimination (which specific leaf?). A single prompt can&#x27;t optimise
+         for both simultaneously.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Use distinct prompt functions per stage. Stage 1 prompt: broad, tolerate
+         false positives, framing is &quot;route to sections&quot;. Stage 2+ prompt: narrow,
+         precision-oriented, explicitly provides parent section context and prior reasoning
+         so the model knows why the section was selected.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Implemented as make_route_section_prompt() and make_discriminate_prompt().</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">None.</span></div>
+</div>
+
+<div class="h-card" data-cat="ARCHITECTURE">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#7048e822;color:#7048e8;border:1px solid #7048e844">Architecture</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">two-stage vs walk-until-leaves</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">two-stage vs walk-until-leaves</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">&quot;Two-stage hierarchical selection&quot; plan breaks for documents with 3+ level trees.
+         Nodes like 1.11.L21 are at level 4; a two-stage walk stops at level 2 and never
+         exposes them to the selection call.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">The plan assumed a two-level tree. The index has split-generated synthetic nodes
+         at levels 3-4.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Implement &quot;walk until all selected nodes are leaves&quot; — recurse at each level
+         until no non-leaves remain. This generalises to arbitrary depth at O(depth) calls.
+         Two-stage is a special case of this for two-level trees.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">_hierarchical_select() implements the recursive loop. Confirmed working:
+         1.11.L21 (level 4) correctly selected in eval.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Fixed two-stage walk — breaks silently for deep trees.</span></div>
+</div>
+
+<div class="h-card" data-cat="ARCHITECTURE">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#7048e822;color:#7048e8;border:1px solid #7048e844">Architecture</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">discrimination prompt precision vs recall</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">discrimination prompt precision vs recall</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Anchor-on-one discrimination (pick single best, add only if strictly absent)
+         reduces noise (P1H: +14→+3) but drops recall on compound multi-section queries
+         (P1H5: 3/3→1/3 expected nodes). P1H6 (dense siblings) requires anchoring;
+         P1H5 (cross-section compound) requires inclusion. The two conflict.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">300-char topic phrase descriptions are lossy. No retrieval prompt can recover
+         information that was never indexed. Precision-oriented prompts amplify this loss
+         by excluding nodes whose labels don&#x27;t match the query vocabulary.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Prefer recall over precision at the discrimination stage. Stage 0 vocabulary
+         fixes (corpus-grounded glossary, retrieval framing shift) are the correct tool for
+         noise reduction — not discrimination tightening.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Reverted to recall-oriented framing: &quot;err inclusive; missing relevant content is
+         worse than one extra section.&quot;</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">fix2 (anchor-on-one + &quot;different facet&quot;), fix3 (same + tighter wording),
+         fix4 (&quot;different part of the question&quot;), fix5 (sub-question decomposition) —
+         all traded recall for precision in ways the lossy index can&#x27;t support.</span></div>
+</div>
+
+<div class="h-card" data-cat="ARCHITECTURE">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#7048e822;color:#7048e8;border:1px solid #7048e844">Architecture</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">P1H5 recall miss — §1.13 never selected</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">P1H5 recall miss — §1.13 never selected</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Query &quot;what should staff do; what signs to look for&quot; never retrieves §1.13
+         &quot;Responding to child abuse disclosures&quot; despite it being required for a full answer.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">Vocabulary gap: query says &quot;concerned about signs&quot;; index label says &quot;Responding
+         to disclosures&quot;. Student hasn&#x27;t disclosed anything in the scenario. No discrimination
+         instruction causes the model to infer &quot;disclosure procedure also needed&quot; from a
+         signs-only query. All five prompt variants failed.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Stage 0 fix path only: corpus-grounded glossary or retrieval framing shift.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">None at Stage 2. Accepted as known gap; Stage 0 items (TODO priority 3, 4) target it.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">All fix2–fix5 discrimination prompt variants failed to surface §1.13 for this query.</span></div>
+</div>
+
+<div class="h-card" data-cat="RETRIEVAL">
+  <div class="h-card-header">
+    <span class="h-date">2026-04-15</span>
+    <span class="h-badge" style="background:#3b5bdb22;color:#3b5bdb;border:1px solid #3b5bdb44">Retrieval</span>
+    <span class="h-service">poc/indexer</span>
+  </div>
+  <div class="h-task">Priority 3 — navigational framing shift</div>
+  <div class="h-field"><span class="h-field-label">Service</span><span class="h-field-val">poc/indexer</span></div><div class="h-field"><span class="h-field-label">Task</span><span class="h-field-val">Priority 3 — navigational framing shift</span></div><div class="h-field"><span class="h-field-label">What went wrong</span><span class="h-field-val">Navigational framing (&quot;which section would a reader turn to first?&quot;) produced
+         identical recall to the baseline but drove precision from F1=0.68 to F1=0.34 on
+         P1H. Average node count per query roughly tripled. P3H was unaffected.</span></div><div class="h-field"><span class="h-field-label">Root cause</span><span class="h-field-val">&quot;Reader navigating&quot; is a more permissive frame than &quot;section likely to contain
+         the answer&quot; — the model interprets navigation as &quot;anything useful to a thorough
+         reader&quot; rather than &quot;what is strictly required&quot;. Under recall-oriented prompting,
+         both framings include everything; navigational adds even more.</span></div><div class="h-field"><span class="h-field-label">How to prevent this</span><span class="h-field-val">Before implementing a prompt reframe, verify the problem it is meant to
+         solve actually exists in the current eval run — not just in a previous variant.
+         P1H5 §1.13 was already selected by the recall-oriented baseline; the problem
+         only manifested in fix2–fix5 (precision-tightened) prompts, which were reverted
+         last session. Priority 3 was already solved by that revert.</span></div><div class="h-field"><span class="h-field-label">Solution</span><span class="h-field-val">Reverted navigational framing. Baseline recall-oriented prompts restored.</span></div><div class="h-field"><span class="h-field-label">Dead ends (what didn&#x27;t work)</span><span class="h-field-val">Navigational framing (&quot;A reader needs to answer this question — which sections
+         would they turn to first?&quot;) — hurts precision without improving recall.
+         &quot;A reader working through this section — which subsections would they read?&quot; —
+         same effect at the discriminate stage.</span></div>
+</div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function filterH(cat, btn) {
+  document.querySelectorAll('.h-filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('#h-timeline .h-card').forEach(card => {
+    if (cat === 'ALL' || card.dataset.cat === cat) {
+      card.classList.remove('hidden');
+    } else {
+      card.classList.add('hidden');
+    }
+  });
+}
+</script>
 </body>
 </html>
