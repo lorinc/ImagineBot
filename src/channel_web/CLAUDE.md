@@ -23,6 +23,7 @@ static/
   app.js                     Vanilla JS. State at top, init() at bottom.
   questions.json             { "en": { "categories": [...] }, "es": { "categories": [...] } }
   images/
+    logo-imagine-montessori-school.png
 deploy.sh                    Manual deploy to Cloud Run (img-dev). Run from repo root.
 ```
 

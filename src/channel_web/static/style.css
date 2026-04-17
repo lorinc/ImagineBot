@@ -79,6 +79,25 @@ button:focus-visible { outline: 2px solid var(--action-green); outline-offset: 2
   gap: 2rem;
 }
 
+/* ── School logo ───────────────────────────────────────────────────────────── */
+.school-logo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.school-logo img {
+  width: 180px;
+  height: auto;
+}
+
+.school-logo .subtitle {
+  margin: 0;
+  font-size: 0.875rem;
+  color: var(--muted-foreground);
+}
+
 /* ── Answers list ──────────────────────────────────────────────────────────── */
 #answers-list {
   display: none;
