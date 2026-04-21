@@ -17,6 +17,13 @@ detection, no reformulation, no clarifying-question mechanism, and no multi-hop 
   beyond prompt tokens. Directly fixes the vocabulary gap without blind world-model
   expansion. Requires re-running when the index changes, not when queries change.
 
+  Note: the glossary is built from the index topic labels, not the full corpus — the
+  output is small (tens to hundreds of entries), not proportional to document count.
+  It is a patch for *known, enumerable* vocabulary gaps; it cannot cover novel query
+  phrasings. PRF is strictly more general. Implement PRF first; only add the glossary
+  if PRF misses systematic, recurring patterns. Advantage of glossary over PRF:
+  deterministic and auditable — easy to show the user exactly why a term was mapped.
+
 - **Retrieval framing shift** — Change the select/discriminate prompt framing from
   implicit label-matching ("does this topic sound related?") to explicit navigational
   reasoning ("which section would a reader look in first to answer this question?").
@@ -34,6 +41,22 @@ detection, no reformulation, no clarifying-question mechanism, and no multi-hop 
   to the LLM: "Given this query and these available index labels, rewrite the query to
   strictly use the terminology found in the index." Keeps expansion grounded in actual
   corpus vocabulary rather than world-model assumptions.
+
+  UX risk: silent reformulation creates a frustrating loop — PRF rewrites the query,
+  gives a wrong answer, user asks again, PRF rewrites again. Two mitigations:
+
+  1. **Inline reformulation line** — Begin every answer with one short line showing
+     the interpreted query: "Searching for: evacuation procedure, post-drill personnel
+     check." Inline and unavoidable; gives the user a correction handle without
+     requiring them to read a sidebar or thinking trace.
+
+  2. **Repetition = negative feedback** — If the same (or near-identical) query appears
+     again within the same session, suppress PRF and run the literal query. The user
+     repeating themselves signals the reformulation did not help. One session-state
+     flag, no extra LLM call.
+
+  Together these break the loop: the user either sees the mismatch and corrects it, or
+  repeating the question automatically falls back to literal retrieval.
 
 - **Multi-hop detection** — When synthesis returns "see other policy / see separate
   section", there is no follow-up retrieval pass. A post-synthesis check for these phrases
