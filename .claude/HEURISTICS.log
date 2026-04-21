@@ -789,3 +789,76 @@ ROOT_CAUSE: Vocabulary gap: query says "concerned about signs"; index label says
 PREVENTED_BY: Stage 0 fix path only: corpus-grounded glossary or retrieval framing shift.
 SOLUTION: None at Stage 2. Accepted as known gap; Stage 0 items (TODO priority 3, 4) target it.
 DEAD_ENDS: All fix2–fix5 discrimination prompt variants failed to surface §1.13 for this query.
+
+[2026-04-15]
+CATEGORY: RETRIEVAL
+SERVICE: poc/indexer
+TASK: Priority 3 — navigational framing shift
+SYMPTOM: Navigational framing ("which section would a reader turn to first?") produced
+         identical recall to the baseline but drove precision from F1=0.68 to F1=0.34 on
+         P1H. Average node count per query roughly tripled. P3H was unaffected.
+ROOT_CAUSE: "Reader navigating" is a more permissive frame than "section likely to contain
+         the answer" — the model interprets navigation as "anything useful to a thorough
+         reader" rather than "what is strictly required". Under recall-oriented prompting,
+         both framings include everything; navigational adds even more.
+PREVENTED_BY: Before implementing a prompt reframe, verify the problem it is meant to
+         solve actually exists in the current eval run — not just in a previous variant.
+         P1H5 §1.13 was already selected by the recall-oriented baseline; the problem
+         only manifested in fix2–fix5 (precision-tightened) prompts, which were reverted
+         last session. Priority 3 was already solved by that revert.
+SOLUTION: Reverted navigational framing. Baseline recall-oriented prompts restored.
+DEAD_ENDS: Navigational framing ("A reader needs to answer this question — which sections
+         would they turn to first?") — hurts precision without improving recall.
+         "A reader working through this section — which subsections would they read?" —
+         same effect at the discriminate stage.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-21]
+CATEGORY: ENVIRONMENT
+SERVICE: poc/openkb_eval
+TASK: OpenKB eval harness setup
+SYMPTOM: `pip install` fails with PEP 668 error when using system python3 (/usr/bin/python3)
+ROOT_CAUSE: System Python is protected; project venv is at .venv/ and must be used explicitly.
+PREVENTED_BY: Always use `.venv/bin/python3` and `.venv/bin/pip` for this project. Never `python3` bare.
+SOLUTION: `.venv/bin/pip install -e temp/OpenKB/` succeeded; `.venv/bin/python3 -c "import openkb"` confirms install.
+
+[2026-04-21]
+CATEGORY: ENVIRONMENT
+SERVICE: poc/openkb_eval
+TASK: OpenKB eval harness setup
+SYMPTOM: GEMINI_API_KEY not present in environment; OpenKB eval cannot run
+ROOT_CAUSE: poc1 uses Vertex AI (ADC / GOOGLE_APPLICATION_CREDENTIALS). OpenKB uses the
+           Gemini direct API, which requires a separate GEMINI_API_KEY from Google AI Studio
+           (aistudio.google.com), not the GCP console.
+PREVENTED_BY: Check which auth path a new tool uses before assuming the existing GCP credentials cover it.
+SOLUTION: Key stored in poc/openkb_eval/credentials (gitignored). Harness loads it automatically.
+
+[2026-04-21]
+CATEGORY: ENVIRONMENT
+SERVICE: poc/openkb_eval
+TASK: OpenKB eval harness — token/cost tracking
+SYMPTOM: _usage_log remained empty (all zeros) despite litellm.success_callback being set.
+         Queries ran and returned answers; cost tracking showed $0.00 for every query.
+ROOT_CAUSE: OpenAI Agents SDK calls litellm.acompletion (async path), which routes through
+           litellm._async_success_callback (internal underscore-prefixed attribute).
+           litellm.success_callback only fires for synchronous litellm.completion calls.
+           First attempt used litellm.async_success_callback (no underscore) — this silently
+           creates a new dead attribute and does nothing.
+PREVENTED_BY: When token tracking shows zeros after the first query, check whether the LLM
+             calls are sync or async. If using Agents SDK or any async framework, set BOTH:
+               litellm.success_callback = [fn]
+               litellm._async_success_callback = [async_fn]
+             Test by asserting _usage_log is non-empty after a single dry-run query.
+SOLUTION: Added async def _async_capture_usage wrapper; set litellm._async_success_callback.
+
+[2026-04-21]
+CATEGORY: ENVIRONMENT
+SERVICE: poc/openkb_eval
+TASK: OpenKB eval harness — Gemini via Agents SDK
+SYMPTOM: UnsupportedParamsError from Gemini: "parallel_tool_calls is not supported"
+ROOT_CAUSE: OpenAI Agents SDK passes parallel_tool_calls=False to every LLM call.
+           Gemini rejects this parameter as unsupported.
+PREVENTED_BY: Set litellm.drop_params = True at module level before any LLM calls when
+             using any non-OpenAI model via litellm with the Agents SDK. Without this,
+             every agent tool call fails on Gemini.
+SOLUTION: litellm.drop_params = True added at the top of eval_harness.py.

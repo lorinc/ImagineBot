@@ -398,6 +398,54 @@ Known gap: module-level globals in observability.py — ContextVar migration pen
 - Hard eval suite committed: queries_policy1_hard.json, queries_policy3_hard.json + result snapshots.
 - Next: Priority 3 — retrieval framing shift (Stage 0, no rebuild).
 
+### POC3 — OpenKB comparison — COMPLETE 2026-04-21
+
+**Question:** Is OpenKB's wiki-compilation + agent approach a better retrieval architecture
+than poc1's PageIndex + hierarchical selection?
+
+**Files:** `poc/openkb_eval/eval_harness.py`, `poc/openkb_eval/run_eval.py`
+**Results:** `poc/openkb_eval/results/results_openkb_*.json`
+
+**Eval results (4 docs, same query batteries as poc1):**
+
+| Document      | OpenKB accuracy | avg latency | avg cost   | avg chars read |
+|---------------|-----------------|-------------|------------|----------------|
+| policy1_hard  | 5/6 PASS        | 4,342ms     | $0.00174   | 8,172          |
+| policy3_hard  | 2/6 PASS        | 6,982ms     | $0.00275   | 18,388         |
+| policy5       | no gold         | —           | —          | —              |
+| family_manual | no gold         | —           | —          | —              |
+
+poc1 node precision (different metric, not directly comparable): P1H 6/6, P3H 6/6.
+OpenKB policy3 2/6 is a clear signal of degradation on procedural content.
+
+**Rejection reasons:**
+
+1. **Lower accuracy on complex documents.** policy3 (health/safety reporting, procedural
+   content) scored 2/6. Procedural knowledge — sequences, conditions, reporting chains —
+   does not compress well into concept pages. The concept-building LLM drops steps.
+
+2. **Retrieval surface is lossy.** Concept pages are full rewrites by the LLM. Each time
+   a new document contributes to an existing concept, the page is rewritten from scratch
+   (confirmed from compiler.py `_CONCEPT_UPDATE_USER`: "Rewrite the full page... do not
+   just append"). Details from earlier documents can be silently dropped.
+   Quality ceiling = concept-building LLM's fidelity. poc1's ceiling = synthesis LLM's
+   capability over the original source text.
+
+3. **Cross-document merging hides provenance.** Once content from doc A and doc B is
+   merged into a concept page, there is no way to retrieve just doc A's version. The
+   sources frontmatter tracks which docs contributed, but the content is one blob.
+
+**Latency finding (carried back to poc1):**
+OpenKB is 2–6× faster despite running 3–7 sequential LLM calls vs poc1's ~3.
+Root cause: poc1 synthesis call receives ~15k chars of raw section text, which triggers
+Gemini 2.5 Flash's extended thinking budget. OpenKB's concept pages are pre-compressed;
+individual calls stay small and thinking-light.
+
+**Lessons carried into poc1 TODO (Stage 4 + Stage 5):**
+- Distilled section text: lossless per-section compression to reduce synthesis prompt size
+- Corpus context card: org-level grounding injected into every synthesis call
+- Topic lookup table + embedding cross-references: multi-doc infrastructure (deferred)
+
 ---
 
 ## Known gaps (to address in Sprint 2+)

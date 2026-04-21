@@ -93,6 +93,30 @@ already in use. No index rebuild. Adds one LLM call per query.
 
 ## Stage 4 — Synthesis
 
+- **Corpus context card** — One offline LLM job reads all documents and extracts factual
+  claims about the organization: name, type, location, grade levels, school year dates, key
+  roles, approximate staff/student count. Output is a ~150-word structured fact block stored
+  at the index root level (not per-document). At synthesis time, inject it as a prefix in
+  the system message — not the user message — so it gets prompt-cached and adds near-zero
+  cost per query.
+
+  Discipline: facts only, no summaries. "Imagine School is a K-12 institution in Budapest
+  with ~400 students and a September–June academic year" is useful grounding. "Imagine School
+  strives to create a safe learning environment" is noise that wastes tokens and teaches the
+  LLM nothing it doesn't already know.
+
+  Why it helps: when a policy says "the Designated Person", the synthesis LLM currently has
+  no idea whether that is a title, a role, or a name. With grounding context it interprets
+  retrieved text correctly and phrases the answer appropriately for the person asking.
+
+  Distinct from the corpus-grounded glossary (Stage 0): the glossary maps query vocabulary
+  to index labels to improve retrieval. The context card grounds the synthesis call to
+  improve answer quality. Both are one-time offline jobs that regenerate when the corpus
+  changes, but they serve different stages.
+
+  No index rebuild required — additive field at the index root. Regenerate whenever
+  documents change. One LLM call over the full corpus.
+
 - **Structured condition extraction** — Replace the current open-ended synthesis prompt
   with a three-step structure: (1) Core Rule — state the primary directive. (2) Exceptions
   and Conditions — explicitly list any "if", "unless", "except", "provided that" clauses
@@ -136,6 +160,80 @@ retrieval quality from synthesis quality. Extend it rather than adopting a heavy
 
 ---
 
+## Stage 5 — Build-time index enrichment
+
+These are offline, per-document jobs that run at index build time and produce additional
+fields/files stored alongside the existing index. They do not change the query-time
+architecture — they change what data the query path operates on. Each requires a rebuild
+to take effect; measure rebuild cost before committing.
+
+**Context:** Compared against OpenKB (wiki-style KB with concept pages) on the same corpus.
+OpenKB is ~6× faster on policy1 (4.3s vs 25s avg). The latency gap is not from a smarter
+index — OpenKB runs 3–7 sequential LLM calls vs poc1's ~3 calls. The gap comes from
+synthesis prompt size: poc1 sends ~15k chars of raw section text to the synthesis call,
+which triggers Gemini 2.5 Flash's extended thinking budget. Smaller input → less thinking →
+lower latency even with the same number of LLM calls.
+
+- **Distilled section text** — For each leaf node, run one LLM call at build time that
+  rewrites the raw section as a dense fact sheet: every rule, number, procedure, condition,
+  and exception is preserved; rhetorical framing, transition sentences, repetition, and
+  stylistic prose are stripped. Store as a new `distilled` field alongside the existing
+  raw text. At query time, send the distilled text to synthesis instead of the raw text.
+
+  This is deliberately different from OpenKB's concept pages:
+  - OpenKB concept pages merge content across multiple documents (cross-doc lossy
+    compression). Quality ceiling = concept-building LLM's fidelity.
+  - Distilled section text is per-section, single-document, lossless. The distillation
+    cannot drop information — it only changes form. Quality ceiling = synthesis LLM's
+    capability over the distilled text (same ceiling as current, smaller prompt).
+
+  Expected effect: synthesis prompt size drops ~40–60%, extended thinking budget shrinks
+  proportionally, latency approaches OpenKB's without introducing lossy retrieval.
+  Accuracy should be neutral-to-positive (same information, less noise for the LLM to
+  parse through).
+
+  Requires rebuild. One LLM call per leaf node. Invalidates no existing index structure —
+  purely additive field.
+
+- **Topic lookup table (inverted index)** — At build time, construct a flat mapping:
+  topic phrase → list of (doc_id, node_path) pairs that cover that topic. Stored as a
+  separate index file, not inside the node tree. At query time, use the inverted index for
+  initial topic lookup before or instead of tree traversal.
+
+  Primary value: multi-document queries. The current hierarchical tree walk is O(docs ×
+  depth) LLM calls for multi-doc; an inverted index is O(1) lookup before any LLM call.
+  For single-doc queries, benefit is marginal — the hierarchical selection already handles
+  it efficiently.
+
+  Hard part: topic normalization. "Parental consent", "guardian authorization for
+  treatment", and "medical permission slip" are the same concept expressed differently in
+  different documents. Resolution: embed each topic phrase at build time (no LLM needed —
+  any sentence embedding model) and cluster by cosine similarity. Queries hit the inverted
+  index via embedding nearest-neighbor lookup, not exact-string match.
+
+  Defer until multi-document eval is running and the routing stage (Stage 1) is stable.
+
+- **Embedding-based cross-document "See also" references** — At build time, embed each
+  node's topic phrases (or distilled text if available) and find cross-document nearest
+  neighbors above a similarity threshold. Emit these as `see_also` links in the index:
+  `(doc_id, node_path) → [(doc_id, node_path, similarity), ...]`.
+
+  At query time, when a node is selected in document A, the query agent optionally follows
+  `see_also` links to retrieve related nodes from document B — without running a full
+  cross-document scan on every query. This directly addresses the multi-hop failure mode
+  in Stage 4 (cross-reference chain) but resolves it at build time rather than through a
+  ReAct loop.
+
+  Embed only once per node at build time. At query time, following a `see_also` link is
+  a deterministic fetch — no LLM call to decide whether to follow it; use a confidence
+  threshold from the similarity score instead. This keeps latency bounded.
+
+  Do not use LLM pairwise comparison across all node pairs — that is O(n²) in nodes and
+  unaffordable at corpus scale. Embedding similarity is the right approach. Gate
+  implementation on the inverted index being in place first (shared embedding infrastructure).
+
+---
+
 ## Priority order — next implementation cycle
 
 Ordered by impact/cost ratio. Each is a prompt change or a single offline job unless noted.
@@ -143,9 +241,17 @@ Ordered by impact/cost ratio. Each is a prompt change or a single offline job un
 1. **Structured synthesis prompt** (Stage 4) — prompt change, fixes a known bug immediately
 2. **Two-stage selection prompt** (Stage 2) — prompt change, targets P1H5/P1H6
 3. **Retrieval framing shift** (Stage 0) — prompt wording change, no cost
-4. **Corpus-grounded glossary** (Stage 0) — one offline job, fixes vocabulary gap safely
-5. **Content-preview rerank** (Stage 3) — one extra LLM call, defer until 1–4 are measured
-6. **ReAct cross-reference loop** (Stage 4) — real engineering work, defer until synthesis is stable
+4. **Corpus context card** (Stage 4) — one offline job, additive index field, improves
+   answer quality on any query involving roles/titles/org-specific references; no rebuild
+5. **Corpus-grounded glossary** (Stage 0) — one offline job, fixes vocabulary gap safely
+6. **Content-preview rerank** (Stage 3) — one extra LLM call, defer until 1–5 are measured
+7. **Distilled section text** (Stage 5) — one LLM call per leaf at build time; directly
+   attacks synthesis latency; requires rebuild; implement after prompt changes are measured
+   so baseline is stable before introducing a new retrieval surface
+8. **ReAct cross-reference loop** (Stage 4) — superseded by Stage 5 cross-doc references
+   if embedding approach works; keep as fallback for in-document cross-refs
+9. **Topic lookup table + embedding cross-references** (Stage 5) — multi-doc infrastructure;
+   defer until multi-doc eval is running
 
 ---
 
