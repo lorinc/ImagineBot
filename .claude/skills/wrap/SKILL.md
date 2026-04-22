@@ -8,7 +8,7 @@ Read `.claude/SESSION.md` and skim `git status` / recent diffs to understand wha
 happened. Then update the three operational files below — but only where there is
 something real to write. Skip any step where there's nothing meaningful to add.
 
-Show each draft to the user before writing.
+Write files directly without asking for approval. After writing each file, show the content that was written so the user can review and correct post-hoc.
 
 ### .claude/HEURISTICS.log
 

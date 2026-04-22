@@ -266,35 +266,26 @@ already HTTPS. Cloud IAP + LB is the production pattern (Sprint 4); this is the 
 
 ## Sprint 2 — Knowledge service rebuild + gateway
 
-**Goal:** Replace Graphiti + Neo4j + OpenAI with Vertex AI Context Caching + Gemini 2.5 Flash.
+**Goal:** Replace Graphiti + Neo4j + OpenAI with a Vertex AI + Gemini pipeline.
 API contract preserved — no channel_web changes required.
 
-### Phase 2.1 — Knowledge service rebuild
+### Phase 2.1 — Knowledge service rebuild — READY TO DEPLOY 2026-04-22
 
-**What changes:**
-- Remove: `graphiti-core`, `neo4j` dependencies; all Graphiti search logic
-- Remove: OpenAI dependency and call
-- Add: `google-cloud-aiplatform` (Vertex AI SDK) for context cache management + generation
-- Add: cache lifecycle management (create/refresh/expire)
+**Architecture chosen:** PageIndex (poc1 validated) — not Context Caching as originally planned.
+Context Caching was a viable interim approach; PageIndex is the better long-term architecture
+(evaluated via POC1/POC2/POC3 track). See POC track section for rationale.
 
-**New behaviour:**
-1. On startup: check for a valid Vertex AI Context Cache. If none, create one from the 7 canonical
-   markdown files in `data/pipeline/latest/02_ai_cleaned/` (en_/es_ prefixed files only).
-2. `POST /search`: call Gemini 2.5 Flash with `cached_content=<cache_id>` + query
-3. System prompt instructs: answer only from context; return JSON `{ answer, citations: [{ document, excerpt }] }`
-4. Map citations → existing `facts` shape: `{ answer, facts: [{ fact: str, source_id: str }] }`
-5. Access filtering: pass permitted `source_ids` in system prompt ("answer only from: X, Y, Z")
+**What was built:**
+- `src/knowledge/indexer/` — PageIndex pipeline (verbatim from poc1, 9 modules)
+- `src/knowledge/main.py` — rewritten: loads multi_index.json at startup, 3-stage query pipeline
+- `tools/build_index.py` — offline index build tool (last step of ingestion pipeline)
+- `tools/archive/create_cache.py` — original Context Cache tool, archived with Firestore reuse notes
+- `data/index/` — pre-built 6-doc index (gitignored; baked into Docker image for UAT)
+- `src/knowledge/TODO.md` — open work tracking (group_ids, structured citations, index lifecycle)
 
-**Cache lifecycle:**
-- Cache ID stored in Firestore doc `config/context_cache` (`{ cache_name: str, created_at: ts, expires_at: ts }`)
-- TTL: 24h (renewed on each restart; corpus updates once per sprint at most)
-- Corpus update flow: delete old cache → create new cache → update Firestore doc
-
-**Secrets/config changes:**
-- Remove: `NEO4J_URI`, `NEO4J_PASSWORD` from Secret Manager (after rebuild verified)
-- Remove: `OPENAI_API_KEY` from Secret Manager (after rebuild verified)
-- `knowledge-sa` IAM: add `roles/aiplatform.user` (Vertex AI calls)
-- No new secrets — service account auth handles Vertex AI (no API key needed)
+**Known stubs (documented in TODO.md):**
+- `group_ids`: accepted but ignored — future access-control filter
+- `facts`: derived from selected nodes (section title + doc_id), not structured citations
 
 **API contract (unchanged):**
 ```
@@ -302,23 +293,71 @@ POST /search
   Request:  { "query": str, "group_ids": list[str] | null }
   Response: { "answer": str, "facts": [{ "fact": str, "source_id": str, "valid_at": null }] }
 ```
-`valid_at` is always `null` (no temporal model in context caching).
 
-**Files changed:**
-```
-src/knowledge/main.py          — rewrite search logic; add cache management
-src/knowledge/requirements.txt — swap graphiti-core/neo4j/openai → google-cloud-aiplatform
-tests/knowledge/test_knowledge.py — update mocks (Vertex AI instead of Graphiti/OpenAI)
+**Deploy:**
+```bash
+git add src/knowledge/ tools/
+git commit -m "Migrate knowledge service to PageIndex (poc1 → src/knowledge)"
+bash src/knowledge/deploy.sh
 ```
 
 **Acceptance:**
 ```bash
-curl -X POST https://[knowledge-url]/search \
+curl -s -X POST https://knowledge-jeyczovqfa-ew.a.run.app/search \
   -H "Authorization: Bearer $(gcloud auth print-identity-token)" \
   -H "Content-Type: application/json" \
-  -d '{"query": "What time does school start?", "group_ids": null}'
-# → { "answer": "...", "facts": [{ "fact": "...", "source_id": "en_family_manual_24_25" }] }
+  -d '{"query": "What time does school start?"}' | python3 -m json.tool
+# → {"answer": "...", "facts": [{"fact": "...", "source_id": "en_..."}]}
 ```
+
+### Phase 2.2 — Gateway orchestration layer — READY TO DEPLOY 2026-04-22
+
+**What was built:**
+- `src/gateway/` — new FastAPI service, single entry point for all channels
+- Pipeline: sanitize → classify (scope+specificity, 1 LLM call) → Tier 3/Tier 2 routing → standalone rewrite → Stage A (topics) → Stage B (synthesis) → SSE response
+- Session tracking: in-memory dict keyed by UUID, 10-turn cap, flows browser ↔ gateway via session_id field
+- Specificity gate: vague queries ("What are the rules?") get orientation response; no KB call
+- Breadth detection: Stage A calls GET /topics on knowledge service; if > MAX_TOPIC_PATHS (5) after sibling consolidation → auto-deliver overview via overview synthesis prompt
+- `src/gateway/TODO.md` — full backlog: PRF, rate limiting, NLI faithfulness, ReAct loop, etc.
+- `src/channel_web/` updated: calls GATEWAY_SERVICE_URL/chat instead of knowledge/search/stream; app.js tracks session_id
+- Tests: 14/14 gateway (sanitize: 8, flow: 6) + 10/10 channel_web still passing
+
+**API contract (gateway — unchanged):**
+```
+POST /chat
+  Request:  { "message": str, "session_id": str | null }
+  Response: SSE stream — progress events + answer event
+  Answer event data: { "answer": str, "facts": [...], "session_id": str }
+
+GET /health
+  Response: { "status": "healthy" }
+```
+
+**New knowledge endpoints (added for gateway):**
+```
+GET /summary
+  Response: { "outline": str }   ← L1 routing outline for classifier prompt
+
+POST /topics
+  Request:  { "query": str, "group_ids": list[str] | null }
+  Response: { "l1_topics": [{ "doc_id": str, "id": str, "title": str }] }
+```
+
+**Deploy:**
+```bash
+git add src/gateway/ src/channel_web/ src/knowledge/ tests/gateway/ tests/channel_web/
+git commit -m "Add specificity gate, breadth detection, and overview mode to gateway + knowledge"
+bash src/knowledge/deploy.sh   # deploy first — gateway needs new endpoints
+bash src/gateway/deploy.sh     # creates gateway-sa, IAM grants, builds + deploys
+bash src/channel_web/deploy.sh
+```
+
+**Acceptance:**
+- `POST /chat` "What are the rules?" → orientation response, facts=[]
+- `POST /chat` broad question → answer prefixed with "Your question covers several…"
+- `POST /chat` school policy question → SSE answer with citations
+- `POST /chat` out-of-scope question → canned refusal, no knowledge call
+- Browser: follow-up question rewritten to standalone; session_id persists across turns
 
 ---
 
@@ -452,13 +491,13 @@ individual calls stay small and thinking-light.
 
 | Gap | Impact | Sprint |
 |-----|--------|--------|
-| Graphiti + Neo4j underperforms on this corpus | Poor answer quality; high cost | Sprint 2 — full rebuild |
-| OpenAI (not Vertex AI/Gemini) for answer synthesis | Wrong LLM stack; cost unpredictability | Sprint 2 — replaced by Context Caching |
-| group_ids=null — all users see all sources | No access control per user | Sprint 2 — prompt-level filtering |
+| ~~Graphiti + Neo4j underperforms on this corpus~~ | ~~Poor answer quality; high cost~~ | ✅ Closed 2026-04-22 — PageIndex deployed |
+| ~~OpenAI (not Vertex AI/Gemini) for answer synthesis~~ | ~~Wrong LLM stack~~ | ✅ Closed 2026-04-22 — Gemini 2.5 Flash via Vertex AI |
+| group_ids=null — all users see all sources | No access control per user | Sprint 2 — stub in place, enforcement pending |
 | No gateway — channel_web calls knowledge directly | Tight coupling, no routing layer | Sprint 2 |
 | No CI/CD — manual deploy scripts only | Error-prone deploys | Sprint 4 |
 | App-level token validation (not Cloud IAP) | Acceptable for POC; replace with IAP + LB in production | Sprint 4 |
-| Suggestion pill default questions not cached | Every click hits LLM; identical queries re-run | Sprint 2 — less critical with caching |
+| Suggestion pill default questions not cached | Every click hits LLM; identical queries re-run | Sprint 2 — less critical with PageIndex |
 
 ### Caching note (suggestion pill questions)
 The questions in `src/channel_web/static/questions.json` are predefined and static.

@@ -7,24 +7,31 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src/gateway"))
 from services.sanitize import sanitize
 
 
-def test_strips_html():
-    assert sanitize("<b>Hello</b> world") == "Hello world"
+def test_strips_html_and_warns():
+    text, warning = sanitize("<b>Hello</b> world")
+    assert text == "Hello world"
+    assert warning is not None
+    assert "code injection attempt" in warning
 
 
 def test_normalizes_whitespace():
-    assert sanitize("  too   many   spaces  ") == "too many spaces"
+    text, warning = sanitize("  too   many   spaces  ")
+    assert text == "too many spaces"
+    assert warning is None
 
 
-def test_strips_script_tag():
-    result = sanitize("<script>alert('xss')</script>fire drill policy")
-    assert "<script>" not in result
-    assert "fire drill policy" in result
+def test_strips_script_tag_and_warns():
+    text, warning = sanitize("<script>alert('xss')</script>fire drill policy")
+    assert "alert" not in text          # script content removed, not just tags
+    assert "fire drill policy" in text
+    assert warning is not None
+    assert "code injection attempt" in warning
 
 
 def test_max_length():
     long_query = "a" * 600
-    result = sanitize(long_query)
-    assert len(result) == 512
+    text, _ = sanitize(long_query)
+    assert len(text) == 512
 
 
 def test_empty_raises():
@@ -44,4 +51,6 @@ def test_only_whitespace_raises():
 
 def test_valid_query_passthrough():
     q = "What is the fire evacuation procedure?"
-    assert sanitize(q) == q
+    text, warning = sanitize(q)
+    assert text == q
+    assert warning is None

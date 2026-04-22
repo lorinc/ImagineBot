@@ -22,7 +22,7 @@ from .config import MODEL_QUALITY, MODEL_STRUCTURAL
 from .llm import DOC_ROUTING_SCHEMA, NODE_SELECTION_SCHEMA, get_model, llm_call
 from .node import Node
 from .observability import cost_usd, render_outline
-from .prompts import make_route_prompt, make_select_prompt, make_synthesize_prompt
+from .prompts import make_route_prompt, make_overview_synthesize_prompt, make_select_prompt, make_synthesize_prompt
 
 _MAX_ROUTING_TOPICS = 6  # phrases per L1 node shown to the routing LLM
 
@@ -89,6 +89,9 @@ async def query_multi_index(
     multi_index: dict,
     structural_model: GenerativeModel,
     quality_model: GenerativeModel,
+    *,
+    topics_only: bool = False,
+    overview: bool = False,
 ) -> dict:
     """
     Three-stage multi-document query.
@@ -178,6 +181,20 @@ async def query_multi_index(
 
         print(f"[multi query]   {doc_id}: {[n.id for n in selected_nodes]}  ({ms}ms)")
 
+        # Compute L1 ancestors for topics_only mode
+        l1_ancestors: list[dict] = []
+        if topics_only:
+            node_to_l1: dict[str, Node] = {}
+            for l1 in root.children:
+                for n in l1.all_nodes():
+                    node_to_l1[n.id] = l1
+            seen_l1: set[str] = set()
+            for n in selected_nodes:
+                l1 = node_to_l1.get(n.id)
+                if l1 and l1.id not in seen_l1:
+                    seen_l1.add(l1.id)
+                    l1_ancestors.append({"doc_id": doc_id, "id": l1.id, "title": l1.title})
+
         return doc_id, {
             "selected_ids": ids,
             "reasoning": reasoning,
@@ -190,10 +207,18 @@ async def query_multi_index(
             "output_tokens": usage.get("output_tokens", 0),
             "latency_ms": ms,
             "_nodes": selected_nodes,  # Node objects; stripped before serialisation
+            "_l1_ancestors": l1_ancestors,
         }
 
     select_results = await asyncio.gather(*[_select_from_doc(d) for d in resolved_docs])
     per_doc_raw: dict[str, dict] = dict(select_results)
+
+    # ── topics_only: return L1 ancestors without synthesis ────────────────────
+    if topics_only:
+        l1_topics: list[dict] = []
+        for sel in per_doc_raw.values():
+            l1_topics.extend(sel.get("_l1_ancestors", []))
+        return {"l1_topics": l1_topics}
 
     # ── Stage 3: Synthesis ────────────────────────────────────────────────────
 
@@ -222,7 +247,11 @@ async def query_multi_index(
         else f"(no sections selected)\n\n{routing_outline}"
     )
 
-    synth_prompt = make_synthesize_prompt(question, sections_text)
+    synth_prompt = (
+        make_overview_synthesize_prompt(question, sections_text)
+        if overview
+        else make_synthesize_prompt(question, sections_text)
+    )
     synth_raw, synth_ms, synth_usage = await llm_call(quality_model, synth_prompt)
     answer = synth_raw.strip()
 

@@ -862,3 +862,61 @@ PREVENTED_BY: Set litellm.drop_params = True at module level before any LLM call
              using any non-OpenAI model via litellm with the Agents SDK. Without this,
              every agent tool call fails on Gemini.
 SOLUTION: litellm.drop_params = True added at the top of eval_harness.py.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-22]
+CATEGORY: TESTING
+SERVICE: src/gateway
+TASK: gateway orchestration layer — unit tests
+SYMPTOM: Mocking `services.scope_gate.is_in_scope` had no effect; router still called the real function.
+ROOT_CAUSE: `routers/chat.py` uses `from services.scope_gate import is_in_scope` (direct import).
+           Python binds the name `is_in_scope` in the `routers.chat` module namespace at import time.
+           Patching `services.scope_gate.is_in_scope` replaces the object in the source module
+           but does NOT update the already-bound reference in `routers.chat`.
+PREVENTED_BY: When patching a function that is imported with `from module import fn`,
+              always patch the name in the importing module: `patch("routers.chat.is_in_scope", ...)`.
+              Only patch the source module (`services.scope_gate.is_in_scope`) when the caller
+              accesses it via the module object (`scope_gate.is_in_scope()`).
+SOLUTION: Changed all patch targets in test_chat_flow.py to `routers.chat.*`.
+
+[2026-04-22]
+CATEGORY: TESTING
+SERVICE: src/gateway
+TASK: gateway orchestration layer — running test suites together
+SYMPTOM: channel_web tests pass alone but ERROR when run in the same pytest invocation as gateway tests.
+ROOT_CAUSE: Both test files insert their own service into sys.path and do `import main`.
+           Python's module cache (`sys.modules`) keeps the first `main` loaded. When the
+           second test file imports `main`, it gets the gateway version, not channel_web's,
+           causing AttributeError on channel_web-specific names.
+PREVENTED_BY: Never name a service's entry point `main.py` if tests for multiple services
+             are run together with flat `import main`. Either use qualified imports
+             (`from src.gateway import main`) or run test suites in isolated subprocess invocations.
+             For now: run `pytest tests/gateway/` and `pytest tests/channel_web/` separately.
+SOLUTION: Services are tested independently; they pass individually (12/12, 10/10).
+
+[2026-04-22]
+CATEGORY: DESIGN
+SERVICE: src/gateway, src/knowledge
+TASK: specificity gate + breadth detection design
+SYMPTOM: Initial proposal used domain-noun wordlist to detect "too vague" queries. "What about balls?" is a legitimate specific query that would be wrongly rejected by any wordlist.
+ROOT_CAUSE: Regexp/wordlist approaches cannot handle the semantic range of natural language. A word absent from the list can still be a legitimate topic anchor in the corpus.
+PREVENTED_BY: When filtering user queries, never use keyword lists or regexp on natural language. Use a cheap LLM classifier with a corpus summary as context instead. One merged classifier call covering both scope and specificity costs the same as the old scope-only call.
+SOLUTION: Replaced `is_in_scope(query)` with `classify(query, corpus_summary) → (in_scope, specific_enough)`. Corpus summary fetched from knowledge service GET /summary at first request, cached.
+
+[2026-04-22]
+CATEGORY: DESIGN
+SERVICE: src/gateway, src/knowledge
+TASK: breadth detection — sibling consolidation semantics
+SYMPTOM: Test for "broad query triggers overview mode" used 6 topics from one doc. After sibling consolidation (≥3 siblings → collapse to doc), count = 1 → overview did NOT trigger. Test was wrong.
+ROOT_CAUSE: Sibling consolidation is for display: many topics from the same doc IS one subject area — not broad. Overview should trigger when topics span many DIFFERENT areas (docs). The consolidated count is the right signal.
+PREVENTED_BY: When writing tests for sibling consolidation, use topics spread across DIFFERENT docs to exceed MAX_TOPIC_PATHS. Topics from one doc collapse to 1 and should not trigger overview mode.
+SOLUTION: Fixed test to spread 6 topics across 6 different docs. All 14 tests pass.
+
+[2026-04-22]
+CATEGORY: DESIGN
+SERVICE: src/gateway
+TASK: Tier 2 "ask user to narrow or get overview" — loop risk
+SYMPTOM: If user asks a broad question, gets "want to narrow or see overview?", says "give me overview", the next turn routes through the same pipeline → topics still broad → same Tier 2 question again. Infinite loop.
+PREVENTED_BY: Do not implement a Tier 2 ask-first pattern without a mechanism to exit the loop (e.g. a frontend signal, classifier detecting "overview_requested", or rewrite producing a detectable signal). Moving rewrite before classification would help but adds latency on all queries.
+SOLUTION: Dropped ask-first pattern. When topics > MAX_TOPIC_PATHS, auto-deliver Stage B with overview synthesis prompt + BROAD_QUERY_PREFIX. No round-trip, no loop. User can follow up to drill into any area.

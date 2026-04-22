@@ -139,6 +139,19 @@ def make_synthesize_prompt(question: str, sections_text: str) -> str:
     )
 
 
+def make_overview_synthesize_prompt(question: str, sections_text: str) -> str:
+    """Synthesis prompt for broad queries: concise per-topic summary instead of deep answer."""
+    return (
+        f"QUESTION: {question}\n\n"
+        f"SECTIONS:\n{sections_text}\n\n"
+        "This question spans multiple school policy areas. "
+        "Write a HIGH-LEVEL OVERVIEW: one short paragraph per distinct area (2-3 sentences max). "
+        "Do not list procedural steps in detail. "
+        "Cite [section_id] per paragraph. "
+        "If no answer in sections: 'The provided sections do not answer this question.'"
+    )
+
+
 def make_route_prompt(routing_outline: str, question: str) -> str:
     """Prompt for multi-doc routing: select which document(s) to search."""
     return (

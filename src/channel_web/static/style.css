@@ -345,6 +345,13 @@ button:focus-visible { outline: 2px solid var(--action-green); outline-offset: 2
   color: var(--destructive);
 }
 
+.answer-warning {
+  color: var(--destructive);
+  font-size: 0.75rem;
+  margin: 0 0 0.75rem;
+  opacity: 0.8;
+}
+
 /* ── Source details ────────────────────────────────────────────────────────── */
 .source-details {
   display: block;

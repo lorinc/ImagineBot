@@ -342,7 +342,7 @@ async function submitQuestion(question) {
           textarea.value = t.progress[payload.key] || '';
         } else if (type === 'answer') {
           if (payload.session_id) sessionId = payload.session_id;
-          addAnswer(id, question, payload.answer, payload.facts, null);
+          addAnswer(id, question, payload.answer, payload.facts, null, payload.warning || null);
         } else if (type === 'error') {
           addAnswer(id, question, null, null, payload.error || 'Unknown error');
         }
@@ -361,13 +361,13 @@ async function submitQuestion(question) {
 }
 
 // ── Answers ───────────────────────────────────────────────────────────────────
-function addAnswer(id, question, answer, facts, error) {
-  answers.push({ id, question, answer, facts, error });
+function addAnswer(id, question, answer, facts, error, warning = null) {
+  answers.push({ id, question, answer, facts, error, warning });
 
   const list = document.getElementById('answers-list');
   const wrapper = document.createElement('div');
   wrapper.id = 'answer-' + id;
-  wrapper.innerHTML = buildAnswerCard(id, question, answer, facts, error);
+  wrapper.innerHTML = buildAnswerCard(id, question, answer, facts, error, warning);
   list.appendChild(wrapper);
 
   list.style.display = 'flex';
@@ -385,7 +385,7 @@ function addAnswer(id, question, answer, facts, error) {
   }, 50);
 }
 
-function buildAnswerCard(id, question, answer, facts, error) {
+function buildAnswerCard(id, question, answer, facts, error, warning = null) {
   const t       = UI[lang];
   const isError = !!error;
   const text    = isError ? error : answer;
@@ -421,6 +421,7 @@ function buildAnswerCard(id, question, answer, facts, error) {
         <div class="answer-content">
           <p class="answer-question">${esc(question)}</p>
           <hr class="answer-divider">
+          ${warning ? `<p class="answer-warning">${esc(warning)}</p>` : ''}
           <p class="answer-text${isError ? ' answer-text-error' : ''}">${isError ? esc(text) : md(text)}</p>
           ${sourcesHtml}
         </div>

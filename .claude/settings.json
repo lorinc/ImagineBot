@@ -1,4 +1,11 @@
 {
+  "permissions": {
+    "allow": [
+      "Read(.claude/**)",
+      "Edit(.claude/**)",
+      "Write(.claude/**)"
+    ]
+  },
   "hooks": {
     "PreToolUse": [
       {

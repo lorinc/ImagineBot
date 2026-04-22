@@ -10,6 +10,20 @@ _No known bugs at UAT entry (2026-04-22)._
 
 ---
 
+## Tuning
+
+### Breadth detection thresholds
+The gateway uses two empirically chosen constants (in `src/gateway/config.py`):
+- `MAX_TOPIC_PATHS = 5` — max distinct topic groups before overview mode triggers
+- `SIBLING_COLLAPSE_THRESHOLD = 3` — min L1 sections from one doc before collapsing to doc-level
+
+These were set to reasonable-sounding defaults without real-query data. To tune:
+1. Run a representative set of parent queries through the pipeline with logging
+2. Inspect `topic_count` in gateway logs for questions that should/shouldn't trigger overview
+3. Adjust the constants — no code changes required, just `config.py`
+
+---
+
 ## Hypotheses
 
 Items carried over from poc1 evaluation cycles. Priority order at the bottom.

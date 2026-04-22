@@ -3,13 +3,13 @@ import sys
 import os
 import json
 import pytest
+import unittest.mock as mock
 from unittest.mock import patch, AsyncMock
 from fastapi.testclient import TestClient
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src/gateway"))
 
 # Mock vertexai.init before importing main to avoid credential requirement
-import unittest.mock as mock
 with mock.patch("vertexai.init"):
     import main  # noqa: E402
 
@@ -39,6 +39,11 @@ _KNOWLEDGE_RESULT = {
     "facts": [{"fact": "Personnel check", "source_id": "policy1", "valid_at": None}],
 }
 
+# classify returns (in_scope, specific_enough)
+_IN_SCOPE = (True, True)
+_OUT_OF_SCOPE = (False, True)
+_NOT_SPECIFIC = (True, False)
+
 
 @pytest.fixture
 def client():
@@ -48,7 +53,8 @@ def client():
 
 def test_valid_school_question_returns_answer(client):
     with (
-        patch("routers.chat.is_in_scope", new_callable=AsyncMock, return_value=True),
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
         patch("services.knowledge_client.search", new_callable=AsyncMock, return_value=_KNOWLEDGE_RESULT),
     ):
         resp = client.post("/chat", json={"message": "What happens after a fire drill?"})
@@ -64,7 +70,7 @@ def test_valid_school_question_returns_answer(client):
 
 
 def test_out_of_scope_returns_refusal(client):
-    with patch("routers.chat.is_in_scope", new_callable=AsyncMock, return_value=False):
+    with patch("routers.chat.classify", new_callable=AsyncMock, return_value=_OUT_OF_SCOPE):
         resp = client.post("/chat", json={"message": "How do I bake a cake?"})
 
     assert resp.status_code == 200
@@ -73,6 +79,19 @@ def test_out_of_scope_returns_refusal(client):
     assert len(answer_events) == 1
     assert "school policies" in answer_events[0]["data"]["answer"]
     assert answer_events[0]["data"]["facts"] == []
+
+
+def test_vague_question_returns_orientation(client):
+    with patch("routers.chat.classify", new_callable=AsyncMock, return_value=_NOT_SPECIFIC):
+        resp = client.post("/chat", json={"message": "What are the rules?"})
+
+    assert resp.status_code == 200
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    assert answer_events[0]["data"]["facts"] == []
+    # orientation response should prompt user to be more specific
+    assert "?" in answer_events[0]["data"]["answer"]
 
 
 def test_empty_message_returns_error(client):
@@ -84,9 +103,33 @@ def test_empty_message_returns_error(client):
     assert len(error_events) == 1
 
 
+def test_broad_query_triggers_overview_mode(client):
+    # 6 topics across 6 different docs — exceeds MAX_TOPIC_PATHS=5 after consolidation
+    many_topics = [
+        {"doc_id": f"doc_{i}", "id": "1", "title": f"Topic {i}"}
+        for i in range(6)
+    ]
+    with (
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=many_topics),
+        patch("services.knowledge_client.search", new_callable=AsyncMock, return_value=_KNOWLEDGE_RESULT) as mock_search,
+    ):
+        resp = client.post("/chat", json={"message": "What are all the school rules?"})
+
+    assert resp.status_code == 200
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    # search must be called with overview=True
+    mock_search.assert_called_once_with(mock.ANY, overview=True)
+    # answer should be prefixed with broad-query text
+    assert "overview" in answer_events[0]["data"]["answer"].lower()
+
+
 def test_session_id_persists_across_requests(client):
     with (
-        patch("routers.chat.is_in_scope", new_callable=AsyncMock, return_value=True),
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
         patch("services.knowledge_client.search", new_callable=AsyncMock, return_value=_KNOWLEDGE_RESULT),
     ):
         resp1 = client.post("/chat", json={"message": "What is the fire drill procedure?"})
@@ -95,7 +138,6 @@ def test_session_id_persists_across_requests(client):
 
         with patch("routers.chat.rewrite_standalone", new_callable=AsyncMock, return_value="What about students in the fire drill?") as mock_rewrite:
             resp2 = client.post("/chat", json={"message": "What about students?", "session_id": session_id})
-            # assert inside the with block while mock is still active
             mock_rewrite.assert_called_once()
 
     assert resp2.status_code == 200

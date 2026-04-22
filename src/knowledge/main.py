@@ -11,7 +11,7 @@ from pydantic import BaseModel
 
 from indexer.config import GCP_PROJECT, REGION, MODEL_QUALITY, MODEL_STRUCTURAL
 from indexer.llm import get_model
-from indexer.multi import query_multi_index
+from indexer.multi import query_multi_index, render_routing_outline
 
 KNOWLEDGE_INDEX_PATH = Path(
     os.environ.get("KNOWLEDGE_INDEX_PATH", "/data/index/multi_index.json")
@@ -57,6 +57,7 @@ app = FastAPI(lifespan=lifespan)
 class SearchRequest(BaseModel):
     query: str
     group_ids: list[str] | None = None  # stub — future access-control filter, ignored for now
+    overview: bool = False
 
 
 class Fact(BaseModel):
@@ -68,6 +69,21 @@ class Fact(BaseModel):
 class SearchResponse(BaseModel):
     answer: str
     facts: list[Fact]
+
+
+class TopicsRequest(BaseModel):
+    query: str
+    group_ids: list[str] | None = None
+
+
+class TopicNode(BaseModel):
+    doc_id: str
+    id: str
+    title: str
+
+
+class TopicsResponse(BaseModel):
+    l1_topics: list[TopicNode]
 
 
 def _facts_from_result(result: dict) -> list[Fact]:
@@ -90,12 +106,32 @@ async def health():
     return {"status": "healthy"}
 
 
+@app.get("/summary")
+async def summary():
+    """Return the routing outline (L1 node titles + topics) for classifier prompts."""
+    return {"outline": render_routing_outline(_multi_index)}
+
+
+@app.post("/topics", response_model=TopicsResponse)
+async def topics(req: TopicsRequest):
+    """Run routing + selection only; return L1 ancestor nodes without synthesis."""
+    try:
+        result = await query_multi_index(
+            req.query, _multi_index, _structural_model, _quality_model,
+            topics_only=True,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=503, detail=f"Topics query failed: {e}")
+    return TopicsResponse(l1_topics=result["l1_topics"])
+
+
 @app.post("/search", response_model=SearchResponse)
 async def search(req: SearchRequest):
     # group_ids: stub for future permission/multi-tenant filtering — ignored for now
     try:
         result = await query_multi_index(
-            req.query, _multi_index, _structural_model, _quality_model
+            req.query, _multi_index, _structural_model, _quality_model,
+            overview=req.overview,
         )
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Query failed: {e}")
