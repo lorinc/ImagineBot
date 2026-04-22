@@ -4,13 +4,12 @@
 Retrieval layer. Given a query and an optional set of permitted source IDs,
 returns a cited answer. Called by channel_web (Sprint 1) / gateway (Sprint 2+).
 
-## Retrieval mechanism (decided 2026-03-23 — see ARCHITECTURE_PIVOT in root CLAUDE.md)
-- **Engine:** Vertex AI Context Caching + Gemini 2.5 Flash (full-context, not RAG)
-- **Why:** ~100K token corpus fits in a single cache; full-context beats RAG at this scale;
-  500 queries/day max; citations returned as structured JSON via response_schema
-- **Cache:** Created by `tools/create_cache.py` from `data/pipeline/latest/02_ai_cleaned/en_*.md`
-- **Cache name:** persisted in Firestore `config/context_cache.cache_name`
-- **Access filtering:** `group_ids` appended to query as instruction ("Answer only from: X, Y")
+## Retrieval mechanism (migrated from poc1 — 2026-04-22)
+- **Engine:** PageIndex — multi-document hierarchical index built offline from cleaned markdown
+- **Query pipeline:** Stage 1 routing (doc selection) → Stage 2 node selection per doc → Stage 3 synthesis
+- **Models:** `gemini-2.5-flash-lite` (structural/routing) + `gemini-2.5-flash` (selection/synthesis)
+- **Index:** built by `tools/build_index.py` from `data/pipeline/latest/02_ai_cleaned/en_*.md`
+- **Index location:** `multi_index.json` + per-doc JSONs in the directory pointed to by `KNOWLEDGE_INDEX_PATH`
 
 ## Deployment constraint
 `--ingress=all --no-allow-unauthenticated` — NOT `--ingress=internal`.
@@ -28,37 +27,53 @@ GET /health
   Response: { "status": "healthy" }
 ```
 
-`valid_at` is always `null` — no temporal model in context caching.
+`group_ids`: accepted but ignored — stub for future per-user access control (see TODO.md).
+`valid_at`: always `null`.
+`facts`: derived from selected index nodes (section title + doc_id). Not structured citations yet — see TODO.md.
 
 ## Module map
 ```
-main.py          POST /search, GET /health, Firestore cache-name lookup
+main.py          POST /search, POST /search/stream, GET /health, index loading
+indexer/         PageIndex pipeline (copied from poc/poc1_single_doc/indexer/)
+  config.py      GCP config, model names, node size thresholds
+  llm.py         Vertex AI async wrapper, response schemas, semaphore
+  multi.py       Multi-doc build + query pipeline (routing → selection → synthesis)
+  pageindex.py   Per-doc build pipeline + single-doc query
+  node.py        Node dataclass (tree unit)
+  parser.py      Markdown → heading tree
+  prompts.py     All prompt builder functions
+  observability.py  Build logging, cost tracking
 ```
 
-## Cache lifecycle
-- Cache name cached in process memory for 5 minutes (`_CACHE_REFRESH_SECS = 300`)
-- Firestore doc `config/context_cache` is the authoritative source of truth
-- To refresh corpus: run `tools/create_cache.py` (deletes old cache, creates new, updates Firestore)
-- Cache TTL: 48h by default (configurable via `--ttl-hours` flag)
-- Service reads `cache_name` from Firestore on startup and after TTL expiry
+## Index lifecycle
+- Build: run `tools/build_index.py` after corpus update → writes to `data/index/`
+- Service reads `KNOWLEDGE_INDEX_PATH` (path to `multi_index.json`) at startup
+- Paths in `multi_index.json` are relative to its directory — portable across environments
 
 ## Environment variables
 ```
 GCP_PROJECT_ID          img-dev-490919
 VERTEX_AI_LOCATION      europe-west1 (default)
+KNOWLEDGE_INDEX_PATH    /data/index/multi_index.json (default)
 ```
 
 ## Service account IAM (knowledge-sa@img-dev-490919.iam.gserviceaccount.com)
-- `roles/aiplatform.user` — Vertex AI context cache + generation calls
-- `roles/datastore.user` — Firestore cache name lookup
-- `roles/secretmanager.secretAccessor` — (legacy from Sprint 1, harmless)
+- `roles/aiplatform.user` — Vertex AI generation calls
+- `roles/datastore.user` — retained (harmless); reuse when vector cache is added
+- `roles/secretmanager.secretAccessor` — legacy, harmless
 
 ## Key invariants
-- The service never calls external services except Vertex AI and Firestore.
-- `group_ids` filtering is always applied before generation — never skipped.
+- The service never calls external services except Vertex AI.
+- `group_ids` filtering is always applied before generation — not yet enforced (stub).
 - Every returned fact carries `source_id` — citation is a hard requirement.
-- If no cache exists in Firestore: returns HTTP 503 ("Run tools/create_cache.py first.")
+- If index not found at startup: RuntimeError (service fails to start — fail-fast).
+
+## Archived: Vertex AI Context Cache approach
+The original implementation cached the full corpus in Vertex AI and sent it with every
+query (single LLM call, no index). Archived files:
+- `tools/archive/create_cache.py` — cache creation tool with Firestore discovery
+- Firestore schema: `config/context_cache` → `{cache_name, created_at, expires_at, source_ids}`
+These are the starting point for the future vector-based cache layer (see TODO.md).
 
 ## Known issues / pending
-- Spanish corpus not in cache (en_*.md only). System prompt multilingual answer
-  is the planned approach — implement before next corpus update.
+See `TODO.md`.

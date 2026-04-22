@@ -8,7 +8,8 @@ IMAGE=${REPO}/knowledge:latest
 SERVICE=knowledge
 SA=knowledge-sa@${PROJECT}.iam.gserviceaccount.com
 
-cd "$(dirname "$0")"
+# Build context is repo root so Dockerfile can COPY data/index/ into the image.
+REPO_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 
 echo "=== Granting IAM roles to knowledge-sa ==="
 gcloud projects add-iam-policy-binding "${PROJECT}" \
@@ -16,13 +17,14 @@ gcloud projects add-iam-policy-binding "${PROJECT}" \
   --role="roles/aiplatform.user" \
   --condition=None
 
+# datastore.user retained: reuse when vector-based cache layer is added.
 gcloud projects add-iam-policy-binding "${PROJECT}" \
   --member="serviceAccount:${SA}" \
   --role="roles/datastore.user" \
   --condition=None
 
-echo "=== Building image ==="
-docker build -t "${IMAGE}" .
+echo "=== Building image (context: ${REPO_ROOT}) ==="
+docker build -t "${IMAGE}" -f "${REPO_ROOT}/src/knowledge/Dockerfile" "${REPO_ROOT}"
 
 echo "=== Pushing image ==="
 docker push "${IMAGE}"
@@ -37,8 +39,8 @@ gcloud run deploy "${SERVICE}" \
   --ingress=all \
   --min-instances=0 \
   --max-instances=3 \
-  --memory=512Mi \
-  --set-env-vars="GCP_PROJECT_ID=${PROJECT},VERTEX_AI_LOCATION=${REGION}"
+  --memory=1Gi \
+  --set-env-vars="GCP_PROJECT_ID=${PROJECT},VERTEX_AI_LOCATION=${REGION},KNOWLEDGE_INDEX_PATH=/app/index/multi_index.json"
 
 echo "=== Done ==="
 gcloud run services describe "${SERVICE}" \

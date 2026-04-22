@@ -2,62 +2,52 @@ import asyncio
 import json
 import os
 from contextlib import asynccontextmanager
-from datetime import datetime, timezone
+from pathlib import Path
 
 import vertexai
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import StreamingResponse
-from google.cloud import firestore
 from pydantic import BaseModel
-from vertexai.generative_models import GenerationConfig
-from vertexai.preview.caching import CachedContent
-from vertexai.preview.generative_models import GenerativeModel
 
-GCP_PROJECT = os.environ["GCP_PROJECT_ID"]
-REGION = os.environ.get("VERTEX_AI_LOCATION", "europe-west1")
+from indexer.config import GCP_PROJECT, REGION, MODEL_QUALITY, MODEL_STRUCTURAL
+from indexer.llm import get_model
+from indexer.multi import query_multi_index
 
-# Cache name refreshed from Firestore at most once every 5 minutes per instance.
-_cache_name: str | None = None
-_cache_checked_at: datetime | None = None
-_CACHE_REFRESH_SECS = 300
-
-_SYSTEM_PROMPT_BASE = (
-    "You are a school information assistant. "
-    "Answer questions using ONLY the information in the provided documents. "
-    "- Cite the exact document source_id for every claim you make. "
-    "- If the documents do not contain enough information to answer, set answer to exactly: "
-    '"I don\'t have that information in the school documents." and citations to []. '
-    "- Never invent, extrapolate, or guess. "
-    "- Answer in the same language the question was written in."
+KNOWLEDGE_INDEX_PATH = Path(
+    os.environ.get("KNOWLEDGE_INDEX_PATH", "/data/index/multi_index.json")
 )
 
-_RESPONSE_SCHEMA = {
-    "type": "object",
-    "properties": {
-        "answer": {"type": "string"},
-        "citations": {
-            "type": "array",
-            "items": {
-                "type": "object",
-                "properties": {
-                    "document": {"type": "string"},
-                    "excerpt": {"type": "string"},
-                },
-                "required": ["document", "excerpt"],
-            },
-        },
-    },
-    "required": ["answer", "citations"],
-}
-
-db: firestore.Client | None = None
+_multi_index: dict | None = None
+_structural_model = None
+_quality_model = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global db
+    global _multi_index, _structural_model, _quality_model
+
     vertexai.init(project=GCP_PROJECT, location=REGION)
-    db = firestore.Client(project=GCP_PROJECT)
+
+    if not KNOWLEDGE_INDEX_PATH.exists():
+        raise RuntimeError(
+            f"Multi-index not found at {KNOWLEDGE_INDEX_PATH}. "
+            "Run tools/build_index.py first."
+        )
+
+    raw = json.loads(KNOWLEDGE_INDEX_PATH.read_text(encoding="utf-8"))
+
+    # Resolve relative index_path values relative to the multi_index.json directory.
+    # build_index.py writes relative paths; absolute paths (from dev builds) pass through.
+    index_dir = KNOWLEDGE_INDEX_PATH.parent
+    for doc in raw.get("documents", []):
+        p = Path(doc["index_path"])
+        if not p.is_absolute():
+            doc["index_path"] = str(index_dir / p)
+
+    _multi_index = raw
+    _structural_model = get_model(MODEL_STRUCTURAL)
+    _quality_model = get_model(MODEL_QUALITY)
+
     yield
 
 
@@ -66,7 +56,7 @@ app = FastAPI(lifespan=lifespan)
 
 class SearchRequest(BaseModel):
     query: str
-    group_ids: list[str] | None = None
+    group_ids: list[str] | None = None  # stub — future access-control filter, ignored for now
 
 
 class Fact(BaseModel):
@@ -80,32 +70,19 @@ class SearchResponse(BaseModel):
     facts: list[Fact]
 
 
-def _read_cache_name_from_firestore() -> str:
-    """Synchronous Firestore read — called via asyncio.to_thread."""
-    doc = db.collection("config").document("context_cache").get()
-    if not doc.exists:
-        raise RuntimeError(
-            "No context cache configured. Run tools/create_cache.py first."
-        )
-    return doc.to_dict()["cache_name"]
-
-
-async def _get_cache_name() -> str:
-    global _cache_name, _cache_checked_at
-    now = datetime.now(timezone.utc)
-    if (
-        _cache_name
-        and _cache_checked_at
-        and (now - _cache_checked_at).total_seconds() < _CACHE_REFRESH_SECS
-    ):
-        return _cache_name
-    try:
-        name = await asyncio.to_thread(_read_cache_name_from_firestore)
-    except RuntimeError as e:
-        raise HTTPException(status_code=503, detail=str(e))
-    _cache_name = name
-    _cache_checked_at = now
-    return _cache_name
+def _facts_from_result(result: dict) -> list[Fact]:
+    # poc1 synthesis produces plain-text answers with inline [section_id] refs,
+    # not structured citations. Facts are derived from the selected nodes sent to
+    # synthesis (section title + doc_id). TODO: replace with structured citation
+    # extraction once synthesis prompt is updated to output JSON.
+    seen: set[str] = set()
+    facts: list[Fact] = []
+    for n in result.get("synthesis", {}).get("selected_nodes", []):
+        key = n["scoped_id"]
+        if key not in seen:
+            seen.add(key)
+            facts.append(Fact(fact=n["title"], source_id=n["doc_id"], valid_at=None))
+    return facts
 
 
 @app.get("/health")
@@ -115,100 +92,40 @@ async def health():
 
 @app.post("/search", response_model=SearchResponse)
 async def search(req: SearchRequest):
-    name = await _get_cache_name()
-
+    # group_ids: stub for future permission/multi-tenant filtering — ignored for now
     try:
-        cached_content = await asyncio.to_thread(CachedContent.get, name)
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Context cache unavailable: {e}")
-
-    # system_instruction cannot be used alongside cached_content (SDK constraint).
-    # The base system prompt is baked into the cache at creation time (tools/create_cache.py).
-    # Per-request group_ids filtering is appended to the user query.
-    model = GenerativeModel.from_cached_content(cached_content=cached_content)
-
-    query = req.query
-    if req.group_ids:
-        query += (
-            f"\n\n[Answer only from these documents: {', '.join(req.group_ids)}. "
-            "Ignore information from any other document.]"
-        )
-    query += "\n\nIMPORTANT: Write your answer in the same language as the question above."
-
-    try:
-        response = await model.generate_content_async(
-            query,
-            generation_config=GenerationConfig(
-                response_mime_type="application/json",
-                response_schema=_RESPONSE_SCHEMA,
-            ),
+        result = await query_multi_index(
+            req.query, _multi_index, _structural_model, _quality_model
         )
     except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Generation failed: {e}")
+        raise HTTPException(status_code=503, detail=f"Query failed: {e}")
 
-    try:
-        data = json.loads(response.text)
-    except (json.JSONDecodeError, AttributeError) as e:
-        raise HTTPException(status_code=500, detail=f"Malformed model response: {e}")
-
-    facts = [
-        Fact(fact=c["excerpt"], source_id=c["document"], valid_at=None)
-        for c in data.get("citations", [])
-    ]
-
-    return SearchResponse(answer=data["answer"], facts=facts)
+    return SearchResponse(
+        answer=result["synthesis"]["answer"],
+        facts=_facts_from_result(result),
+    )
 
 
 @app.post("/search/stream")
 async def search_stream(req: SearchRequest):
     async def generate():
-        yield 'event: progress\ndata: {"key": "cache_lookup"}\n\n'
-
-        try:
-            name = await _get_cache_name()
-            cached_content = await asyncio.to_thread(CachedContent.get, name)
-        except HTTPException as e:
-            yield f'event: error\ndata: {json.dumps({"error": e.detail})}\n\n'
-            return
-        except Exception as e:
-            yield f'event: error\ndata: {json.dumps({"error": f"Context cache unavailable: {e}"})}\n\n'
-            return
-
         yield 'event: progress\ndata: {"key": "querying_ai"}\n\n'
 
-        model = GenerativeModel.from_cached_content(cached_content=cached_content)
-        query = req.query
-        if req.group_ids:
-            query += (
-                f"\n\n[Answer only from these documents: {', '.join(req.group_ids)}. "
-                "Ignore information from any other document.]"
-            )
-        query += "\n\nIMPORTANT: Write your answer in the same language as the question above."
-
         try:
-            response = await model.generate_content_async(
-                query,
-                generation_config=GenerationConfig(
-                    response_mime_type="application/json",
-                    response_schema=_RESPONSE_SCHEMA,
-                ),
+            result = await query_multi_index(
+                req.query, _multi_index, _structural_model, _quality_model
             )
         except Exception as e:
-            yield f'event: error\ndata: {json.dumps({"error": f"Generation failed: {e}"})}\n\n'
+            yield f'event: error\ndata: {json.dumps({"error": str(e)})}\n\n'
             return
 
         yield 'event: progress\ndata: {"key": "processing"}\n\n'
 
-        try:
-            data = json.loads(response.text)
-        except (json.JSONDecodeError, AttributeError) as e:
-            yield f'event: error\ndata: {json.dumps({"error": f"Malformed model response: {e}"})}\n\n'
-            return
-
+        answer = result["synthesis"]["answer"]
         facts = [
-            {"fact": c["excerpt"], "source_id": c["document"], "valid_at": None}
-            for c in data.get("citations", [])
+            {"fact": f.fact, "source_id": f.source_id, "valid_at": f.valid_at}
+            for f in _facts_from_result(result)
         ]
-        yield f'event: answer\ndata: {json.dumps({"answer": data["answer"], "facts": facts})}\n\n'
+        yield f'event: answer\ndata: {json.dumps({"answer": answer, "facts": facts})}\n\n'
 
     return StreamingResponse(generate(), media_type="text/event-stream")
