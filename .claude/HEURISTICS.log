@@ -920,3 +920,12 @@ TASK: Tier 2 "ask user to narrow or get overview" — loop risk
 SYMPTOM: If user asks a broad question, gets "want to narrow or see overview?", says "give me overview", the next turn routes through the same pipeline → topics still broad → same Tier 2 question again. Infinite loop.
 PREVENTED_BY: Do not implement a Tier 2 ask-first pattern without a mechanism to exit the loop (e.g. a frontend signal, classifier detecting "overview_requested", or rewrite producing a detectable signal). Moving rewrite before classification would help but adds latency on all queries.
 SOLUTION: Dropped ask-first pattern. When topics > MAX_TOPIC_PATHS, auto-deliver Stage B with overview synthesis prompt + BROAD_QUERY_PREFIX. No round-trip, no loop. User can follow up to drill into any area.
+
+[2026-04-22]
+CATEGORY: TOOLING
+SERVICE: src/channel_web
+TASK: update progress labels in app.js
+SYMPTOM: Edit tool failed to match strings containing `…` (ellipsis). The Read tool renders `…` as the unicode character `…`, but the file stores the literal 6-char escape sequence `…`. Edit old_string built from Read output therefore never matches.
+ROOT_CAUSE: Read tool decodes unicode escapes for display; the file bytes are the escape sequences. Edit tool matches raw bytes, not the decoded display.
+PREVENTED_BY: When editing JS files that use `\uXXXX` escape sequences, use Python string replacement (reading/writing the file directly) rather than the Edit tool. Alternatively, verify the raw bytes with `cat -v` before writing the old_string.
+SOLUTION: Used Python to read, replace, and write the file.

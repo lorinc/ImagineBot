@@ -30,6 +30,18 @@ no vocabulary bridging, no completeness check, no multi-hop detection.
   ask a clarifying question rather than silently retrieving on an underspecified query.
   No separate classifier model needed — a prompt-based judge is sufficient at this corpus scale.
 
+- **Multi-question decomposition** — A single message can contain multiple distinct questions.
+  Example: "My son lost his hat, who can I call?" contains two questions: (1) what is the
+  lost-items policy, and (2) who is the person responsible for lost items. The current pipeline
+  treats the message as one query and typically answers whichever sub-question the retrieval
+  selects — the second is silently dropped.
+
+  Mitigation: after the scope gate passes, run a decomposition prompt: "Does this message
+  contain more than one distinct question? If so, list each as a standalone query." If the
+  result is a list, run each sub-query through the Stage A → Stage B pipeline independently
+  and concatenate the answers in order. Single-question messages pass straight through with
+  no added latency. A cheap structural model (Flash Lite) is sufficient for decomposition.
+
 - **Multi-hop detection** — When knowledge synthesis returns "see other policy / see separate
   section", there is no follow-up retrieval pass. A post-synthesis check for these phrases
   could trigger a second retrieval round. See Stage 4 cross-reference item.
@@ -149,11 +161,12 @@ Ordered by impact/cost ratio.
 
 1. **Reformulation logging** — pure observability, zero-cost, ships with Stage 0 anyway
 2. **Scope gate accuracy test set** — validates the cheapest LLM call before we rely on it
-3. **PRF reformulation** (Stage 0) — fixes vocabulary gap, the most common retrieval failure
-4. **Query completeness check** (Stage 0) — prevents silent failures on underspecified queries
-5. **Confidence threshold / I don't know** (Stage 3) — trivial check, prevents confident wrong answers
-6. **Rate limiting** (Stage 1) — needed before any public launch
-7. **NLI faithfulness check** (Stage 3) — one extra LLM call, catches conditional clause drop
-8. **Session expiry** — prevents memory leak in production
-9. **ReAct cross-reference loop** (Stage 4) — real engineering work; defer until synthesis quality is otherwise stable
-10. **PII redaction** (Stage 1) — regex patterns first, LLM detection later
+3. **Multi-question decomposition** (Stage 0) — correctness gap: second sub-question is silently dropped
+4. **PRF reformulation** (Stage 0) — fixes vocabulary gap, the most common retrieval failure
+5. **Query completeness check** (Stage 0) — prevents silent failures on underspecified queries
+6. **Confidence threshold / I don't know** (Stage 3) — trivial check, prevents confident wrong answers
+7. **Rate limiting** (Stage 1) — needed before any public launch
+8. **NLI faithfulness check** (Stage 3) — one extra LLM call, catches conditional clause drop
+9. **Session expiry** — prevents memory leak in production
+10. **ReAct cross-reference loop** (Stage 4) — real engineering work; defer until synthesis quality is otherwise stable
+11. **PII redaction** (Stage 1) — regex patterns first, LLM detection later

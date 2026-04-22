@@ -269,7 +269,7 @@ already HTTPS. Cloud IAP + LB is the production pattern (Sprint 4); this is the 
 **Goal:** Replace Graphiti + Neo4j + OpenAI with a Vertex AI + Gemini pipeline.
 API contract preserved — no channel_web changes required.
 
-### Phase 2.1 — Knowledge service rebuild — READY TO DEPLOY 2026-04-22
+### Phase 2.1 — Knowledge service rebuild — DEPLOYED 2026-04-22
 
 **Architecture chosen:** PageIndex (poc1 validated) — not Context Caching as originally planned.
 Context Caching was a viable interim approach; PageIndex is the better long-term architecture
@@ -310,7 +310,7 @@ curl -s -X POST https://knowledge-jeyczovqfa-ew.a.run.app/search \
 # → {"answer": "...", "facts": [{"fact": "...", "source_id": "en_..."}]}
 ```
 
-### Phase 2.2 — Gateway orchestration layer — READY TO DEPLOY 2026-04-22
+### Phase 2.2 — Gateway orchestration layer — DEPLOYED 2026-04-22
 
 **What was built:**
 - `src/gateway/` — new FastAPI service, single entry point for all channels
