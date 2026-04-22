@@ -14,6 +14,7 @@ let disclaimerSeen   = false;
 let answers          = [];     // [{id, question, answer, facts, error}]
 let answerIdCounter  = 0;
 let idToken          = null;   // Google ID token — in memory only, never persisted
+let sessionId        = null;   // Gateway session ID — tracks conversation history
 
 // ── UI strings ────────────────────────────────────────────────────────────────
 const UI = {
@@ -294,7 +295,7 @@ async function submitQuestion(question) {
     const resp = await fetch('/chat', {
       method:  'POST',
       headers: headers,
-      body:    JSON.stringify({ message: question }),
+      body:    JSON.stringify({ message: question, session_id: sessionId }),
     });
 
     if (resp.status === 401) {
@@ -340,6 +341,7 @@ async function submitQuestion(question) {
         if (type === 'progress') {
           textarea.value = t.progress[payload.key] || '';
         } else if (type === 'answer') {
+          if (payload.session_id) sessionId = payload.session_id;
           addAnswer(id, question, payload.answer, payload.facts, null);
         } else if (type === 'error') {
           addAnswer(id, question, null, null, payload.error || 'Unknown error');

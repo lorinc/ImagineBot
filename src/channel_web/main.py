@@ -12,7 +12,7 @@ from pydantic import BaseModel
 
 logger = logging.getLogger(__name__)
 
-KNOWLEDGE_SERVICE_URL = os.environ.get("KNOWLEDGE_SERVICE_URL", "")
+GATEWAY_SERVICE_URL = os.environ.get("GATEWAY_SERVICE_URL", "")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "")
 
 _ALLOWED_EMAILS_PATH = Path("/secrets/allowed_emails/ALLOWED_EMAILS")
@@ -66,6 +66,7 @@ templates = Jinja2Templates(directory=str(_HERE / "templates"))
 
 class ChatRequest(BaseModel):
     message: str
+    session_id: str | None = None
 
 
 @app.get("/health")
@@ -86,25 +87,21 @@ async def chat(body: ChatRequest, _user: dict = Depends(_get_current_user)):
         return JSONResponse(status_code=400, content={"error": "Message cannot be empty"})
 
     async def generate():
-        yield 'event: progress\ndata: {"key": "received"}\n\n'
-
         try:
-            token = _get_identity_token(KNOWLEDGE_SERVICE_URL)
+            token = _get_identity_token(GATEWAY_SERVICE_URL)
         except Exception as e:
             logger.error("Identity token error: %s", e)
             yield f'event: error\ndata: {json.dumps({"error": "Authentication error"})}\n\n'
             return
 
-        yield 'event: progress\ndata: {"key": "contacting"}\n\n'
-
         try:
             async with httpx.AsyncClient() as client:
                 async with client.stream(
                     "POST",
-                    f"{KNOWLEDGE_SERVICE_URL}/search/stream",
-                    json={"query": body.message, "group_ids": None},
+                    f"{GATEWAY_SERVICE_URL}/chat",
+                    json={"message": body.message, "session_id": body.session_id},
                     headers={"Authorization": f"Bearer {token}"},
-                    timeout=60.0,
+                    timeout=180.0,
                 ) as response:
                     response.raise_for_status()
                     async for line in response.aiter_lines():
@@ -114,13 +111,13 @@ async def chat(body: ChatRequest, _user: dict = Depends(_get_current_user)):
                             yield "\n"
         except httpx.HTTPStatusError as e:
             logger.error(
-                "Knowledge service returned %s: %s",
+                "Gateway returned %s: %s",
                 e.response.status_code,
                 e.response.text,
             )
-            yield f'event: error\ndata: {json.dumps({"error": "Knowledge service error"})}\n\n'
+            yield f'event: error\ndata: {json.dumps({"error": "Gateway error"})}\n\n'
         except Exception as e:
-            logger.error("Unexpected error calling knowledge service: %s", e)
+            logger.error("Unexpected error calling gateway: %s", e)
             yield f'event: error\ndata: {json.dumps({"error": "Service temporarily unavailable"})}\n\n'
 
     return StreamingResponse(generate(), media_type="text/event-stream")

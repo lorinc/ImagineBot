@@ -154,11 +154,10 @@ def test_chat_proxies_to_knowledge_service(mock_token, authed_client):
     assert answer_events[0]['data']['answer'] == "School starts at 8:30 AM."
     assert answer_events[0]['data']['facts'][0]['source_id'] == "family-manual"
 
-    # Assert query forwarded correctly
+    # Assert message forwarded correctly to gateway
     assert len(stream_calls) == 1
     call = stream_calls[0]
-    assert call['kwargs']['json']['query'] == "What time does school start?"
-    assert call['kwargs']['json']['group_ids'] is None
+    assert call['kwargs']['json']['message'] == "What time does school start?"
     assert "Bearer test-token" in call['kwargs']['headers']['Authorization']
 
 

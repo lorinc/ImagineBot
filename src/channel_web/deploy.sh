@@ -22,7 +22,7 @@ for line in text.splitlines():
 EOF
 )
 
-KNOWLEDGE_SERVICE_URL=https://knowledge-jeyczovqfa-ew.a.run.app
+GATEWAY_SERVICE_URL=https://gateway-jeyczovqfa-ew.a.run.app
 
 echo "Building image..."
 docker build -t "${IMAGE}:latest" src/channel_web/
@@ -38,7 +38,7 @@ gcloud run deploy channel-web \
   --project="${PROJECT}" \
   --service-account="${SA}" \
   --allow-unauthenticated \
-  --set-env-vars="KNOWLEDGE_SERVICE_URL=${KNOWLEDGE_SERVICE_URL},GOOGLE_CLIENT_ID=${OAUTH_CLIENT_ID}" \
+  --set-env-vars="GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL},GOOGLE_CLIENT_ID=${OAUTH_CLIENT_ID}" \
   --set-secrets="/secrets/allowed_emails/ALLOWED_EMAILS=ALLOWED_EMAILS:latest" \
   --memory=256Mi \
   --min-instances=0 \

@@ -103,6 +103,22 @@
           "What are the penalties for returned bank receipts?"
         ]
       }
+      },
+      {
+        "id": "gateway_testing",
+        "label": "Gateway Testing",
+        "symbol": "🧪",
+        "questions": [
+          "What happens after a fire drill?",
+          "What should a teacher do if a student is injured?",
+          "Who is responsible for safeguarding?",
+          "What is the capital of France?",
+          "How do I make pasta?",
+          "<b>What are the <script>alert(1)</script>school hours?</b>",
+          "Can you help me?",
+          "What are the rules?"
+        ]
+      }
     ]
   },
   "es": {
