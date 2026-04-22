@@ -33,11 +33,11 @@ const UI = {
     disclaimer:          'Disclaimer',
     disclaimerQuestion:  'What are the limitations of this chatbot?',
     progress: {
-      received:     'Question received\u2026',
-      contacting:   'Contacting knowledge base\u2026',
+      received:     'Understanding your question\u2026',
+      contacting:   'Searching knowledge base\u2026',
       cache_lookup: 'Loading knowledge cache\u2026',
-      querying_ai:  'Querying AI\u2026',
-      processing:   'Preparing answer\u2026',
+      querying_ai:  'Generating answer\u2026',
+      processing:   'Almost there\u2026',
     },
   },
   es: {
@@ -55,11 +55,11 @@ const UI = {
     disclaimer:          'Aviso legal',
     disclaimerQuestion:  '\u00bfCu\u00e1les son las limitaciones de este chatbot?',
     progress: {
-      received:     'Pregunta recibida\u2026',
-      contacting:   'Consultando la base de conocimiento\u2026',
+      received:     'Analizando tu pregunta\u2026',
+      contacting:   'Buscando en la base de conocimiento\u2026',
       cache_lookup: 'Cargando la cach\u00e9 de conocimiento\u2026',
-      querying_ai:  'Consultando la IA\u2026',
-      processing:   'Preparando la respuesta\u2026',
+      querying_ai:  'Generando la respuesta\u2026',
+      processing:   'Casi listo\u2026',
     },
   },
 };
