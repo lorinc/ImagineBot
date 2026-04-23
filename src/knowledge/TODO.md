@@ -10,6 +10,21 @@ _No known bugs at UAT entry (2026-04-22)._
 
 ---
 
+## Multilingual index support (blocked on ingestion spike)
+
+Once `src/ingestion/TODO.md` — "SPIKE: multilingual corpus" resolves to Option A
+(translate at ingestion time), the knowledge service needs to:
+
+- Accept a `language: "en" | "es"` parameter on `POST /search` and `POST /topics`.
+- Route to the language-appropriate index variant (parallel `en_*` / `es_*` indexes,
+  or a bilingual index with per-node language fields — TBD in the spike).
+- Default to `"en"` until ES indexes exist.
+
+Do not implement until the ingestion spike answers: which Spanish variant(s), who reviews
+translations, and how often the corpus updates. See `src/ingestion/TODO.md` for full context.
+
+---
+
 ## Tuning
 
 ### Breadth detection thresholds
@@ -90,6 +105,58 @@ Change select/discriminate prompt framing from label-matching to navigational re
 Directly fixes cases like `1.5` being skipped for ambiguous queries.
 
 See `poc/poc1_single_doc/TODO.md` for Stage 0 items (query reformulation, PRF, glossary).
+
+---
+
+### Precision-without-latency: parallel retrieval quality improvements
+
+Full analysis in `docs/design/parallelization_ideas.md` §5. These use Stage 2's existing
+concurrency budget to run more work at the same wall-clock cost.
+
+**Prerequisite for all four:** BigQuery trace must exist so before/after quality can be
+measured. Do not implement blindly — each has a stated hypothesis and test condition.
+
+#### 5a. Widen routing to 3-4 docs
+**Hypothesis:** Widening routing reduces answer-misses on cross-cutting queries without
+increasing latency (Stage 2 already runs all docs concurrently).
+**Change:** `make_route_prompt` in `indexer/prompts.py` — change "Select 1–2 document IDs"
+to "Select 1–4 document IDs."
+**Test condition:** Measure routing miss rate from trace data. Implement if >15% of
+low-rated answers had the correct doc outside the routed set.
+
+#### 5b. Dual-pass selection per doc (direct + context framings)
+**Hypothesis:** Running two concurrent selection passes per doc (direct-answer framing +
+background-context framing) and unioning the results reduces incomplete answers on
+procedural/conditional questions.
+**Change:** In `_select_from_doc` in `indexer/multi.py`, fire `asyncio.gather` over two
+`llm_call` invocations — current `make_select_prompt` plus a new
+`make_context_select_prompt` (background/definitions framing). Union unique node IDs
+before synthesis.
+**Test condition:** Compare `selected_nodes` count and user ratings on procedural questions
+(those with if/unless/except clauses) before and after.
+
+#### 5c. Query expansion in parallel with routing
+**Hypothesis:** A vocabulary-normalization rewrite fired concurrently with Stage 1 routing,
+then used alongside the original query in Stage 2 selection, reduces selection misses on
+informal/colloquial phrasing.
+**Change:** At the start of `query_multi_index`, fire an `asyncio.gather` over
+`llm_call(structural_model, make_expand_prompt(question))` and the routing call. Pass
+both `question` and `expanded_question` to `_select_from_doc`; union results.
+Add `make_expand_prompt` to `indexer/prompts.py`.
+Related to gateway PRF reformulation (gateway `TODO.md` Stage 0) but knowledge-internal:
+no gateway change required.
+**Test condition:** Compare ratings on queries that use informal vocabulary vs. their
+formal equivalents in the eval set.
+
+#### 5d. Routing miss recovery (cheap parallel scan on un-routed docs)
+**Hypothesis:** A structural-model pass on un-routed docs, run in parallel with Stage 2
+selection on routed docs, catches the tail of routing errors with low cost overhead.
+**Change:** In `query_multi_index`, after Stage 1, fire `asyncio.gather` over both the
+existing Stage 2 coroutines (quality model) and a new `_scan_doc(doc_id, question)`
+coroutine (structural model, lightweight prompt) for each un-routed doc. Merge any hits
+into `resolved_docs` before synthesis.
+**Test condition:** Track how often recovery nodes appear in synthesis. If <10% of queries
+use recovery nodes, routing is already good enough; if >10%, prioritise 5a instead.
 
 ---
 
