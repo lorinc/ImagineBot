@@ -4,6 +4,16 @@
 User-to-data-source mapping. Given a user ID, returns the set of source IDs that user
 is permitted to query. Called by the gateway's access middleware after auth passes.
 
+## Multi-tenant context
+In a multi-tenant system, every user belongs to a tenant and can only see that tenant's
+corpus. `permitted_source_ids` is the mechanism: the knowledge service accepts `group_ids`
+(currently stubbed as null) and filters its index to only those sources. Access control
+is enforced at the gateway — the knowledge service trusts whatever group_ids it receives.
+
+The admin service (`src/admin/`) is responsible for managing access grants:
+connecting sources to tenants and assigning users to tenants. The access service
+answers read queries only; it does not manage grants directly.
+
 ## ⚠️ SPIKE REQUIRED BEFORE IMPLEMENTATION
 Access control design is not yet decided. Do not implement until `docs/spikes/access.md`
 exists and contains a decision.

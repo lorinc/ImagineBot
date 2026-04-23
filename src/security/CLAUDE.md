@@ -1,56 +1,64 @@
 # src/security/ — Claude Code context
 
 ## Purpose
-Rate limiting, abuse detection, and malicious input screening. Runs as middleware in the
-gateway before any service call. Stateless where possible. Never calls the LLM.
+Rate limiting, abuse detection, and malicious input screening. Imported as a library
+by the gateway — not a deployed HTTP service. A round-trip before every user request
+would add unacceptable latency and create a circular dependency.
 
-## Responsibilities
-- **Rate limiting:** per-user and per-IP request limits. Configurable via env vars.
-- **Input screening:** detect prompt injection, jailbreak attempts, and abusive inputs.
-  Block before the request reaches the knowledge or LLM layer.
-- **Load protection:** reject requests when system load exceeds thresholds.
-
-## What this service does NOT do
-- It does not authenticate users (that's auth service)
-- It does not check data source permissions (that's access service)
-- It does not log conversation content (that's the gateway's job)
-
-## Implementation pattern
-Security checks are implemented as FastAPI middleware or as dependency-injected functions,
-called explicitly in the gateway. The gateway imports from this service as a library
-(same monorepo, direct import) rather than via HTTP — security checks must be fast.
-
+## How it is consumed
 ```python
-# In gateway middleware:
+# In gateway — imported directly, not called over HTTP:
 from security.rate_limiter import check_rate_limit
 from security.screener import screen_input
 
-# Both raise HTTPException on violation. Gateway catches nothing — let it propagate.
+# Both raise HTTPException on violation. Let it propagate.
 ```
 
-## Rate limiting design
-Store rate limit counters in Firestore (simple, no extra infra) or in-memory with
-periodic Firestore sync. Decision TBD — document here when made.
+The gateway imports this package directly (same monorepo). No Cloud Run deployment for
+this module. If other services need rate limiting in future, they import the same package.
 
-Key: `rate_limits/{user_id}` or `rate_limits/{ip}` depending on auth state.
+## Responsibilities
 
-## Input screening
-Initial implementation: regex + heuristic blocklist. No LLM for screening (circular).
-Log every blocked request with: user_id, input_hash (not raw input), rule_triggered, timestamp.
-Never log raw user input in security events.
+### Rate limiting
+Per-user, per-tenant request quotas. For multi-tenant operation, limits must be enforced
+across all gateway instances, not just in-process. Backend: Firestore sliding window counter
+keyed by `{tenant_id}:{user_id}`. In-memory fallback acceptable for single-instance dev.
 
-## Environment variables
+Target: 20 RPM per authenticated user. Burst allowance: 3.
+
+Firestore key: `rate_limits/{tenant_id}/{user_id}`. Read-modify-write under Firestore
+transaction (optimistic concurrency). Cache the counter in-process for the token TTL
+to reduce Firestore reads on sequential requests from the same user.
+
+Spike before implementation: confirm Firestore latency (~5ms) is acceptable in the gateway
+hot path, or evaluate Cloud Memorystore (Redis) as alternative.
+
+### Input screening
+Detect prompt injection and jailbreak attempts before the scope gate. Regex + heuristic
+blocklist first; LLM-based detection only if precision demands it (LLM screening of every
+request is expensive and circular). Never use the same LLM being protected as the screener.
+
+Log every blocked request: `user_id`, `input_hash` (not raw input), `rule_triggered`,
+`timestamp`. Never log raw user input.
+
+### What this module does NOT do
+- Authentication (that is `src/auth/`)
+- Permission checks (that is `src/access/`)
+- Output screening — handled by the gateway before SSE emission if needed
+
+## Key invariants
+- Rate limit checks run before auth — a blocked request never touches the database
+- Blocking is opaque to the caller: raise HTTP 429 with no rule details exposed
+- Rate limit state survives gateway restarts — do not use in-memory-only counters in production
+- Never log raw user input
+
+## Environment variables (read by gateway, passed to security functions)
 ```
 RATE_LIMIT_RPM          Requests per minute per authenticated user (default: 20)
 RATE_LIMIT_RPM_ANON     Requests per minute per IP for unauthenticated (default: 5)
-RATE_LIMIT_BURST        Burst allowance (default: 3)
-SECURITY_LOG_COLLECTION Firestore collection for security events (default: security_events)
+RATE_LIMIT_BURST        Burst allowance above RPM (default: 3)
+GCP_PROJECT_ID          For Firestore rate limit storage
 ```
 
-## Key invariants
-- Security checks run before auth. A blocked IP never touches the database.
-- Blocking is silent from the user's perspective: return 429 with no details on why.
-- Rate limit state survives service restarts. Do not use in-memory-only counters in production.
-
-## Known issues
-[Populate as work proceeds]
+## Implementation status
+Not yet implemented. Stub folder only.

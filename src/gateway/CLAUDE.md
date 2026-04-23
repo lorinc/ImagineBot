@@ -1,91 +1,108 @@
 # src/gateway/ — Claude Code context
 
 ## Purpose
-Single entry point for all channels. Routes requests after auth, access, and security
-checks pass. Channels (web, WhatsApp, future) call this service only — they have no
-direct access to knowledge, auth, or any other service.
+Single entry point for all channels. Orchestrates the full request pipeline:
+sanitize → classify → rewrite → retrieve → stream. Auth, access control, and
+rate limiting are enforced here before any retrieval call. Channels have no
+direct access to knowledge or any other backend service.
 
-## Module map
+## Current structure
 ```
-main.py             App factory. Wires together middleware and routers. No logic here.
+main.py             App factory. Wires vertexai init and chat router. No logic.
+config.py           All tunable constants. Reads env vars at startup; raises on missing.
 routers/
-  query.py          POST /query — the main user-facing endpoint
-  health.py         GET /health — used by smoke tests and Cloud Run health checks
-middleware/
-  auth_middleware.py      Validates token. Attaches user_id to request state.
-  access_middleware.py    Calls access service. Attaches permitted_source_ids to request state.
-  security_middleware.py  Rate limiting + input screening. Rejects before any service call.
-models/
-  query.py          QueryRequest, QueryResponse — source of truth for API contract
+  chat.py           POST /chat — full streaming pipeline (SSE)
 services/
-  knowledge_client.py   HTTP client for knowledge service. Thin wrapper.
-  llm_client.py         LLM API call. Receives context from knowledge, returns answer.
-config.py           Reads environment variables. Fails loudly on startup if missing.
+  sanitize.py       HTML stripping, whitespace normalization, 512-char limit
+  scope_gate.py     LLM classifier: in_scope + specific_enough (one Gemini call)
+  rewrite.py        Standalone query rewrite for session follow-ups
+  knowledge_client.py  HTTP client for knowledge service (GET /topics, POST /search)
 ```
 
-## Request lifecycle (inside gateway)
+## Pipeline steps (all gateway-internal)
 ```
-POST /query
-  → security_middleware (rate limit + screen input)
-  → auth_middleware (validate token → user_id)
-  → access_middleware (user_id → permitted_source_ids)
-  → knowledge_client.retrieve(query, permitted_source_ids) → context
-  → llm_client.answer(query, context) → answer
-  → QueryResponse
+POST /chat
+  1. sanitize          Strip HTML, normalize whitespace, enforce 512-char limit
+  2. classify          LLM call → (in_scope, specific_enough)
+  3. rewrite           If session history: rewrite follow-up as standalone question
+  4. topics            Knowledge GET /topics → L1 topic list
+  5. breadth check     Sibling consolidation → is query broad?
+  6. search            Knowledge POST /search → {answer, facts}
+  7. stream            Emit SSE events; prepend BROAD_QUERY_PREFIX if broad
 ```
 
-Middleware runs in the order registered. Order matters. Do not reorder without understanding
-the security implications: security checks must run before auth (to block before any DB hit),
-auth must run before access (access needs user_id).
+Steps 3–7 are skipped when classify returns out-of-scope or not-specific-enough.
 
-## API contract (QueryResponse fields)
-| Field | Type | Notes |
-|-------|------|-------|
-| answer | str | LLM-generated answer |
-| sources | list[SourceRef] | Sources used — id + title only, not content |
-| session_id | str | For conversation continuity |
-| [fields TBD] | | Update this table when models are finalised |
+## What stays gateway-internal
+Pipeline steps are stateless transforms tied to a single request. They scale with
+the gateway and have no independent lifecycle:
+- Input sanitization and HTML screening
+- Scope + specificity classification (scope_gate.py)
+- Session-based query rewriting (rewrite.py)
+- Breadth detection (topic count + sibling collapse)
+- BigQuery trace emission (planned — fire-and-forget after answer event)
 
-Contract tests live in `tests/contracts/test_query_contract.py`.
-When any field changes here, update that file first.
+## What is called over HTTP (separate services)
+```
+knowledge/    GET /topics, POST /search — retrieval and synthesis
+auth/         POST /validate — token validation on every request (planned)
+access/       GET /access/{user_id} — permitted source IDs (planned)
+```
+
+Rate limiting and input abuse detection are imported as a library from `src/security/`,
+not called over HTTP — a round-trip before every request would add unacceptable latency.
+See `src/security/CLAUDE.md`.
+
+## API contract
+```
+POST /chat
+  Request:  { "message": str, "session_id": str | null }
+  Response: Server-Sent Events stream
+    event: progress  data: {"key": "received" | "contacting" | "querying_ai" | "processing"}
+    event: answer    data: {"answer": str, "facts": [...], "session_id": str, "warning": str|null}
+    event: error     data: {"error": str}
+
+GET /health
+  Response: { "status": "healthy" }
+```
+
+`facts` is always present; empty when pipeline short-circuits (out-of-scope, vague).
+`warning` is non-null only when HTML was stripped from the input.
+
+## Routing tiers
+| Tier | Condition | Knowledge call? |
+|------|-----------|----------------|
+| 3 — Out of scope | `in_scope = false` | No |
+| 2 — Vague | `in_scope = true, specific_enough = false` | No |
+| 1b — Broad | in scope, specific, `topic_count > MAX_TOPIC_PATHS` | Yes (overview prompt) |
+| 1a — Focused | in scope, specific, `topic_count ≤ MAX_TOPIC_PATHS` | Yes (full synthesis) |
+
+## Session management
+In-memory: `session_id → last 10 turns [{q, a}]`. Lost on instance restart.
+Cloud Run may spin down idle instances. Firestore-backed sessions deferred until
+multi-instance scaling requires it.
 
 ## Key invariants
-- The gateway never directly queries Firestore. It calls services.
-- Permitted source IDs are attached by middleware and passed through — never derived inside a route handler.
-- LLM is called only after knowledge retrieval completes. No LLM calls with empty context.
-- All inter-service calls are HTTP. No shared in-process state between services.
-- Config is read once at startup. `config.py` raises on missing required vars.
+- All inter-service calls go through dedicated client modules — never raw httpx in route handlers
+- Permitted source IDs come from the access service middleware — never derived in a route handler
+- LLM calls happen only inside dedicated service modules (scope_gate.py, rewrite.py)
+- Config raises on startup for missing required vars — no silent defaults in production
 
-## Inter-service calls
-All outbound calls go through dedicated client modules. Never use `httpx` directly
-inside a route handler.
-
-```python
-# CORRECT
-context = await knowledge_client.retrieve(query, permitted_source_ids)
-
-# WRONG
-resp = await httpx.post(settings.knowledge_url + "/retrieve", ...)
-```
-
-This makes mocking in tests straightforward and keeps route handlers readable.
-
-## Environment variables
-```
-KNOWLEDGE_SERVICE_URL     Internal Cloud Run URL for knowledge service
-AUTH_SERVICE_URL          Internal Cloud Run URL for auth service
-ACCESS_SERVICE_URL        Internal Cloud Run URL for access service
-LLM_API_KEY               LLM provider API key (never log this)
-LLM_MODEL                 Model identifier string
-RATE_LIMIT_RPM            Requests per minute per user (default: 20)
-```
+## Configuration (config.py — all tunable via env vars)
+| Variable | Default | Effect |
+|----------|---------|--------|
+| `GCP_PROJECT_ID` | `img-dev-490919` | GCP project for Vertex AI |
+| `VERTEX_AI_LOCATION` | `europe-west1` | Vertex AI region |
+| `KNOWLEDGE_SERVICE_URL` | *(required in prod)* | Knowledge service URL |
+| `MAX_TOPIC_PATHS` | `5` | Topic count threshold for overview mode |
+| `SIBLING_COLLAPSE_THRESHOLD` | `3` | L1 sections per doc before collapsing to doc-level |
 
 ## Running locally
 ```bash
 cd src/gateway
 pip install -r requirements.txt
+export GCP_PROJECT_ID=img-dev-490919
+export KNOWLEDGE_SERVICE_URL=https://knowledge-jeyczovqfa-ew.a.run.app
 uvicorn main:app --reload --port 8000
+# Requires: gcloud auth application-default login
 ```
-
-## Known issues
-[Populate as work proceeds]

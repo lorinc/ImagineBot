@@ -2,7 +2,14 @@
 
 ## Purpose
 Web UI channel. The first user-facing surface. Thin client: formats requests for the
-knowledge service (Sprint 1) / gateway (Sprint 2+), renders responses. No business logic here.
+gateway, renders responses. No business logic here — all pipeline logic lives in the gateway.
+
+## Sprint 1 vs. Sprint 2+ transition
+Sprint 1: channel_web calls the knowledge service directly (`POST /search`). Auth is
+inline — Google Sign-In + `ALLOWED_EMAILS` secret. Single tenant only.
+
+Sprint 2+: channel_web calls the gateway (`POST /chat`). Auth moves to the gateway's
+auth middleware backed by `src/auth/`. The ALLOWED_EMAILS approach is retired.
 
 ## Stack
 - **FastAPI** — serves the Jinja2 template and handles POST /chat

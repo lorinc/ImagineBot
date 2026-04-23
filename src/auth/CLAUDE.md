@@ -1,8 +1,22 @@
 # src/auth/ — Claude Code context
 
 ## Purpose
-Authentication. Issues and validates tokens. Called by the gateway's auth middleware.
-Users never call this directly.
+Authentication. Issues and validates tokens for all users across all tenants.
+Called by the gateway's auth middleware on every request. Users never call this directly.
+
+## Current state (Sprint 1)
+Auth is not yet implemented as a service. Channel_web handles auth inline using
+Google Sign-In + `ALLOWED_EMAILS` (a Secret Manager secret). This is a single-tenant
+interim: changing the allowed user list requires a GCP secret update and redeploy.
+This service is the multi-tenant replacement.
+
+## Multi-tenant requirements
+The auth service must support:
+- An org/user/role hierarchy: tenant → users → roles (admin, member)
+- Invite flows: admins invite users; users do not self-register
+- Token issuance with tenant context embedded (so the gateway can route correctly)
+- Runtime revocation: removing a user takes effect on the next request, not after token TTL
+- Multiple channels: web (Google OAuth), future WhatsApp (phone identity — different mechanism)
 
 ## ⚠️ SPIKE REQUIRED BEFORE IMPLEMENTATION
 Auth design is not yet decided. Do not implement until `docs/spikes/auth.md` exists
