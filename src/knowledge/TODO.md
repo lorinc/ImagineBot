@@ -4,6 +4,47 @@ _Append-only. Resolve items by striking through and noting the outcome._
 
 ---
 
+## UX Framework gaps — knowledge service obligations
+
+Full analysis in `gap_analysis.md`. All four open gaps share the same root prerequisite.
+
+### selected_nodes in SearchResponse (prerequisite for Gate 3, Gate 4, trace, evaluation)
+
+`POST /search` currently reads `synthesis.selected_nodes` internally in `_facts_from_result`
+but does not return it to callers. Add it to `SearchResponse`:
+
+```python
+class SearchResponse(BaseModel):
+    answer: str
+    facts: list[FactRef]
+    selected_nodes: list[str]  # node IDs used in synthesis; empty = retrieval miss
+```
+
+This single change unblocks four downstream items in the gateway:
+1. Gate 3 — evidence gate: `selected_nodes: []` → gateway routes to "in scope, unsupported" response
+2. Gate 4 — cross-reference follow-up: gateway can detect whether a second call retrieved new nodes
+3. Retrieval miss vs. documentation gap: empty `selected_nodes` signals retrieval failure, not corpus gap
+4. BigQuery trace: gateway needs `selected_nodes` to log which chunks were used per query
+
+See `gap_analysis.md` §Gate 3, §Gate 4, §Retrieval miss vs. documentation gap, §Evaluation.
+
+### has_evidence flag (Gate 3 — simplest evidence signal)
+
+Once `selected_nodes` is exposed, the gateway can derive evidence presence itself.
+If a simpler signal is preferred, add `has_evidence: bool` to `SearchResponse`:
+
+```python
+has_evidence: bool  # True if selected_nodes is non-empty
+```
+
+Derived field — no change to retrieval logic, just surface the information already computed.
+This lets the gateway distinguish "in scope, evidence found" from "in scope, no supporting
+documents" without the gateway needing to know what `selected_nodes` means internally.
+
+See `gap_analysis.md` §Gate 3.
+
+---
+
 ## Bugs
 
 _No known bugs at UAT entry (2026-04-22)._
@@ -74,6 +115,7 @@ Implementation: filter `multi_index["documents"]` to only those whose `doc_id` i
 **Problem:** `facts` in the API response are derived from the list of selected nodes
 (section title + doc_id), not from structured citations in the answer. The synthesis
 prompt produces plain text with inline `[doc_id:section_id]` references.
+Related to UX framework Gate 3 and evaluation gaps — see `gap_analysis.md`.
 
 **Hypothesis:** Change `make_synthesize_prompt` to output JSON with a `citations` array
 (`[{document, excerpt}]`) instead of plain text. Map to `facts` directly.
