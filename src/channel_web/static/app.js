@@ -493,23 +493,38 @@ async function submitFeedback(traceId, rating, comment = null) {
   }
 }
 
+function _applyThumbHighlight(id, rating) {
+  document.getElementById('thumbup-'   + id)?.classList.toggle('action-btn-selected', rating === 1);
+  document.getElementById('thumbdown-' + id)?.classList.toggle('action-btn-selected', rating === -1);
+}
+
 function handleThumbUp(id) {
   const a = answers.find(a => a.id === id);
+  if (!a?.traceId) return;
+  const comment = a.feedback?.comment || null;
+  _applyThumbHighlight(id, 1);
+  submitFeedback(a.traceId, 1, comment);
+  a.feedback = { rating: 1, comment };
   const form = document.getElementById('feedback-form-' + id);
   if (!form) return;
   form.dataset.pendingRating = '1';
   const textarea = document.getElementById('feedback-comment-' + id);
-  if (textarea) textarea.value = a?.feedback?.comment || '';
+  if (textarea) textarea.value = comment || '';
   form.style.display = '';
 }
 
 function handleThumbDown(id) {
   const a = answers.find(a => a.id === id);
+  if (!a?.traceId) return;
+  const comment = a.feedback?.comment || null;
+  _applyThumbHighlight(id, -1);
+  submitFeedback(a.traceId, -1, comment);
+  a.feedback = { rating: -1, comment };
   const form = document.getElementById('feedback-form-' + id);
   if (!form) return;
   form.dataset.pendingRating = '-1';
   const textarea = document.getElementById('feedback-comment-' + id);
-  if (textarea) textarea.value = a?.feedback?.comment || '';
+  if (textarea) textarea.value = comment || '';
   form.style.display = '';
 }
 
@@ -522,8 +537,7 @@ function handleFeedbackSubmit(id, btn) {
   const a = answers.find(a => a.id === id);
   if (a) a.feedback = { rating, comment: comment || null };
   if (form) form.style.display = 'none';
-  document.getElementById('thumbup-' + id)?.classList.toggle('action-btn-selected', rating === 1);
-  document.getElementById('thumbdown-' + id)?.classList.toggle('action-btn-selected', rating === -1);
+  _applyThumbHighlight(id, rating);
 }
 
 // Event delegation for answer list actions
