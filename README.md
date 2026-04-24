@@ -4,35 +4,38 @@ A multi-service Q&A system. Documents are ingested and kept current; users ask q
 
 ## Stack
 
-Python 3.12 · FastAPI · Firestore · Vertex AI (Gemini 2.5 Flash, text-embedding-004) · GCP Cloud Run
+Python 3.12 · FastAPI · Firestore · Vertex AI (Gemini 2.5 Flash) · GCP Cloud Run · GCS
 
 ## Services
 
 ```
 channel_web   Web UI. Thin client — formats requests, renders responses. No business logic.
-gateway       Single entry point for all channels. Handles auth and routing.
-knowledge     Retrieval layer. Given a query + permitted source IDs, returns context for the LLM.
-ingestion     Document intake. Watches sources, processes changes, writes to the knowledge store.
-access        User-to-source mapping. Returns the set of sources a user may query.
-auth          Token issuance and validation.
-security      Rate limiting and input screening. Sits before the LLM call.
+gateway       Single entry point for all channels. Handles routing, session, tracing, feedback.
+knowledge     Retrieval layer. PageIndex + Gemini: given a query, returns cited answer.
+ingestion     Document intake. Converts Drive corpus → Markdown → PageIndex → GCS.
+access        User-to-source mapping. Returns the set of sources a user may query. [planned]
+auth          Token issuance and validation. [planned]
+security      Rate limiting and input screening. [planned]
+admin         Tenant + corpus management. [planned]
+```
+
+## Deployed (img-dev-490919, europe-west1)
+
+```
+channel_web   https://channel-web-jeyczovqfa-ew.a.run.app   public, Google Sign-In
+gateway       https://gateway-jeyczovqfa-ew.a.run.app        internal
+knowledge     https://knowledge-jeyczovqfa-ew.a.run.app      internal
 ```
 
 ## Request flow
 
 ```
-User → channel_web → gateway → auth → access → security → knowledge → LLM → response
+User → channel_web → gateway → knowledge → Vertex AI → response
+                   ↘ Firestore (traces + feedback, fire-and-forget)
 ```
-
-## Research
-
-### PageIndex — single-document retrieval
-
-[`poc/poc1_single_doc/`](poc/poc1_single_doc/) — an LLM-indexed retrieval pipeline over markdown documents. No vector database, no embeddings. Build once; the index is a JSON file. Queries run in two LLM round trips: outline-based node selection, then synthesis over the selected sections.
-
-[Technical specification & usage guide →](poc/poc1_single_doc/SPEC.md)
 
 ## Development
 
-See `CLAUDE.md` for session protocol, spike queue, and service-level context.
-See `.claude/HEURISTICS.log` for recorded failure modes and their root causes.
+See `CLAUDE.md` for session protocol and service-level context.
+See `.claude/HEURISTICS.log` for recorded failure modes and root causes.
+See `docs/PROJECT_PLAN.md` for sprint status.
