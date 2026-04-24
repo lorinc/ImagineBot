@@ -6,61 +6,26 @@ At the start of every session, before anything else:
 2. Run `tail -40 .claude/HEURISTICS.log`
 3. Output a session brief — 3–5 sentences max: what was done last session, what comes next. No headers, no bullet trees, no essay.
 
-## What this is
-A multi-service knowledge system: documents are ingested and kept current,
-a knowledge layer serves answers to an LLM, and users interact through channels
-(web UI first, WhatsApp later) with access controlled per user per data source.
-
-## Stack
-- **Language/Runtime:** Python 3.12
-- **Framework:** FastAPI (all services)
-- **Database:** Firestore (primary)
-- **Knowledge retrieval:** Vertex AI Context Caching + Gemini 2.5 Flash (full-context, not RAG)
-- **LLM:** Gemini 2.5 Flash via Vertex AI (both knowledge retrieval and answer synthesis)
-- **Auth:** [TBD — see SPIKE: auth]
-- **Frontend:** Jinja2 SSR, hand-written CSS (no framework, no build step)
-- **Infra:** GCP — 2 projects: `img-dev` (staging) and `img-prod` (production)
-           Cloud Run per service, Firestore, Secret Manager, Artifact Registry, Vertex AI
-- **CI/CD:** GitHub Actions + Workload Identity Federation (one pool per project, no stored keys)
-           Note: CI/CD workflows have placeholder values and are not yet wired up.
-           Deploy path is local Docker only — see .claude/HEURISTICS.log ARCHIVE block.
-
 ## Service map
 ```
 src/
-  gateway/        API gateway. Single entry point for all channels.
-                  Channels are thin clients — they call this, nothing else.
-                  Routes requests after auth + access checks pass.
+  gateway/        Entry point for all channels. Routing, session, tracing, feedback.
+                  Deployed. Calls knowledge service directly (auth/access/security stubbed).
 
-  ingestion/      Document intake and freshness. Watches sources, processes
-                  changes, writes to the knowledge store. Runs on schedule
-                  or webhook trigger, not on user request path.
+  knowledge/      Retrieval layer. PageIndex + Gemini 2.5 Flash. Given a query + source IDs,
+                  returns cited answer. Deployed. Index loaded from GCS (or baked image fallback).
 
-  knowledge/      Retrieval layer. Given a query + permitted source IDs,
-                  returns relevant context for the LLM.
-                  Vertex AI Context Caching + Gemini 2.5 Flash (full-context, not RAG).
+  ingestion/      Document intake. CLI pipeline: Drive → Markdown → PageIndex → GCS.
+                  Not yet deployed as a service. See gdrive_integration_plan.md for roadmap.
 
-  security/       Rate limiting, abuse detection, malicious input screening.
-                  Sits before the LLM call. Stateless where possible.
+  channel_web/    Web UI. Jinja2 SSR. Thin client: calls gateway, renders SSE stream.
+                  Deployed. Google Sign-In auth, allowed-email list in Secret Manager.
 
-  auth/           Authentication. Issues and validates tokens.
-                  [Design TBD — see SPIKE: auth]
-
-  access/         User-to-data-source mapping. Given a user ID, returns
-                  the set of source IDs they may query.
-                  [Design TBD — see SPIKE: access control]
-
-  channel_web/    Web UI channel. Jinja2 SSR. Thin client: formats requests
-                  for the gateway, renders responses. No business logic here.
+  admin/          Tenant + corpus management. [not yet implemented]
+  auth/           Token issuance and validation. [not yet implemented]
+  access/         User-to-source mapping. [not yet implemented]
+  security/       Rate limiting and input screening. [not yet implemented]
 ```
-
-## Request flow (current understanding)
-```
-User → channel_web → gateway → [auth] → [access: get permitted sources]
-     → [security: rate limit + screen] → [knowledge: retrieve context]
-     → LLM call → response → channel_web → User
-```
-This flow is an assumption. Validate it in the architecture spike before building services.
 
 ## Operational files
 
@@ -69,10 +34,12 @@ This flow is an assumption. Validate it in the architecture spike before buildin
 | `.claude/SESSION.md` | Per-session working state | Read at session start. Overwrite each new session. Gitignored. |
 | `.claude/HEURISTICS.log` | Append-only institutional memory | Never edit past entries. `tail -40` to review recent. |
 | `docs/PROJECT_PLAN.md` | Sprint breakdown and phase status | Update when phases complete or are added. |
+| `src/<service>/CLAUDE.md` | Service-level context, architecture, current state | Read before touching that service. |
+| `src/<service>/TODO.md` | Service-level backlog | Append-only. Strike through resolved items. |
 
 Each file has a purpose header with its own format rules. CLAUDE.md does not duplicate them.
 
-Use `/wrap` at the end of each session to update all three files consistently.
+Use `/wrap` at the end of each session to update SESSION.md, HEURISTICS.log, and PROJECT_PLAN.md consistently.
 
 ## Dependency policy
 This project is deliberately conservative on dependencies.
