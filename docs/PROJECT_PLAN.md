@@ -310,6 +310,55 @@ curl -s -X POST https://knowledge-jeyczovqfa-ew.a.run.app/search \
 # → {"answer": "...", "facts": [{"fact": "...", "source_id": "en_..."}]}
 ```
 
+### Phase 2.3 — Pipeline tracing + version stamps + 👎👍 feedback — IMPLEMENTATION COMPLETE 2026-04-24
+
+**What was built:**
+- Firestore `traces/{trace_id}` written fire-and-forget after every chat request
+- Schema: trace_id, session_id, timestamp, versions, pipeline_path, input, classifier, rewrite, topics, knowledge, output, feedback
+- Frugal storage (~800 bytes/trace): decisions + IDs only — no prompt text, no corpus summary, no node text
+- Per-service version stamps via `MODULE_GIT_REV=$(git log -1 --format="%H" -- src/<service>/)` injected at deploy time
+- Knowledge service returns `selected_nodes: [{doc_id, node_id}]` in SearchResponse + `X-Service-Version` header
+- Gateway reads version header → `versions.knowledge` in trace
+- `POST /feedback` on gateway updates `traces/{trace_id}.feedback.*` in Firestore
+- `POST /feedback` on channel_web forwards to gateway (thin client pattern preserved)
+- 👎👍 buttons in UI: 👍 fires immediately, 👎 shows comment form; both attach `trace_id` from SSE
+
+**Files created/modified:**
+- `src/gateway/services/trace_writer.py` (new)
+- `src/gateway/routers/chat.py`, `src/gateway/config.py`, `src/gateway/requirements.txt`, `src/gateway/deploy.sh`
+- `src/knowledge/main.py`, `src/knowledge/deploy.sh`
+- `src/channel_web/main.py`, `src/channel_web/static/app.js`, `src/channel_web/deploy.sh`
+
+**Status:** DEPLOYED 2026-04-24. All three services live at bb2f256. Smoke test passed (trace doc verified in Firestore). Browser UAT pending.
+
+### Phase 2.4 — Feedback editing + short-circuit feedback buttons — IMPLEMENTATION COMPLETE 2026-04-24
+
+**What was built:**
+- Feedback editing: both 👍 and 👎 open comment form; re-clicking a selected thumb re-opens form pre-filled with prior comment
+- Short-circuit exits (out-of-scope, orientation) now emit `trace_id` in SSE event → 👍/👎 buttons appear on those answers
+- `src/gateway/routers/chat.py` — add `trace_id` field to `out_of_scope` and `orientation` answer events
+- `src/channel_web/static/app.js` — feedback editing state machine; pre-fill on re-click
+- `src/channel_web/static/style.css` — `.action-btn-selected` CSS class
+
+**Status:** Implementation complete. Browser UAT pending (uncommitted).
+
+### Phase 3.1 — GDrive integration UAT plan — SCOPED 2026-04-24
+
+**Plan:** `~/.claude/plans/awesome-do-a-gap-dynamic-stardust.md`
+
+**Scope (agreed):** Ops-triggered ingest via CLI (no admin UI). Single corpus. Flat Drive folder. No multi-tenant isolation.
+
+**Gap summary:**
+- Ingestion: personal OAuth → service account auth; hardcoded folder name → `--drive-folder-id` param; local index → GCS write
+- Knowledge: Docker-baked index → GCS download at startup
+- GCP: create `ingestion-sa`, GCS bucket `img-dev-index`, grant roles, SA key in Secret Manager
+
+**Explicitly deferred:** admin service, Firestore `sources` collection, `group_ids` enforcement, scheduled polling, subfolder recursion, DOCX-via-SA.
+
+**Status:** Plan written. Not started.
+
+---
+
 ### Phase 2.2 — Gateway orchestration layer — DEPLOYED 2026-04-22
 
 **What was built:**

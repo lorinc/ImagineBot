@@ -109,6 +109,13 @@ forward retrieval hints derived from the query understanding stage.
 
 ## Bugs
 
+- **Feedback buttons missing on short-circuit exits** — Out-of-scope and vague (Tier 2/3)
+  responses do not emit a `trace_id` in the SSE stream, so the frontend never renders thumb
+  buttons. This is wrong: feedback is most valuable when the classifier made the wrong call.
+  Fix: write the trace doc and emit `trace_id` in the `answer` event for *all* pipeline exits,
+  including short-circuits. The trace doc will have `pipeline_path: "out_of_scope"` or
+  `"vague"` and empty `knowledge.*` fields.
+
 - **Citation/source list mismatch** — Query: "What should a teacher do if a student is injured?"
   Every block in the answer cited `[en_policy3_health_safety_reporting:2.4]`, but the `sources`
   field listed 3 chunks from that document and 3 chunks from a different document. Either the

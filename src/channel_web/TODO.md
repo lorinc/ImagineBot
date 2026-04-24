@@ -101,6 +101,54 @@ field — coordinate with knowledge service TODO.
 
 ---
 
+---
+
+## Feedback editing
+
+After feedback is submitted, the selected thumb stays highlighted. If the user clicks
+either thumb button again, re-open the feedback form pre-filled with their previous
+rating and comment, allowing them to change either or both.
+
+On re-submit, overwrite the existing `feedback.*` fields in the Firestore trace doc
+(same `POST /feedback` call — the endpoint already does an update, not an insert).
+`rated_at` gets a fresh timestamp.
+
+**Browser state**: keep the last submitted `{ rating, comment }` in the same JS object
+that holds `traceId`. No persistence needed beyond the current page — if the user
+reloads, the highlight is gone, which is acceptable.
+
+---
+
+## Disclaimer button
+
+The disclaimer button originally worked by submitting a hardcoded question
+(`"What are the limitations of this chatbot?"`) as a regular chat query, relying
+on the knowledge service to return a canned answer from the corpus.
+
+Since the gateway was introduced, this no longer works: the question is not in
+the corpus, so the scope gate classifies it as out-of-scope and returns the
+out-of-scope reply instead of a disclaimer.
+
+**Fix options (pick one):**
+
+1. **Hardcoded response (simplest)** — Intercept the disclaimer question in the
+   gateway before the scope gate and return a static `DISCLAIMER_TEXT` string
+   from `config.py`. No corpus dependency, no LLM call.
+
+2. **Static modal (no backend)** — Replace the submit-question flow entirely.
+   Clicking "Disclaimer" opens a modal with hardcoded disclaimer text in the
+   frontend. Zero backend involvement. Correct separation of concerns: disclaimer
+   is a UI concern, not a knowledge concern.
+
+3. **Corpus entry** — Add a disclaimer document to the corpus so the classifier
+   marks it in-scope. Fragile: depends on the classifier and retrieval both
+   working correctly for a non-question query.
+
+Option 2 is recommended. The disclaimer text is product copy, not knowledge-base
+content — it belongs in the UI layer.
+
+---
+
 ### Out of scope for MVP
 
 - Aggregated feedback dashboard

@@ -938,3 +938,15 @@ SYMPTOM: Edit tool raised "File has not been read yet" on src/security/CLAUDE.md
 ROOT_CAUSE: The Edit tool tracks whether the Read tool was called on the file, not whether the file contents were seen in any tool output. Bash cat output does not count as a Read.
 PREVENTED_BY: Before using Edit or Write on any file, always call the Read tool on that specific file path — even if you already know its contents from Bash output.
 SOLUTION: Called Read tool on the file, then Edit succeeded.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-24]
+CATEGORY: TOOLING
+SERVICE: cross-cutting
+TASK: verify deployed service health endpoint
+SYMPTOM: `curl` output for a JSON endpoint came back as `{ status: string, version: string }` — unquoted keys, literal "string" values. Looked like an OpenAPI schema. Verbose flag (-sv) showed no HTTP headers either.
+ROOT_CAUSE: The rtk hook rewrites `curl` → `rtk curl`, which summarises/filters JSON responses to reduce token count. The filter produces a schema-like summary instead of the raw bytes.
+PREVENTED_BY: When you need the raw response from a service (e.g. verifying a version hash, checking an exact field value), always use `rtk proxy curl ...` — the `proxy` subcommand bypasses all filtering and returns the real output.
+SOLUTION: Re-ran with `rtk proxy curl` and received correct JSON: `{"status":"healthy","version":"bb2f256..."}`.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
