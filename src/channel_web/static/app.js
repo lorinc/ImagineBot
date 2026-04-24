@@ -364,7 +364,7 @@ async function submitQuestion(question) {
 
 // ── Answers ───────────────────────────────────────────────────────────────────
 function addAnswer(id, question, answer, facts, error, warning = null, traceId = null) {
-  answers.push({ id, question, answer, facts, error, warning, traceId });
+  answers.push({ id, question, answer, facts, error, warning, traceId, feedback: null });
 
   const list = document.getElementById('answers-list');
   const wrapper = document.createElement('div');
@@ -469,7 +469,7 @@ function buildAnswerCard(id, question, answer, facts, error, warning = null, tra
       ${traceId ? `
       <div id="feedback-form-${id}" style="display:none;padding:8px 12px 12px;border-top:1px solid var(--border)">
         <textarea id="feedback-comment-${id}"
-          placeholder="What went wrong? (optional)"
+          placeholder="Optional: tell us why"
           style="width:100%;box-sizing:border-box;resize:vertical;min-height:60px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font:inherit;font-size:0.85rem"
         ></textarea>
         <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end">
@@ -493,29 +493,37 @@ async function submitFeedback(traceId, rating, comment = null) {
   }
 }
 
-function handleThumbUp(id, btn) {
-  const traceId = btn.dataset.traceId;
-  submitFeedback(traceId, 1);
-  btn.innerHTML = icon('check');
-  const downBtn = document.getElementById('thumbdown-' + id);
-  if (downBtn) downBtn.style.display = 'none';
+function handleThumbUp(id) {
+  const a = answers.find(a => a.id === id);
+  const form = document.getElementById('feedback-form-' + id);
+  if (!form) return;
+  form.dataset.pendingRating = '1';
+  const textarea = document.getElementById('feedback-comment-' + id);
+  if (textarea) textarea.value = a?.feedback?.comment || '';
+  form.style.display = '';
 }
 
 function handleThumbDown(id) {
+  const a = answers.find(a => a.id === id);
   const form = document.getElementById('feedback-form-' + id);
-  if (form) form.style.display = form.style.display === 'none' ? '' : 'none';
+  if (!form) return;
+  form.dataset.pendingRating = '-1';
+  const textarea = document.getElementById('feedback-comment-' + id);
+  if (textarea) textarea.value = a?.feedback?.comment || '';
+  form.style.display = '';
 }
 
 function handleFeedbackSubmit(id, btn) {
-  const traceId = btn.dataset.traceId;
-  const comment = (document.getElementById('feedback-comment-' + id) || {}).value || null;
-  submitFeedback(traceId, -1, comment || null);
   const form = document.getElementById('feedback-form-' + id);
-  if (form) {
-    form.innerHTML = '<p style="padding:4px 0;font-size:0.85rem;color:var(--muted-foreground,#6b7280)">Thanks for the feedback.</p>';
-  }
-  const downBtn = document.getElementById('thumbdown-' + id);
-  if (downBtn) downBtn.innerHTML = icon('check');
+  const rating = parseInt(form?.dataset.pendingRating || '-1', 10);
+  const commentInput = document.getElementById('feedback-comment-' + id);
+  const comment = commentInput?.value.trim() || null;
+  submitFeedback(btn.dataset.traceId, rating, comment || null);
+  const a = answers.find(a => a.id === id);
+  if (a) a.feedback = { rating, comment: comment || null };
+  if (form) form.style.display = 'none';
+  document.getElementById('thumbup-' + id)?.classList.toggle('action-btn-selected', rating === 1);
+  document.getElementById('thumbdown-' + id)?.classList.toggle('action-btn-selected', rating === -1);
 }
 
 // Event delegation for answer list actions
@@ -529,7 +537,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (action === 'dismiss')          handleDismiss(id);
     else if (action === 'copy')        handleCopy(id, btn);
     else if (action === 'disclaimer')  handleDisclaimerClick();
-    else if (action === 'thumbup')     handleThumbUp(id, btn);
+    else if (action === 'thumbup')     handleThumbUp(id);
     else if (action === 'thumbdown')   handleThumbDown(id);
     else if (action === 'feedback-submit')  handleFeedbackSubmit(id, btn);
     else if (action === 'feedback-cancel') {

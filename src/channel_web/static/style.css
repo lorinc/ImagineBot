@@ -454,6 +454,8 @@ button:focus-visible { outline: 2px solid var(--action-green); outline-offset: 2
 .action-btn-inactive { cursor: default; }
 .action-btn-inactive:hover { color: var(--muted-foreground); background: transparent; }
 
+.action-btn-selected { color: var(--foreground); background: var(--secondary); }
+
 /* Disclaimer button states */
 .action-btn-disclaimer.disclaimer-unseen {
   animation: soft-pulse-border 1.2s ease-in-out infinite;

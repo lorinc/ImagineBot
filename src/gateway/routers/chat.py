@@ -132,14 +132,14 @@ async def chat(body: ChatRequest):
             trace["pipeline_path"] = "out_of_scope"
             trace["output"] = {"answer": OUT_OF_SCOPE_REPLY}
             asyncio.create_task(write_trace(trace))
-            yield f'event: answer\ndata: {json.dumps({"answer": OUT_OF_SCOPE_REPLY, "facts": [], "session_id": session_id})}\n\n'
+            yield f'event: answer\ndata: {json.dumps({"answer": OUT_OF_SCOPE_REPLY, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
             return
 
         if not specific_enough:
             trace["pipeline_path"] = "orientation"
             trace["output"] = {"answer": ORIENTATION_RESPONSE}
             asyncio.create_task(write_trace(trace))
-            yield f'event: answer\ndata: {json.dumps({"answer": ORIENTATION_RESPONSE, "facts": [], "session_id": session_id})}\n\n'
+            yield f'event: answer\ndata: {json.dumps({"answer": ORIENTATION_RESPONSE, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
             return
 
         yield 'event: progress\ndata: {"key": "contacting"}\n\n'
