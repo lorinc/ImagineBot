@@ -929,3 +929,12 @@ SYMPTOM: Edit tool failed to match strings containing `…` (ellipsis). The Read
 ROOT_CAUSE: Read tool decodes unicode escapes for display; the file bytes are the escape sequences. Edit tool matches raw bytes, not the decoded display.
 PREVENTED_BY: When editing JS files that use `\uXXXX` escape sequences, use Python string replacement (reading/writing the file directly) rather than the Edit tool. Alternatively, verify the raw bytes with `cat -v` before writing the old_string.
 SOLUTION: Used Python to read, replace, and write the file.
+
+[2026-04-24]
+CATEGORY: TOOLING
+SERVICE: cross-cutting
+TASK: update CLAUDE.md files across multiple modules
+SYMPTOM: Edit tool raised "File has not been read yet" on src/security/CLAUDE.md even though its contents had been read via a Bash `cat` command earlier in the session.
+ROOT_CAUSE: The Edit tool tracks whether the Read tool was called on the file, not whether the file contents were seen in any tool output. Bash cat output does not count as a Read.
+PREVENTED_BY: Before using Edit or Write on any file, always call the Read tool on that specific file path — even if you already know its contents from Bash output.
+SOLUTION: Called Read tool on the file, then Edit succeeded.
