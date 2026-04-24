@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import vertexai
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -16,6 +16,8 @@ from indexer.multi import query_multi_index, render_routing_outline
 KNOWLEDGE_INDEX_PATH = Path(
     os.environ.get("KNOWLEDGE_INDEX_PATH", "/data/index/multi_index.json")
 )
+
+SERVICE_VERSION = os.getenv("MODULE_GIT_REV", "unknown")
 
 _multi_index: dict | None = None
 _structural_model = None
@@ -69,6 +71,7 @@ class Fact(BaseModel):
 class SearchResponse(BaseModel):
     answer: str
     facts: list[Fact]
+    selected_nodes: list[dict] = []
 
 
 class TopicsRequest(BaseModel):
@@ -101,11 +104,6 @@ def _facts_from_result(result: dict) -> list[Fact]:
     return facts
 
 
-@app.get("/health")
-async def health():
-    return {"status": "healthy"}
-
-
 @app.get("/summary")
 async def summary():
     """Return the routing outline (L1 node titles + topics) for classifier prompts."""
@@ -125,8 +123,13 @@ async def topics(req: TopicsRequest):
     return TopicsResponse(l1_topics=result["l1_topics"])
 
 
+@app.get("/health")
+async def health():
+    return {"status": "healthy", "version": SERVICE_VERSION}
+
+
 @app.post("/search", response_model=SearchResponse)
-async def search(req: SearchRequest):
+async def search(req: SearchRequest, response: Response):
     # group_ids: stub for future permission/multi-tenant filtering — ignored for now
     try:
         result = await query_multi_index(
@@ -136,9 +139,18 @@ async def search(req: SearchRequest):
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Query failed: {e}")
 
+    response.headers["X-Service-Version"] = SERVICE_VERSION
+
+    synthesis_nodes = result.get("synthesis", {}).get("selected_nodes", [])
+    selected_nodes = [
+        {"doc_id": n["doc_id"], "node_id": n.get("scoped_id", "")}
+        for n in synthesis_nodes
+    ]
+
     return SearchResponse(
         answer=result["synthesis"]["answer"],
         facts=_facts_from_result(result),
+        selected_nodes=selected_nodes,
     )
 
 

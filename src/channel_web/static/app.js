@@ -11,7 +11,7 @@ let questions        = null;   // loaded from /static/questions.json
 let expandedCategory = null;
 let isLoading        = false;
 let disclaimerSeen   = false;
-let answers          = [];     // [{id, question, answer, facts, error}]
+let answers          = [];     // [{id, question, answer, facts, error, traceId}]
 let answerIdCounter  = 0;
 let idToken          = null;   // Google ID token — in memory only, never persisted
 let sessionId        = null;   // Gateway session ID — tracks conversation history
@@ -81,6 +81,8 @@ const ICON_PATHS = {
   'mail':           '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
   'shield-alert':   '<path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="M12 8v4"/><path d="M12 16h.01"/>',
   'file-text':      '<path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 9H8"/><path d="M16 13H8"/><path d="M16 17H8"/>',
+  'thumb-up':       '<path d="M7 10v12"/><path d="M15 5.88 14 10h5.83a2 2 0 0 1 1.92 2.56l-2.33 8A2 2 0 0 1 17.5 22H4a2 2 0 0 1-2-2v-8a2 2 0 0 1 2-2h2.76a2 2 0 0 0 1.79-1.11L12 2a3.13 3.13 0 0 1 3 3.88Z"/>',
+  'thumb-down':     '<path d="M17 14V2"/><path d="M9 18.12 10 14H4.17a2 2 0 0 1-1.92-2.56l2.33-8A2 2 0 0 1 6.5 2H20a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-2.76a2 2 0 0 0-1.79 1.11L12 22a3.13 3.13 0 0 1-3-3.88Z"/>',
 };
 
 function icon(name, extraClass) {
@@ -342,7 +344,7 @@ async function submitQuestion(question) {
           textarea.value = t.progress[payload.key] || '';
         } else if (type === 'answer') {
           if (payload.session_id) sessionId = payload.session_id;
-          addAnswer(id, question, payload.answer, payload.facts, null, payload.warning || null);
+          addAnswer(id, question, payload.answer, payload.facts, null, payload.warning || null, payload.trace_id || null);
         } else if (type === 'error') {
           addAnswer(id, question, null, null, payload.error || 'Unknown error');
         }
@@ -361,13 +363,13 @@ async function submitQuestion(question) {
 }
 
 // ── Answers ───────────────────────────────────────────────────────────────────
-function addAnswer(id, question, answer, facts, error, warning = null) {
-  answers.push({ id, question, answer, facts, error, warning });
+function addAnswer(id, question, answer, facts, error, warning = null, traceId = null) {
+  answers.push({ id, question, answer, facts, error, warning, traceId });
 
   const list = document.getElementById('answers-list');
   const wrapper = document.createElement('div');
   wrapper.id = 'answer-' + id;
-  wrapper.innerHTML = buildAnswerCard(id, question, answer, facts, error, warning);
+  wrapper.innerHTML = buildAnswerCard(id, question, answer, facts, error, warning, traceId);
   list.appendChild(wrapper);
 
   list.style.display = 'flex';
@@ -385,7 +387,7 @@ function addAnswer(id, question, answer, facts, error, warning = null) {
   }, 50);
 }
 
-function buildAnswerCard(id, question, answer, facts, error, warning = null) {
+function buildAnswerCard(id, question, answer, facts, error, warning = null, traceId = null) {
   const t       = UI[lang];
   const isError = !!error;
   const text    = isError ? error : answer;
@@ -438,10 +440,21 @@ function buildAnswerCard(id, question, answer, facts, error, warning = null) {
           ${icon('copy')}
           <span class="copy-label">${esc(t.copy)}</span>
         </button>
+        ${traceId ? `
+        <button class="action-btn" id="thumbup-${id}"
+                data-action="thumbup" data-id="${id}" data-trace-id="${esc(traceId)}"
+                aria-label="${esc(t.feedback)}">
+          ${icon('thumb-up')}
+        </button>
+        <button class="action-btn" id="thumbdown-${id}"
+                data-action="thumbdown" data-id="${id}" data-trace-id="${esc(traceId)}"
+                aria-label="${esc(t.feedback)}">
+          ${icon('thumb-down')}
+        </button>` : `
         <button class="action-btn action-btn-inactive" aria-label="${esc(t.feedback)}">
           ${icon('message-circle')}
           <span>${esc(t.feedback)}</span>
-        </button>
+        </button>`}
         <button class="action-btn action-btn-inactive" aria-label="${esc(t.askUs)}">
           ${icon('mail')}
           <span>${esc(t.askUs)}</span>
@@ -453,7 +466,56 @@ function buildAnswerCard(id, question, answer, facts, error, warning = null) {
           <span>${esc(t.disclaimer)}</span>
         </button>
       </div>
+      ${traceId ? `
+      <div id="feedback-form-${id}" style="display:none;padding:8px 12px 12px;border-top:1px solid var(--border)">
+        <textarea id="feedback-comment-${id}"
+          placeholder="What went wrong? (optional)"
+          style="width:100%;box-sizing:border-box;resize:vertical;min-height:60px;padding:6px 8px;border:1px solid var(--border);border-radius:6px;font:inherit;font-size:0.85rem"
+        ></textarea>
+        <div style="display:flex;gap:8px;margin-top:6px;justify-content:flex-end">
+          <button class="action-btn" data-action="feedback-cancel" data-id="${id}">Cancel</button>
+          <button class="action-btn" data-action="feedback-submit" data-id="${id}" data-trace-id="${esc(traceId)}" style="background:var(--destructive,#dc2626);color:#fff">Submit</button>
+        </div>
+      </div>` : ''}
     </div>`;
+}
+
+async function submitFeedback(traceId, rating, comment = null) {
+  if (!idToken) return;
+  try {
+    await fetch('/feedback', {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + idToken },
+      body:    JSON.stringify({ trace_id: traceId, rating, comment }),
+    });
+  } catch (_) {
+    // non-fatal
+  }
+}
+
+function handleThumbUp(id, btn) {
+  const traceId = btn.dataset.traceId;
+  submitFeedback(traceId, 1);
+  btn.innerHTML = icon('check');
+  const downBtn = document.getElementById('thumbdown-' + id);
+  if (downBtn) downBtn.style.display = 'none';
+}
+
+function handleThumbDown(id) {
+  const form = document.getElementById('feedback-form-' + id);
+  if (form) form.style.display = form.style.display === 'none' ? '' : 'none';
+}
+
+function handleFeedbackSubmit(id, btn) {
+  const traceId = btn.dataset.traceId;
+  const comment = (document.getElementById('feedback-comment-' + id) || {}).value || null;
+  submitFeedback(traceId, -1, comment || null);
+  const form = document.getElementById('feedback-form-' + id);
+  if (form) {
+    form.innerHTML = '<p style="padding:4px 0;font-size:0.85rem;color:var(--muted-foreground,#6b7280)">Thanks for the feedback.</p>';
+  }
+  const downBtn = document.getElementById('thumbdown-' + id);
+  if (downBtn) downBtn.innerHTML = icon('check');
 }
 
 // Event delegation for answer list actions
@@ -464,9 +526,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const action = btn.dataset.action;
     const id     = parseInt(btn.dataset.id, 10);
 
-    if (action === 'dismiss')    handleDismiss(id);
-    else if (action === 'copy')  handleCopy(id, btn);
-    else if (action === 'disclaimer') handleDisclaimerClick();
+    if (action === 'dismiss')          handleDismiss(id);
+    else if (action === 'copy')        handleCopy(id, btn);
+    else if (action === 'disclaimer')  handleDisclaimerClick();
+    else if (action === 'thumbup')     handleThumbUp(id, btn);
+    else if (action === 'thumbdown')   handleThumbDown(id);
+    else if (action === 'feedback-submit')  handleFeedbackSubmit(id, btn);
+    else if (action === 'feedback-cancel') {
+      const form = document.getElementById('feedback-form-' + id);
+      if (form) form.style.display = 'none';
+    }
   });
 });
 

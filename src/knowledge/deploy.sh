@@ -30,6 +30,7 @@ echo "=== Pushing image ==="
 docker push "${IMAGE}"
 
 echo "=== Deploying to Cloud Run ==="
+MODULE_GIT_REV=$(git log -1 --format="%H" -- src/knowledge/)
 gcloud run deploy "${SERVICE}" \
   --image="${IMAGE}" \
   --project="${PROJECT}" \
@@ -40,7 +41,7 @@ gcloud run deploy "${SERVICE}" \
   --min-instances=0 \
   --max-instances=3 \
   --memory=1Gi \
-  --set-env-vars="GCP_PROJECT_ID=${PROJECT},VERTEX_AI_LOCATION=${REGION},KNOWLEDGE_INDEX_PATH=/app/index/multi_index.json"
+  --set-env-vars="GCP_PROJECT_ID=${PROJECT},VERTEX_AI_LOCATION=${REGION},KNOWLEDGE_INDEX_PATH=/app/index/multi_index.json,MODULE_GIT_REV=${MODULE_GIT_REV}"
 
 echo "=== Done ==="
 gcloud run services describe "${SERVICE}" \

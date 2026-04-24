@@ -25,6 +25,11 @@ gcloud projects add-iam-policy-binding "${PROJECT}" \
   --role="roles/aiplatform.user" \
   --condition=None
 
+gcloud projects add-iam-policy-binding "${PROJECT}" \
+  --member="serviceAccount:${SA}" \
+  --role="roles/datastore.user" \
+  --condition=None
+
 # Allow gateway-sa to call knowledge service
 gcloud run services add-iam-policy-binding knowledge \
   --region="${REGION}" \
@@ -39,6 +44,7 @@ echo "=== Pushing image ==="
 docker push "${IMAGE}:latest"
 
 echo "=== Deploying to Cloud Run ==="
+MODULE_GIT_REV=$(git log -1 --format="%H" -- src/gateway/)
 gcloud run deploy gateway \
   --image="${IMAGE}:latest" \
   --platform=managed \
@@ -50,7 +56,7 @@ gcloud run deploy gateway \
   --min-instances=0 \
   --max-instances=2 \
   --memory=256Mi \
-  --set-env-vars="GCP_PROJECT_ID=${PROJECT},VERTEX_AI_LOCATION=${REGION},KNOWLEDGE_SERVICE_URL=${KNOWLEDGE_SERVICE_URL}"
+  --set-env-vars="GCP_PROJECT_ID=${PROJECT},VERTEX_AI_LOCATION=${REGION},KNOWLEDGE_SERVICE_URL=${KNOWLEDGE_SERVICE_URL},MODULE_GIT_REV=${MODULE_GIT_REV}"
 
 echo "=== Granting channel-web-sa invoker on gateway ==="
 gcloud run services add-iam-policy-binding gateway \

@@ -31,6 +31,7 @@ echo "Pushing image..."
 docker push "${IMAGE}:latest"
 
 echo "Deploying to Cloud Run..."
+MODULE_GIT_REV=$(git log -1 --format="%H" -- src/channel_web/)
 gcloud run deploy channel-web \
   --image="${IMAGE}:latest" \
   --platform=managed \
@@ -38,7 +39,7 @@ gcloud run deploy channel-web \
   --project="${PROJECT}" \
   --service-account="${SA}" \
   --allow-unauthenticated \
-  --set-env-vars="GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL},GOOGLE_CLIENT_ID=${OAUTH_CLIENT_ID}" \
+  --set-env-vars="GATEWAY_SERVICE_URL=${GATEWAY_SERVICE_URL},GOOGLE_CLIENT_ID=${OAUTH_CLIENT_ID},MODULE_GIT_REV=${MODULE_GIT_REV}" \
   --set-secrets="/secrets/allowed_emails/ALLOWED_EMAILS=ALLOWED_EMAILS:latest" \
   --memory=256Mi \
   --min-instances=0 \

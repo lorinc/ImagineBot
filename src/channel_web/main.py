@@ -69,6 +69,12 @@ class ChatRequest(BaseModel):
     session_id: str | None = None
 
 
+class FeedbackRequest(BaseModel):
+    trace_id: str
+    rating: int
+    comment: str | None = None
+
+
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
@@ -121,3 +127,21 @@ async def chat(body: ChatRequest, _user: dict = Depends(_get_current_user)):
             yield f'event: error\ndata: {json.dumps({"error": "Service temporarily unavailable"})}\n\n'
 
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+
+@app.post("/feedback")
+async def feedback(body: FeedbackRequest, _user: dict = Depends(_get_current_user)):
+    try:
+        token = _get_identity_token(GATEWAY_SERVICE_URL)
+        async with httpx.AsyncClient() as client:
+            resp = await client.post(
+                f"{GATEWAY_SERVICE_URL}/feedback",
+                json={"trace_id": body.trace_id, "rating": body.rating, "comment": body.comment},
+                headers={"Authorization": f"Bearer {token}"},
+                timeout=30.0,
+            )
+            resp.raise_for_status()
+    except Exception as e:
+        logger.error("Feedback forwarding error: %s", e)
+        raise HTTPException(status_code=502, detail="Feedback submission failed")
+    return {"status": "ok"}

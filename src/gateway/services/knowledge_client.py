@@ -38,8 +38,8 @@ async def get_topics(query: str) -> list[dict]:
         return response.json().get("l1_topics", [])
 
 
-async def search(query: str, overview: bool = False) -> dict:
-    """Call knowledge /search, return {answer, facts}. Raises on HTTP error."""
+async def search(query: str, overview: bool = False) -> tuple[dict, str]:
+    """Call knowledge /search, return (data, service_version). Raises on HTTP error."""
     token = _get_identity_token(KNOWLEDGE_SERVICE_URL)
     async with httpx.AsyncClient() as client:
         response = await client.post(
@@ -49,4 +49,5 @@ async def search(query: str, overview: bool = False) -> dict:
             timeout=120.0,
         )
         response.raise_for_status()
-        return response.json()
+        knowledge_version = response.headers.get("x-service-version", "unknown")
+        return response.json(), knowledge_version
