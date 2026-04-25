@@ -16,20 +16,26 @@ def _get_db() -> firestore.AsyncClient:
     return _db
 
 
-async def write_trace(trace: dict) -> None:
+def _trace_ref(db, trace_id: str, tenant_id: str | None):
+    if tenant_id:
+        return db.collection("tenants").document(tenant_id).collection("traces").document(trace_id)
+    return db.collection("traces").document(trace_id)
+
+
+async def write_trace(trace: dict, tenant_id: str | None = None) -> None:
     try:
         db = _get_db()
-        await db.collection("traces").document(trace["trace_id"]).set(trace)
+        await _trace_ref(db, trace["trace_id"], tenant_id).set(trace)
     except Exception as e:
         logger.warning("Trace write failed (non-fatal): %s", e)
 
 
-async def update_feedback(trace_id: str, rating: int, comment: str | None) -> None:
+async def update_feedback(trace_id: str, rating: int, comment: str | None, tenant_id: str | None = None) -> None:
     from datetime import datetime, timezone
 
     try:
         db = _get_db()
-        await db.collection("traces").document(trace_id).update(
+        await _trace_ref(db, trace_id, tenant_id).update(
             {
                 "feedback": {
                     "rating": rating,

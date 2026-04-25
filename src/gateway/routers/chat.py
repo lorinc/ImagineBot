@@ -21,6 +21,8 @@ from services.sanitize import sanitize
 from services.scope_gate import classify
 from services.rewrite import rewrite_standalone
 from services import knowledge_client
+from services.observability import SpanCollector
+from services.step_messages import format_span
 from services.trace_writer import write_trace, update_feedback
 
 logger = logging.getLogger(__name__)
@@ -65,6 +67,13 @@ def _count_topics(l1_topics: list[dict]) -> tuple[int, list[str]]:
     return len(labels), labels
 
 
+def _thinking_sse(span: dict) -> str | None:
+    text = format_span(span)
+    if text is None:
+        return None
+    return f'event: thinking\ndata: {json.dumps({"text": text, "ms": span["duration_ms"]})}\n\n'
+
+
 class ChatRequest(BaseModel):
     message: str
     session_id: str | None = None
@@ -81,6 +90,7 @@ async def chat(body: ChatRequest):
     async def generate():
         trace_id = str(uuid4())
         session_id = body.session_id or str(uuid4())
+        spans = SpanCollector()
 
         trace: dict = {
             "trace_id": trace_id,
@@ -122,15 +132,32 @@ async def chat(body: ChatRequest):
             logger.error("Classifier error: %s", e)
             in_scope, specific_enough = True, True  # fail open
 
+        classify_ms = int((time.monotonic() - t_classify) * 1000)
         trace["classifier"] = {
             "in_scope": in_scope,
             "specific_enough": specific_enough,
-            "latency_ms": int((time.monotonic() - t_classify) * 1000),
+            "latency_ms": classify_ms,
         }
+
+        if not in_scope:
+            span = spans.record("classify.out_of_scope",
+                                {"in_scope": in_scope, "specific_enough": specific_enough},
+                                duration_ms=classify_ms)
+        elif not specific_enough:
+            span = spans.record("classify.not_specific",
+                                {"in_scope": in_scope, "specific_enough": specific_enough},
+                                duration_ms=classify_ms)
+        else:
+            span = spans.record("classify",
+                                {"in_scope": in_scope, "specific_enough": specific_enough},
+                                duration_ms=classify_ms)
+        if msg := _thinking_sse(span):
+            yield msg
 
         if not in_scope:
             trace["pipeline_path"] = "out_of_scope"
             trace["output"] = {"answer": OUT_OF_SCOPE_REPLY}
+            trace["spans"] = spans.spans()
             asyncio.create_task(write_trace(trace))
             yield f'event: answer\ndata: {json.dumps({"answer": OUT_OF_SCOPE_REPLY, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
             return
@@ -138,6 +165,7 @@ async def chat(body: ChatRequest):
         if not specific_enough:
             trace["pipeline_path"] = "orientation"
             trace["output"] = {"answer": ORIENTATION_RESPONSE}
+            trace["spans"] = spans.spans()
             asyncio.create_task(write_trace(trace))
             yield f'event: answer\ndata: {json.dumps({"answer": ORIENTATION_RESPONSE, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
             return
@@ -157,10 +185,19 @@ async def chat(body: ChatRequest):
             except Exception as e:
                 logger.warning("Rewrite failed, using original: %s", e)
 
+        rewrite_ms = int((time.monotonic() - t_rewrite) * 1000) if history else None
         trace["rewrite"] = {
             "rewritten_query": rewritten,
-            "latency_ms": int((time.monotonic() - t_rewrite) * 1000) if history else None,
+            "latency_ms": rewrite_ms,
         }
+        if rewritten:
+            span = spans.record("rewrite",
+                                {"rewritten_query": rewritten, "original_query": query},
+                                duration_ms=rewrite_ms)
+        else:
+            span = spans.record("rewrite.skipped", {}, duration_ms=None)
+        if msg := _thinking_sse(span):
+            yield msg
 
         yield 'event: progress\ndata: {"key": "querying_ai"}\n\n'
 
@@ -170,12 +207,22 @@ async def chat(body: ChatRequest):
         doc_ids_selected: list[str] = []
         t_topics = time.monotonic()
         try:
-            l1_topics = await knowledge_client.get_topics(final_query)
-            topic_count, _labels = _count_topics(l1_topics)
+            l1_topics = await knowledge_client.get_topics(final_query, trace_id=trace_id)
+            topic_count, topic_labels = _count_topics(l1_topics)
             doc_ids_selected = list({t["doc_id"] for t in l1_topics})
             if topic_count > MAX_TOPIC_PATHS:
                 overview = True
                 logger.info("Broad query (%d topics after consolidation) — overview mode", topic_count)
+            topic_labels_short = ", ".join(topic_labels[:4])
+            if len(topic_labels) > 4:
+                topic_labels_short += f" +{len(topic_labels) - 4} more"
+            span = spans.record("topics", {
+                "topic_labels_short": topic_labels_short,
+                "topic_count": topic_count,
+                "doc_ids_selected": doc_ids_selected,
+            }, duration_ms=int((time.monotonic() - t_topics) * 1000))
+            if msg := _thinking_sse(span):
+                yield msg
         except Exception as e:
             logger.warning("Topics check failed, skipping breadth detection: %s", e)
 
@@ -186,10 +233,29 @@ async def chat(body: ChatRequest):
             "latency_ms": int((time.monotonic() - t_topics) * 1000),
         }
 
-        # 5. Stage B: full synthesis (overview prompt when broad)
+        if overview:
+            span = spans.record("breadth.overview", {"topic_count": topic_count}, duration_ms=None)
+        else:
+            span = spans.record("breadth.focused", {"topic_count": topic_count}, duration_ms=None)
+        if msg := _thinking_sse(span):
+            yield msg
+
+        # 5. Stage B: full synthesis via streaming (overview prompt when broad)
         t_knowledge = time.monotonic()
+        result: dict | None = None
+        knowledge_version = "unknown"
         try:
-            result, knowledge_version = await knowledge_client.search(final_query, overview=overview)
+            async for event_type, payload, kv in knowledge_client.search_stream(
+                    final_query, trace_id=trace_id, overview=overview):
+                knowledge_version = kv
+                if event_type == "span":
+                    spans.record_external(payload)
+                    if msg := _thinking_sse(payload):
+                        yield msg
+                elif event_type == "answer":
+                    result = payload
+                elif event_type == "error":
+                    raise RuntimeError(payload.get("error", "unknown error"))
         except Exception as e:
             logger.error("Knowledge service error: %s", e)
             yield f'event: error\ndata: {json.dumps({"error": "Knowledge service unavailable"})}\n\n'
@@ -200,14 +266,14 @@ async def chat(body: ChatRequest):
         yield 'event: progress\ndata: {"key": "processing"}\n\n'
 
         # 6. Update session history
-        answer = result.get("answer", "")
+        answer = (result or {}).get("answer", "")
         history = history + [{"q": query, "a": answer}]
         _sessions[session_id] = history[-_MAX_HISTORY:]
 
         trace["knowledge"] = {
-            "nodes_selected": result.get("selected_nodes", []),
+            "nodes_selected": (result or {}).get("selected_nodes", []),
             "answer": answer,
-            "facts": result.get("facts", []),
+            "facts": (result or {}).get("facts", []),
             "latency_ms": int((time.monotonic() - t_knowledge) * 1000),
         }
 
@@ -216,11 +282,12 @@ async def chat(body: ChatRequest):
 
         trace["pipeline_path"] = "broad" if overview else "specific"
         trace["output"] = {"answer": answer}
+        trace["spans"] = spans.spans()
         asyncio.create_task(write_trace(trace))
 
         payload = {
             "answer": answer,
-            "facts": result.get("facts", []),
+            "facts": (result or {}).get("facts", []),
             "session_id": session_id,
             "trace_id": trace_id,
         }
