@@ -331,7 +331,7 @@ curl -s -X POST https://knowledge-jeyczovqfa-ew.a.run.app/search \
 
 **Status:** DEPLOYED 2026-04-24. All three services live at bb2f256. Smoke test passed (trace doc verified in Firestore). Browser UAT pending.
 
-### Phase 2.4 — Feedback editing + short-circuit feedback buttons — IMPLEMENTATION COMPLETE 2026-04-24
+### Phase 2.4 — Feedback editing + short-circuit feedback buttons — DEPLOYED 2026-04-25
 
 **What was built:**
 - Feedback editing: both 👍 and 👎 open comment form; re-clicking a selected thumb re-opens form pre-filled with prior comment
@@ -340,7 +340,33 @@ curl -s -X POST https://knowledge-jeyczovqfa-ew.a.run.app/search \
 - `src/channel_web/static/app.js` — feedback editing state machine; pre-fill on re-click
 - `src/channel_web/static/style.css` — `.action-btn-selected` CSS class
 
-**Status:** Implementation complete. Browser UAT pending (uncommitted).
+**Status:** DEPLOYED 2026-04-25. Browser UAT PASSED (commits 0277339, ffcade7).
+
+### Phase 2.5 — Pipeline observability: spans + thinking panel — DEPLOYED 2026-04-25
+
+**Architecture:** OTel-inspired spans, stdlib only, no SDK dependency. Each service emits
+its own spans via a ContextVar. Gateway aggregates + persists. Display prose lives in
+`step_messages.py` — not in pipeline code.
+
+**What was built:**
+- `src/knowledge/indexer/observability.py` — `QueryContext` + ContextVar; `emit_span`, `get_query_spans`
+- `src/knowledge/indexer/multi.py` — 4 span points: `knowledge.routing`, `knowledge.selection`, `knowledge.synthesis_started`, `knowledge.synthesis_done`
+- `src/knowledge/main.py` — `QueryContext` wired into `/search` (spans in response) and `/search/stream` (real-time `event: span` SSE)
+- `src/gateway/services/observability.py` — `SpanCollector` (gateway spans + relay of knowledge spans)
+- `src/gateway/services/step_messages.py` — all display prose; `format_span()` — no prose in pipeline code
+- `src/gateway/services/knowledge_client.py` — `X-Trace-Id` header on all calls; `search_stream()` replaces `search()`
+- `src/gateway/routers/chat.py` — `SpanCollector` per request; `event: thinking` SSE; `trace["spans"]` in Firestore
+- `src/gateway/services/trace_writer.py` — `tenant_id` seam (`_trace_ref` helper; always `None` until auth lands)
+- `src/channel_web/static/app.js` — pending card with live thinking list; `buildAnswerCard` adds collapsed `<details>` panel
+- `src/channel_web/static/style.css` — `.pending-card`, `.thinking-details`, `.thinking-steps`, `.thinking-step`, `.step-ms`
+
+**Firestore trace schema addendum:** `spans: list[Span]` added to `traces/{trace_id}`. Each span: `{service, name, attributes, duration_ms}`. Existing fields unchanged.
+
+**Smoke test (2026-04-25):** 8 spans in Firestore for a single `/chat` call:
+  `[gateway]` classify, rewrite.skipped, topics, breadth.focused
+  `[knowledge]` knowledge.routing, knowledge.selection, knowledge.synthesis_started, knowledge.synthesis_done
+
+**Status:** DEPLOYED 2026-04-25 (commits 7215269, 310bc16, b7943ab). Browser UAT pending.
 
 ### Phase 3.1 — GDrive integration UAT plan — SCOPED 2026-04-24
 

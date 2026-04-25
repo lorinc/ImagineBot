@@ -950,3 +950,22 @@ ROOT_CAUSE: The rtk hook rewrites `curl` → `rtk curl`, which summarises/filter
 PREVENTED_BY: When you need the raw response from a service (e.g. verifying a version hash, checking an exact field value), always use `rtk proxy curl ...` — the `proxy` subcommand bypasses all filtering and returns the real output.
 SOLUTION: Re-ran with `rtk proxy curl` and received correct JSON: `{"status":"healthy","version":"bb2f256..."}`.
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-25]
+CATEGORY: TOOLING
+SERVICE: src/channel_web
+TASK: Insert a new JS function before addAnswer in app.js using Python str.replace()
+SYMPTOM: The replacement string was written to the file without error, but the new
+function body was missing. The call site (addPendingCard) was present but the function
+definition was not.
+ROOT_CAUSE: Python str.replace() returns the original string silently when the pattern
+does not match — no exception, no warning. The anchor comment `// ── Answers ──...` had
+a different number of em-dashes in the file than in the replacement string.
+PREVENTED_BY: After any Python str.replace() that is supposed to insert or replace
+something non-trivial, immediately grep for one unique token from the inserted text.
+If not found, the replacement silently failed and must be retried with the corrected
+anchor string.
+SOLUTION: Used the Edit tool directly with the correct anchor string (read from the file
+first), which succeeded immediately.
