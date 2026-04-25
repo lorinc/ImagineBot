@@ -5,13 +5,14 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 import vertexai
-from fastapi import FastAPI, HTTPException, Response
+from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
 from indexer.config import GCP_PROJECT, REGION, MODEL_QUALITY, MODEL_STRUCTURAL
 from indexer.llm import get_model
 from indexer.multi import query_multi_index, render_routing_outline
+from indexer.observability import get_query_spans, init_query_context, reset_query_context
 
 KNOWLEDGE_INDEX_PATH = Path(
     os.environ.get("KNOWLEDGE_INDEX_PATH", "/data/index/multi_index.json")
@@ -72,6 +73,7 @@ class SearchResponse(BaseModel):
     answer: str
     facts: list[Fact]
     selected_nodes: list[dict] = []
+    spans: list[dict] = []
 
 
 class TopicsRequest(BaseModel):
@@ -87,6 +89,23 @@ class TopicNode(BaseModel):
 
 class TopicsResponse(BaseModel):
     l1_topics: list[TopicNode]
+
+
+def _build_response(result: dict) -> dict:
+    synthesis_nodes = result.get("synthesis", {}).get("selected_nodes", [])
+    selected_nodes = [
+        {"doc_id": n["doc_id"], "node_id": n.get("scoped_id", "")}
+        for n in synthesis_nodes
+    ]
+    facts = [
+        {"fact": f.fact, "source_id": f.source_id, "valid_at": f.valid_at}
+        for f in _facts_from_result(result)
+    ]
+    return {
+        "answer": result["synthesis"]["answer"],
+        "facts": facts,
+        "selected_nodes": selected_nodes,
+    }
 
 
 def _facts_from_result(result: dict) -> list[Fact]:
@@ -129,51 +148,62 @@ async def health():
 
 
 @app.post("/search", response_model=SearchResponse)
-async def search(req: SearchRequest, response: Response):
+async def search(req: SearchRequest, request: Request, response: Response):
     # group_ids: stub for future permission/multi-tenant filtering — ignored for now
+    trace_id = request.headers.get("X-Trace-Id", "")
+    ctx_token = init_query_context(trace_id)
     try:
         result = await query_multi_index(
             req.query, _multi_index, _structural_model, _quality_model,
             overview=req.overview,
         )
+        spans = get_query_spans()
     except Exception as e:
         raise HTTPException(status_code=503, detail=f"Query failed: {e}")
+    finally:
+        reset_query_context(ctx_token)
 
     response.headers["X-Service-Version"] = SERVICE_VERSION
-
-    synthesis_nodes = result.get("synthesis", {}).get("selected_nodes", [])
-    selected_nodes = [
-        {"doc_id": n["doc_id"], "node_id": n.get("scoped_id", "")}
-        for n in synthesis_nodes
-    ]
-
-    return SearchResponse(
-        answer=result["synthesis"]["answer"],
-        facts=_facts_from_result(result),
-        selected_nodes=selected_nodes,
-    )
+    return {**_build_response(result), "spans": spans}
 
 
 @app.post("/search/stream")
-async def search_stream(req: SearchRequest):
+async def search_stream(req: SearchRequest, request: Request):
+    trace_id = request.headers.get("X-Trace-Id", "")
+
     async def generate():
-        yield 'event: progress\ndata: {"key": "querying_ai"}\n\n'
+        queue: asyncio.Queue = asyncio.Queue()
 
-        try:
-            result = await query_multi_index(
-                req.query, _multi_index, _structural_model, _quality_model
-            )
-        except Exception as e:
-            yield f'event: error\ndata: {json.dumps({"error": str(e)})}\n\n'
-            return
+        def stream_cb(span: dict) -> None:
+            queue.put_nowait({"_span": span})
 
-        yield 'event: progress\ndata: {"key": "processing"}\n\n'
+        ctx_token = init_query_context(trace_id, stream_cb=stream_cb)
 
-        answer = result["synthesis"]["answer"]
-        facts = [
-            {"fact": f.fact, "source_id": f.source_id, "valid_at": f.valid_at}
-            for f in _facts_from_result(result)
-        ]
-        yield f'event: answer\ndata: {json.dumps({"answer": answer, "facts": facts})}\n\n'
+        async def run() -> None:
+            try:
+                result = await query_multi_index(
+                    req.query, _multi_index, _structural_model, _quality_model,
+                    overview=req.overview,
+                )
+                queue.put_nowait({"_done": result, "_spans": get_query_spans()})
+            except Exception as e:
+                queue.put_nowait({"_error": str(e)})
+            finally:
+                reset_query_context(ctx_token)
 
-    return StreamingResponse(generate(), media_type="text/event-stream")
+        asyncio.create_task(run())
+
+        while True:
+            item = await queue.get()
+            if "_span" in item:
+                yield f"event: span\ndata: {json.dumps(item['_span'])}\n\n"
+            elif "_done" in item:
+                response_data = {**_build_response(item["_done"]), "spans": item["_spans"]}
+                yield f"event: answer\ndata: {json.dumps(response_data)}\n\n"
+                break
+            else:
+                yield f"event: error\ndata: {json.dumps({'error': item['_error']})}\n\n"
+                break
+
+    return StreamingResponse(generate(), media_type="text/event-stream",
+                             headers={"X-Service-Version": SERVICE_VERSION})

@@ -21,7 +21,7 @@ from vertexai.generative_models import GenerativeModel
 from .config import MODEL_QUALITY, MODEL_STRUCTURAL
 from .llm import DOC_ROUTING_SCHEMA, NODE_SELECTION_SCHEMA, get_model, llm_call
 from .node import Node
-from .observability import cost_usd, render_outline
+from .observability import cost_usd, emit_span, render_outline
 from .prompts import make_route_prompt, make_overview_synthesize_prompt, make_select_prompt, make_synthesize_prompt
 
 _MAX_ROUTING_TOPICS = 6  # phrases per L1 node shown to the routing LLM
@@ -125,6 +125,13 @@ async def query_multi_index(
     resolved_docs = [d for d in selected_doc_ids if d in docs_by_id]
     unresolved_docs = [d for d in selected_doc_ids if d not in docs_by_id]
 
+    emit_span("knowledge.routing", {
+        "selected_doc_ids": resolved_docs,
+        "doc_titles": ", ".join(d.replace("_", " ").replace("-", " ").title() for d in resolved_docs),
+        "unresolved": unresolved_docs,
+        "reasoning_preview": route_reasoning[:120],
+    }, duration_ms=route_ms)
+
     print(f"[multi query] Routing → {resolved_docs}")
     print(f"[multi query]   Reasoning: {route_reasoning[:120]}")
     if unresolved_docs:
@@ -213,6 +220,18 @@ async def query_multi_index(
     select_results = await asyncio.gather(*[_select_from_doc(d) for d in resolved_docs])
     per_doc_raw: dict[str, dict] = dict(select_results)
 
+    sel_chunks = [{"title": n.title, "chars": n.full_text_char_count}
+                  for sel in per_doc_raw.values() for n in sel["_nodes"]]
+    sel_summary = ", ".join(f"{c['title']} ({c['chars']}c)" for c in sel_chunks[:6])
+    if len(sel_chunks) > 6:
+        sel_summary += f" +{len(sel_chunks) - 6} more"
+    emit_span("knowledge.selection", {
+        "chunk_count": len(sel_chunks),
+        "chunk_summary": sel_summary,
+        "chunks": sel_chunks,
+        "total_chars": sum(c["chars"] for c in sel_chunks),
+    }, duration_ms=max((v["latency_ms"] for v in per_doc_raw.values()), default=0))
+
     # ── topics_only: return L1 ancestors without synthesis ────────────────────
     if topics_only:
         l1_topics: list[dict] = []
@@ -252,8 +271,15 @@ async def query_multi_index(
         if overview
         else make_synthesize_prompt(question, sections_text)
     )
+    emit_span("knowledge.synthesis_started", {
+        "chunk_count": len(all_selected_node_info),
+        "total_chars": len(sections_text),
+    }, duration_ms=None)
     synth_raw, synth_ms, synth_usage = await llm_call(quality_model, synth_prompt)
     answer = synth_raw.strip()
+    emit_span("knowledge.synthesis_done", {
+        "answer_chars": len(answer),
+    }, duration_ms=synth_ms)
 
     print(f"[multi query] Synthesis done ({synth_ms}ms)")
 

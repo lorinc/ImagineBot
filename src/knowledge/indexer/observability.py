@@ -3,7 +3,7 @@
 from contextvars import ContextVar, Token
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from .config import MAX_NODE_CHARS, PRICING_PER_1M_USD
 from .node import Node
@@ -35,6 +35,41 @@ def init_build_context(request_id: str = "") -> "Token[BuildContext | None]":
 def reset_build_context(token: "Token[BuildContext | None]") -> None:
     """Restore the context to its state before init_build_context was called."""
     _BUILD_CTX.reset(token)
+
+
+# ── Query context ──────────────────────────────────────────────────────────────
+
+@dataclass
+class QueryContext:
+    trace_id: str
+    spans: list[dict] = field(default_factory=list)
+    stream_cb: Callable[[dict], None] | None = None
+
+
+_QUERY_CTX: ContextVar["QueryContext | None"] = ContextVar("_QUERY_CTX", default=None)
+
+
+def init_query_context(trace_id: str, stream_cb: Callable[[dict], None] | None = None) -> "Token[QueryContext | None]":
+    return _QUERY_CTX.set(QueryContext(trace_id=trace_id, stream_cb=stream_cb))
+
+
+def reset_query_context(token: "Token[QueryContext | None]") -> None:
+    _QUERY_CTX.reset(token)
+
+
+def emit_span(name: str, attributes: dict, duration_ms: int | None) -> dict:
+    span = {"service": "knowledge", "name": name, "attributes": attributes, "duration_ms": duration_ms}
+    ctx = _QUERY_CTX.get()
+    if ctx:
+        ctx.spans.append(span)
+        if ctx.stream_cb:
+            ctx.stream_cb(span)
+    return span
+
+
+def get_query_spans() -> list[dict]:
+    ctx = _QUERY_CTX.get()
+    return list(ctx.spans) if ctx else []
 
 
 def get_build_usage() -> dict:
