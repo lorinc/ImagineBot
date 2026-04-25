@@ -12,6 +12,7 @@ let expandedCategory = null;
 let isLoading        = false;
 let disclaimerSeen   = false;
 let answers          = [];     // [{id, question, answer, facts, error, traceId}]
+let thinkingByMsg    = {};     // id -> [{text, ms}] — cleared after card is built
 let answerIdCounter  = 0;
 let idToken          = null;   // Google ID token — in memory only, never persisted
 let sessionId        = null;   // Gateway session ID — tracks conversation history
@@ -289,6 +290,8 @@ async function submitQuestion(question) {
   smoothScrollTo(document.getElementById('chat-input-box'));
 
   const id = ++answerIdCounter;
+  thinkingByMsg[id] = [];
+  addPendingCard(id, question);
 
   try {
     const headers = { 'Content-Type': 'application/json' };
@@ -340,11 +343,22 @@ async function submitQuestion(question) {
         let payload;
         try { payload = JSON.parse(dataStr); } catch (_) { continue; }
 
-        if (type === 'progress') {
+        if (type === 'thinking') {
+          thinkingByMsg[id].push({ text: payload.text, ms: payload.ms });
+          const ul = document.getElementById('thinking-' + id);
+          if (ul) {
+            const li = document.createElement('li');
+            li.className = 'thinking-step';
+            const ms = payload.ms != null ? ` <span class="step-ms">${payload.ms}ms</span>` : '';
+            li.innerHTML = esc(payload.text) + ms;
+            ul.appendChild(li);
+          }
+        } else if (type === 'progress') {
           textarea.value = t.progress[payload.key] || '';
         } else if (type === 'answer') {
           if (payload.session_id) sessionId = payload.session_id;
-          addAnswer(id, question, payload.answer, payload.facts, null, payload.warning || null, payload.trace_id || null);
+          addAnswer(id, question, payload.answer, payload.facts, null, payload.warning || null, payload.trace_id || null, thinkingByMsg[id] || null);
+          delete thinkingByMsg[id];
         } else if (type === 'error') {
           addAnswer(id, question, null, null, payload.error || 'Unknown error');
         }
@@ -363,14 +377,34 @@ async function submitQuestion(question) {
 }
 
 // ── Answers ───────────────────────────────────────────────────────────────────
-function addAnswer(id, question, answer, facts, error, warning = null, traceId = null) {
-  answers.push({ id, question, answer, facts, error, warning, traceId, feedback: null });
-
+function addPendingCard(id, question) {
   const list = document.getElementById('answers-list');
   const wrapper = document.createElement('div');
   wrapper.id = 'answer-' + id;
-  wrapper.innerHTML = buildAnswerCard(id, question, answer, facts, error, warning, traceId);
+  wrapper.innerHTML = `
+    <div class="answer-card pending-card" id="card-${id}">
+      <p class="answer-question">${esc(question)}</p>
+      <hr class="answer-divider">
+      <ul class="thinking-steps" id="thinking-${id}"></ul>
+    </div>`;
   list.appendChild(wrapper);
+  list.style.display = 'flex';
+  updateLayout();
+}
+
+function addAnswer(id, question, answer, facts, error, warning = null, traceId = null, steps = null) {
+  answers.push({ id, question, answer, facts, error, warning, traceId, steps, feedback: null });
+
+  const list = document.getElementById('answers-list');
+  let wrapper = document.getElementById('answer-' + id);
+  if (wrapper) {
+    wrapper.innerHTML = buildAnswerCard(id, question, answer, facts, error, warning, traceId, steps);
+  } else {
+    wrapper = document.createElement('div');
+    wrapper.id = 'answer-' + id;
+    wrapper.innerHTML = buildAnswerCard(id, question, answer, facts, error, warning, traceId, steps);
+    list.appendChild(wrapper);
+  }
 
   list.style.display = 'flex';
   updateLayout();
@@ -387,7 +421,7 @@ function addAnswer(id, question, answer, facts, error, warning = null, traceId =
   }, 50);
 }
 
-function buildAnswerCard(id, question, answer, facts, error, warning = null, traceId = null) {
+function buildAnswerCard(id, question, answer, facts, error, warning = null, traceId = null, steps = null) {
   const t       = UI[lang];
   const isError = !!error;
   const text    = isError ? error : answer;
@@ -424,6 +458,14 @@ function buildAnswerCard(id, question, answer, facts, error, warning = null, tra
           <p class="answer-question">${esc(question)}</p>
           <hr class="answer-divider">
           ${warning ? `<p class="answer-warning">${esc(warning)}</p>` : ''}
+          ${(steps && steps.length > 0 && !isError) ? `
+          <details class="thinking-details">
+            <summary>Thinking (${steps.length} steps)</summary>
+            <ul class="thinking-steps">${steps.map(s => {
+              const ms = s.ms != null ? ` <span class="step-ms">${s.ms}ms</span>` : '';
+              return `<li class="thinking-step">${esc(s.text)}${ms}</li>`;
+            }).join('')}</ul>
+          </details>` : ''}
           <p class="answer-text${isError ? ' answer-text-error' : ''}">${isError ? esc(text) : md(text)}</p>
           ${sourcesHtml}
         </div>
