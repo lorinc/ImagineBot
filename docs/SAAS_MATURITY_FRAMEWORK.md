@@ -16,8 +16,8 @@ Each row is a maturity dimension. Columns are levels:
 | **L1** | Exists for one tenant; requires developer/operator action each time |
 | **L2** | Reliable and automated for one tenant; no dev intervention for normal operation |
 | **L3** | Multi-tenant capable; self-service or operationally isolated per tenant |
-
-`◀ now` marks current state.
+| `◀ now` | Marks current state |
+| `[verified]` | Cell content discussed with and approved by the developer. **Cells without this flag are drafts. Do not use an unverified cell as the basis for a decision or implementation plan.** |
 
 ---
 
@@ -87,6 +87,34 @@ Each row is a maturity dimension. Columns are levels:
 
 ---
 
+## Pillar 6 — UX
+
+| Dimension | L0 | L1 | L2 | L3 |
+|---|---|---|---|---|
+| **Conversation context** | Each query independent; no session memory; follow-up questions fail `◀ now` | Session history passed to LLM within a single browser session | Session persisted in Firestore; survives page refresh; user can scroll history | Per-tenant session retention policy; admin can search/export sessions |
+| **Citation display** | Citations show opaque `source_id` (e.g. `en_policy3_admissions`); no human-readable title `◀ now` | Source metadata in Firestore; citations show document title | Citations show title + Drive link + last-modified date | Per-tenant source registry; admin can annotate sources with display names |
+| **Freshness signal** | `valid_at` always null; no corpus-last-updated indicator anywhere in UI `◀ now` | Corpus last-updated timestamp shown in UI footer | Per-citation freshness date shown where available; stale corpus warning after N days | Per-tenant freshness threshold configurable; user-visible staleness badge |
+| **Language / multilingual UX** | UI language toggle disconnected from LLM; Spanish corpus silently excluded; not disclosed `◀ now` | Spanish exclusion disclosed in UI; query language detection surfaces an explicit fallback notice | Spanish corpus ingested; query language respected; UI language and LLM language aligned | Per-tenant language configuration; corpus language coverage report in admin UI |
+| **User feedback** | No thumbs up/down, no report mechanism `◀ now` | 👍/👎 stored in Firestore traces `◀ now` | Feedback linked to source and query; visible in ops dashboard; weekly thumbs-down report | Per-tenant feedback dashboard; low-rated topics surfaced to corpus admin |
+| **Onboarding / access denied UX** | 403 with no explanation; no way to request access; no contact information `◀ now` | 403 shows human-readable message with contact email | Self-service access request form; email notification to admin | Per-tenant branded sign-in page; admin-controlled invite flow |
+| **Suggested questions** | Static global `questions.json`; same for every user and corpus; change requires redeploy `◀ now` | Questions stored in Firestore; editable without redeploy | Questions configurable per tenant via admin UI | Questions personalized by usage history; surfaced from high-rated prior queries |
+| **Error specificity** | Generic error messages; no actionable information `◀ now` | Distinct user-facing messages for: auth failure, corpus unavailable, rate limit, service error | Error messages include retry guidance and status page link | Per-tenant status page; errors link to tenant-specific support channel |
+| **Mobile layout** | CSS authored for desktop demo; no responsive design `◀ now` | Responsive layout tested on 375px and 768px viewports | Mobile-first CSS; tested on iOS Safari and Android Chrome | Per-tenant theme/branding; mobile PWA manifest |
+
+---
+
+## Pillar 7 — Security & Compliance
+
+| Dimension | L0 | L1 | L2 | L3 |
+|---|---|---|---|---|
+| **Input validation / prompt injection** | User queries pass directly to LLM with no screening `◀ now` | Input length cap + basic injection pattern detection; flagged queries logged | Abuse screening service (jailbreak, prompt injection, data exfiltration patterns); flagged queries rejected with 400 | Per-tenant sensitivity tuning; tenant admin notified of repeated abuse attempts |
+| **Output screening** | LLM responses returned verbatim; no filtering `◀ now` | Response length cap; error if model returns empty answer | Harmful-content classifier on responses; system-prompt leak detection | Per-tenant content policy; blocked response categories configurable by admin |
+| **Infrastructure-layer security** | Cloud Run exposed directly; no WAF, no DDoS protection `◀ now` | knowledge service `--ingress=internal`; only gateway reachable from internet | Cloud Armor WAF in front of gateway; geo-restriction configurable | Per-tenant Cloud Armor policy; DDoS alert integrated with on-call |
+| **Terms of service / DPA** | No ToS, no data processing agreement, no privacy policy `◀ now` | ToS and privacy policy published; linked from sign-in page | DPA template available for institutional customers; countersigned before onboarding | Per-tenant DPA executed and stored; auto-reminder on renewal |
+| **Data residency** | All data in `europe-west1`; no per-tenant configuration `◀ now` | Data residency documented; communicated to customers at onboarding | Firestore and GCS bucket region selectable at tenant provisioning | Active enforcement of tenant data residency constraints; audit report available |
+
+---
+
 ## Current state snapshot (2026-04-26)
 
 | Pillar | Honest summary |
@@ -96,6 +124,8 @@ Each row is a maturity dimension. Columns are levels:
 | Resilience & Availability | L0 / L1 — circuit breaker absent (L0), cold starts unaddressed (L0), no rollback procedure (L0), health check synthetic (L0) |
 | Observability & Cost | L1 / emerging L2 — traces in Firestore, spans collected, 👍/👎 feedback (L1); no dashboards, no alerts, no cost controls (L0) |
 | Operational Readiness | L0 / L1 — deploys manual (L0), no runbook (L0), corpus in GCS (L1), one environment (L0) |
+| UX | L0 / L1 — 👍/👎 feedback collected (L1); conversation context absent (L0), citations opaque (L0), freshness invisible (L0), language toggle disconnected (L0) |
+| Security & Compliance | L0 — no input/output screening, no WAF, no ToS/DPA, no data residency controls |
 
 **L2 across all dimensions** is the threshold for a production-grade single-tenant deployment.  
 **L3 across all dimensions** is the threshold for a second customer signing up without engineering involvement.
