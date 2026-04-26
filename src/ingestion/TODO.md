@@ -23,15 +23,14 @@ manual ingest trigger → knowledge service GCS read → scheduled polling (v2).
 
 ## Housekeeping
 
-- **Delete `pipeline/steps/step6_ingest.py`** — Graphiti/Neo4j ingest step. Dead code:
+- ~~**Delete `pipeline/steps/step6_ingest.py`** — Graphiti/Neo4j ingest step. Dead code:
   nothing in the pipeline calls it, the Neo4j dependency is gone, and it was never
-  part of the production path. Safe to delete outright.
+  part of the production path. Safe to delete outright.~~ DONE 2026-04-26.
 
-- **Verify Step 4 output path feeds `build_index.py`** — `run.py` writes table-to-prose
-  output into `data/pipeline/latest/03_chunked/`. Confirm that `build_index.py` reads
-  from that same directory and not directly from `02_ai_cleaned/`. A one-time trace
-  through both scripts; no code change expected, but needs explicit verification before
-  any chunking work.
+- ~~**Verify Step 4 output path feeds `build_index.py`**~~ FIXED 2026-04-26.
+  Gap found and closed: Step 4 was writing only to `03_chunked/` while `build_index.py`
+  reads from `02_ai_cleaned/`. Step 4 now overwrites `02_ai_cleaned/<stem>.md` in-place
+  and also writes a copy to `03_chunked/<stem>_prose.md` for step5_chunk.py.
 
 ---
 

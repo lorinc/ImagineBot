@@ -484,7 +484,7 @@ These run in parallel with Sprint 2 — they are exploratory only, no production
 
 #### Iteration 3 — DONE 2026-04-13
 **Params:** MAX=5000, MIN=1500 (unchanged)
-**Files:** `poc/poc1_single_doc/` — see `post_mortem/iter3_design.md` for protocol
+**Files:** poc1 phase (deleted 2026-04-26)
 
 **Architecture under test:**
 - Parse → hoist preamble (step 2) → split oversized leaves on full_text_chars (steps 3–5) →
@@ -545,8 +545,7 @@ Known gap: module-level globals in observability.py — ContextVar migration pen
 **Question:** Is OpenKB's wiki-compilation + agent approach a better retrieval architecture
 than poc1's PageIndex + hierarchical selection?
 
-**Files:** `poc/openkb_eval/eval_harness.py`, `poc/openkb_eval/run_eval.py`
-**Results:** `poc/openkb_eval/results/results_openkb_*.json`
+**Files:** openkb_eval phase (deleted 2026-04-26)
 
 **Eval results (4 docs, same query batteries as poc1):**
 

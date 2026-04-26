@@ -33,19 +33,21 @@ data/pipeline/<run_id>/02_ai_cleaned/
       Converts markdown tables to narrative sentences.
       WHY: tables produce no structured facts in LLM extraction.
            Validated: timetable table → 0 facts; prose → extracted correctly.
+      Overwrites 02_ai_cleaned/<stem>.md in-place AND writes a copy to
+      03_chunked/<stem>_prose.md for step5_chunk.py.
+data/pipeline/<run_id>/02_ai_cleaned/  ← also updated in-place by Step 4
 data/pipeline/<run_id>/03_chunked/
     ↓ Step 5 — Semantic chunking (split by ## headers)
       Each ## section becomes one chunk file.
 data/pipeline/<run_id>/03_chunked/
     ↓ [Index build — separate tool]
       tools/build_index.py reads data/pipeline/latest/02_ai_cleaned/en_*.md
-      and writes the PageIndex to data/index/multi_index.json
+      (prose-converted by Step 4) and writes the PageIndex to data/index/multi_index.json
 ```
 
 ### What Step 6 (Graphiti/Neo4j) was
 Step 6 ingested chunks into a Neo4j knowledge graph via Graphiti. This approach was
-abandoned in favour of PageIndex (full-context retrieval). The code remains in
-`pipeline/steps/step6_ingest.py` for reference but is not used in production.
+abandoned in favour of PageIndex (full-context retrieval). The file was deleted 2026-04-26.
 
 ## Running the pipeline
 ```bash

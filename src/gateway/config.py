@@ -4,6 +4,8 @@ GCP_PROJECT = os.environ.get("GCP_PROJECT_ID", "img-dev-490919")
 SERVICE_VERSION = os.getenv("MODULE_GIT_REV", "unknown")
 REGION = os.environ.get("VERTEX_AI_LOCATION", "europe-west1")
 KNOWLEDGE_SERVICE_URL = os.environ.get("KNOWLEDGE_SERVICE_URL", "")
+if not KNOWLEDGE_SERVICE_URL:
+    raise RuntimeError("KNOWLEDGE_SERVICE_URL is not set")
 MODEL = "gemini-2.5-flash-lite"
 
 # Breadth detection: how many distinct L1 topic groups trigger overview mode.

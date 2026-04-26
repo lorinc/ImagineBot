@@ -33,18 +33,23 @@ router = APIRouter()
 _sessions: dict[str, list[dict]] = {}
 _MAX_HISTORY = 10
 
-# Cached corpus summary for the classifier prompt. Loaded lazily on first request.
+# Cached corpus summary for the classifier prompt. Refreshed every 10 minutes so a
+# knowledge service redeploy with a new index is picked up without restarting the gateway.
 _corpus_summary: str | None = None
+_corpus_summary_fetched_at: float = 0.0
+_CORPUS_SUMMARY_TTL = 600  # seconds
 
 
 async def _get_corpus_summary() -> str:
-    global _corpus_summary
-    if _corpus_summary is None:
+    global _corpus_summary, _corpus_summary_fetched_at
+    if _corpus_summary is None or time.monotonic() - _corpus_summary_fetched_at > _CORPUS_SUMMARY_TTL:
         try:
             _corpus_summary = await knowledge_client.get_summary()
+            _corpus_summary_fetched_at = time.monotonic()
         except Exception as e:
             logger.warning("Could not fetch corpus summary, using fallback: %s", e)
-            _corpus_summary = "A school information system covering policies and procedures."
+            if _corpus_summary is None:
+                _corpus_summary = "A school information system covering policies and procedures."
     return _corpus_summary
 
 

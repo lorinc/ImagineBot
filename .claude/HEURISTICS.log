@@ -1006,3 +1006,23 @@ PREVENTED_BY: `tools/cleanup_revisions.sh` now runs automatically at the end of 
               Supports `--dry-run` flag.
 SOLUTION: Wrote `tools/cleanup_revisions.sh`; added call to all three deploy.sh scripts.
           Ran manually to clear the 30+ backlog (2026-04-26).
+
+[2026-04-26]
+CATEGORY: DATA_PIPELINE_BUG
+SERVICE: src/ingestion
+TASK: Housekeeping — verify Step 4 output path feeds build_index.py.
+SYMPTOM: None visible. The index built and the service ran without error. Discovered only
+         by tracing the two scripts: step4_table_to_prose.py wrote to 03_chunked/ while
+         build_index.py read from 02_ai_cleaned/. Table-heavy documents silently produced
+         zero extracted facts in the index.
+ROOT_CAUSE: step4_table_to_prose.py wrote prose output to 03_chunked/<stem>_prose.md (as
+            an intermediate for step5_chunk.py) but never wrote back to 02_ai_cleaned/.
+            build_index.py uses DEFAULT_CORPUS_DIR = 02_ai_cleaned/ and never read from
+            03_chunked/. The two tools did not share the same source of truth.
+PREVENTED_BY: Any pipeline change to Step 3, 4, or build_index.py must verify the full
+              chain: grep the output path in the step script and compare it to
+              DEFAULT_CORPUS_DIR in build_index.py. They must match, or Step 4 must
+              overwrite the source file in-place.
+SOLUTION: step4_table_to_prose.py now overwrites 02_ai_cleaned/<stem>.md in-place AND
+          writes a copy to 03_chunked/<stem>_prose.md for step5_chunk.py compatibility.
+          Fixed 2026-04-26.

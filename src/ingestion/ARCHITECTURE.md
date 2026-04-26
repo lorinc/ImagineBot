@@ -29,14 +29,12 @@ Step 5  Semantic chunking by ## headers (pure Python)
 tools/build_index.py                    (PageIndex build from 02_ai_cleaned/, Vertex AI / ADC)
 ```
 
-**Step 6 (Graphiti/Neo4j ingest) is dead code.** It appears in `pipeline/steps/step6_ingest.py`
-and is accessible via `--step6` in the CLI. It is never used in production. Do not delete it
-(needed for archaeological reference) but do not invoke it, do not extend it, and do not
-let it influence the pipeline design.
+**Step 6 (Graphiti/Neo4j ingest) has been deleted.** It was dead code — never used in production,
+Neo4j dependency gone. Removed 2026-04-26.
 
 The index build (`tools/build_index.py`) is a separate tool, not a pipeline step. It reads
-from `data/pipeline/latest/02_ai_cleaned/en_*.md` — the Step 3 output. Steps 4 and 5 produce
-alternative formats for downstream use but the index build does not depend on them.
+from `data/pipeline/latest/02_ai_cleaned/en_*.md`. Step 4 overwrites these files in-place with
+prose-converted versions, so the index build always sees prose output provided Step 4 ran first.
 
 ---
 
@@ -74,14 +72,10 @@ empirically: a school timetable table produced zero extracted facts; the same da
 prose sentences produced correct extraction. See HEURISTICS.log [2026-03-21] and
 `table_to_prose.py`'s module docstring.
 
-**Step 4 (table-to-prose) must always run before `build_index.py`.** The index is built
-from `02_ai_cleaned/` output (Step 3), not from `03_chunked/` (Step 4+5). This means
-`build_index.py` must be pointed at Step 4 output, or the pipeline ordering guarantees
-that Step 4 updates `02_ai_cleaned/` in place.
-
-**Current gap:** The `run.py` orchestrator runs Step 4 output into `03_chunked/`, not
-back into `02_ai_cleaned/`. If `build_index.py` reads from `02_ai_cleaned/`, it reads
-pre-table-to-prose output. Verify the actual index build command before each run.
+**Step 4 (table-to-prose) must always run before `build_index.py`.** Step 4 overwrites
+`02_ai_cleaned/<stem>.md` in-place with prose-converted content and also writes a copy
+to `03_chunked/<stem>_prose.md` for step5_chunk.py. Running `build_index.py` before
+Step 4 will index tables instead of prose — producing zero extracted facts for table-heavy documents.
 
 ---
 
@@ -102,8 +96,7 @@ rule without updating the tests and the docstring simultaneously.
 
 Steps 1–5 overwrite their output directories if re-run. They are idempotent by
 overwrite — not by skipping. `manifest.json` tracks current state per file as a status
-record, not a skip-if-done gate. The exception is Step 6 (dead code), which used a
-`.done` marker file as an idempotency gate.
+record, not a skip-if-done gate.
 
 ---
 
@@ -120,9 +113,6 @@ record, not a skip-if-done gate. The exception is Step 6 (dead code), which used
 ---
 
 ## Guardrails
-
-**Do not invoke or extend step6_ingest.py.** Graphiti/Neo4j was retired. The file is
-preserved as a reference artifact. Treat it as read-only archaeological record.
 
 **`group_id` per document must equal `source_id` — never null, never shared.**
 Each document must have a unique, stable `group_id` that matches its `source_id` in the
@@ -156,7 +146,6 @@ files once (HEURISTICS.log [2026-04-12]).
 | No scheduling | Someone must remember to re-run after corpus updates |
 | No audit trail | No record of when corpus was last refreshed or from what state |
 | No multi-tenant isolation | All documents share a single corpus/index |
-| Step 4 output path gap | Verify table-to-prose actually feeds `build_index.py` |
 
 All of these are blocked on the ingestion service becoming a deployed Cloud Run job.
 See `CLAUDE.md` "Future: deployed service" for the full roadmap.

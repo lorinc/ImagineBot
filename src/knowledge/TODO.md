@@ -128,9 +128,8 @@ existing eval set before shipping.
 
 ---
 
-### Query improvement backlog (carried from poc1/TODO.md)
-The full poc1 improvement backlog lives at `poc/poc1_single_doc/TODO.md`. Items
-relevant to the production service, in priority order:
+### Query improvement backlog (carried from poc1)
+Items relevant to the production service, in priority order:
 
 **Priority 1 — Structured synthesis prompt** _(prompt-only, no rebuild)_
 Edit `indexer/prompts.py` — `make_synthesize_prompt`.
@@ -150,7 +149,7 @@ Change select/discriminate prompt framing from label-matching to navigational re
 "which section would a reader look in first to answer this question?"
 Directly fixes cases like `1.5` being skipped for ambiguous queries.
 
-See `poc/poc1_single_doc/TODO.md` for Stage 0 items (query reformulation, PRF, glossary).
+Stage 0 items (query reformulation, PRF, glossary) are tracked in `src/gateway/TODO.md` Stage 0.
 
 ---
 

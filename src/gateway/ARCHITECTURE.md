@@ -64,11 +64,10 @@ large multi-section document from being mis-classified as broad.
 on the knowledge `/search` call. The knowledge service chooses a different synthesis
 prompt. The gateway never constructs prompts directly.
 
-**Corpus summary cached forever.** `_corpus_summary` is a module-level variable, loaded
-once on the first request. It is never expired. If the index is rebuilt and the gateway
-is not restarted, the classifier will still use the old corpus outline. This is acceptable
-while the index is baked into the Docker image and rebuilt deploys always restart the service.
-**This will break when GCS-backed index is implemented — add a TTL at that point.**
+**Corpus summary has a 10-minute TTL.** `_corpus_summary` is a module-level variable,
+refreshed every 600 seconds via `time.monotonic()`. On refresh failure, the stale cached
+value is retained (not the hardcoded fallback string) so a transient knowledge service
+hiccup doesn't degrade classification.
 
 **Sessions are in-memory.** `_sessions` is a dict on a single process. Multi-instance
 Cloud Run scale-out means a user whose second request routes to a different instance

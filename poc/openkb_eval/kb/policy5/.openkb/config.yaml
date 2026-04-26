@@ -1,3 +1,0 @@
-language: en
-model: gemini/gemini-2.5-flash
-pageindex_threshold: 20

@@ -37,7 +37,7 @@ GET /health
 ## Module map
 ```
 main.py          POST /search, POST /search/stream, GET /health, index loading
-indexer/         PageIndex pipeline (copied from poc/poc1_single_doc/indexer/)
+indexer/         PageIndex pipeline (originated in poc1 phase, 2026-04)
   config.py      GCP config, model names, node size thresholds
   llm.py         Vertex AI async wrapper, response schemas, semaphore
   multi.py       Multi-doc build + query pipeline (routing → selection → synthesis)

@@ -152,7 +152,7 @@ failure mode in the build context (same pattern).
 **Recall over precision in selection prompts.** The selection stage uses recall-oriented
 framing: "err inclusive; missing relevant content is worse than one extra section."
 Do not tighten the selection prompt for precision without running the eval suite
-(`poc/poc1_single_doc/eval/`). Prior iterations proved that precision-tightening causes
+(eval results from poc1 phase, 2026-04). Prior iterations proved that precision-tightening causes
 compound query recall failures that the lossy topic index cannot recover from.
 
 **Hierarchical selection, never flat.** Node selection walks the tree top-down at each
