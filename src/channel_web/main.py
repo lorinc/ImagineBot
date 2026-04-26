@@ -8,7 +8,8 @@ from fastapi import Depends, FastAPI, HTTPException, Request
 from fastapi.responses import HTMLResponse, JSONResponse, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
+
+from models import ChatRequest, FeedbackRequest
 
 logger = logging.getLogger(__name__)
 
@@ -62,17 +63,6 @@ _HERE = Path(__file__).parent
 app = FastAPI()
 app.mount("/static", StaticFiles(directory=str(_HERE / "static")), name="static")
 templates = Jinja2Templates(directory=str(_HERE / "templates"))
-
-
-class ChatRequest(BaseModel):
-    message: str
-    session_id: str | None = None
-
-
-class FeedbackRequest(BaseModel):
-    trace_id: str
-    rating: int
-    comment: str | None = None
 
 
 @app.get("/health")

@@ -283,6 +283,10 @@ not `services.scope_gate.classify`.
 
 These rules cut across all services. Violating them creates cross-service breakage.
 
+**API boundary models live in `src/<service>/models.py`.** Never define Pydantic request or
+response models inline in router or `main.py` files. Contract tests in `tests/contracts/`
+import directly from these files — an inline definition is invisible to them.
+
 **Never construct LLM prompts outside `services/` modules.** Routers sequence steps;
 services own prompts. This applies to the gateway; the same separation principle applies
 everywhere.

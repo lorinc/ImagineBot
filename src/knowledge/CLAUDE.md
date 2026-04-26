@@ -37,6 +37,8 @@ GET /health
 ## Module map
 ```
 main.py          POST /search, POST /search/stream, GET /health, index loading
+models.py        API boundary models: SearchRequest, SearchResponse, Fact, TopicsRequest, TopicsResponse, TopicNode
+                 — imported by main.py; contract-tested in tests/contracts/test_knowledge_contract.py
 indexer/         PageIndex pipeline (originated in poc1 phase, 2026-04)
   config.py      GCP config, model names, node size thresholds
   llm.py         Vertex AI async wrapper, response schemas, semaphore

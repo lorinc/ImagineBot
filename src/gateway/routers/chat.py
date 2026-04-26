@@ -7,7 +7,6 @@ from uuid import uuid4
 
 from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 
 from config import (
     BROAD_QUERY_PREFIX,
@@ -79,15 +78,7 @@ def _thinking_sse(span: dict) -> str | None:
     return f'event: thinking\ndata: {json.dumps({"text": text, "ms": span["duration_ms"]})}\n\n'
 
 
-class ChatRequest(BaseModel):
-    message: str
-    session_id: str | None = None
-
-
-class FeedbackRequest(BaseModel):
-    trace_id: str
-    rating: int
-    comment: str | None = None
+from models import ChatRequest, FeedbackRequest
 
 
 @router.post("/chat")

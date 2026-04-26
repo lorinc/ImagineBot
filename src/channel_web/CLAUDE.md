@@ -26,6 +26,8 @@ auth middleware backed by `src/auth/`. The ALLOWED_EMAILS approach is retired.
 ## File map
 ```
 main.py                      App factory. Mounts static files, registers routes.
+models.py                    API boundary models: ChatRequest, FeedbackRequest (inbound from browser)
+                             — contract-tested in tests/contracts/test_channel_web_contract.py
 templates/
   index.html                 Single-page Jinja2 template. Uses /static/... paths (NOT url_for).
 static/

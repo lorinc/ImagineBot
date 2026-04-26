@@ -1026,3 +1026,23 @@ PREVENTED_BY: Any pipeline change to Step 3, 4, or build_index.py must verify th
 SOLUTION: step4_table_to_prose.py now overwrites 02_ai_cleaned/<stem>.md in-place AND
           writes a copy to 03_chunked/<stem>_prose.md for step5_chunk.py compatibility.
           Fixed 2026-04-26.
+
+[2026-04-26]
+CATEGORY: TEST_INFRASTRUCTURE
+SERVICE: tests/contracts/
+TASK: Extract Pydantic models to src/<service>/models.py; write contract tests.
+SYMPTOM: First attempt at `pytest tests/contracts/` failed with ImportError: cannot
+         import name 'Fact' from 'models' — it loaded src/channel_web/models.py
+         instead of src/knowledge/models.py.
+ROOT_CAUSE: All three services have a file named `models.py`. When pytest collects
+            all contract test files, the first `sys.path.insert(..., "src/channel_web")`
+            loads `models` into sys.modules. Subsequent files that insert
+            `src/knowledge` at index 0 still get the cached channel_web version because
+            Python never re-imports a key already in sys.modules.
+PREVENTED_BY: When multiple services share a module filename, never use sys.path.insert
+              for cross-service test imports. Use importlib.util.spec_from_file_location
+              with a unique module name per service (e.g. "gateway.models",
+              "knowledge.models", "channel_web.models"). This pattern is now documented
+              in tests/CLAUDE.md.
+SOLUTION: Replaced sys.path.insert approach with importlib.util.spec_from_file_location
+          in all three contract test files. All 35 tests pass in a single invocation.

@@ -7,12 +7,12 @@ from pathlib import Path
 import vertexai
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
 
 from indexer.config import GCP_PROJECT, REGION, MODEL_QUALITY, MODEL_STRUCTURAL
 from indexer.llm import get_model
 from indexer.multi import query_multi_index, render_routing_outline
 from indexer.observability import get_query_spans, init_query_context, reset_query_context
+from models import Fact, SearchRequest, SearchResponse, TopicNode, TopicsRequest, TopicsResponse
 
 KNOWLEDGE_INDEX_PATH = Path(
     os.environ.get("KNOWLEDGE_INDEX_PATH", "/data/index/multi_index.json")
@@ -55,40 +55,6 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-
-
-class SearchRequest(BaseModel):
-    query: str
-    group_ids: list[str] | None = None  # stub — future access-control filter, ignored for now
-    overview: bool = False
-
-
-class Fact(BaseModel):
-    fact: str
-    source_id: str
-    valid_at: str | None = None
-
-
-class SearchResponse(BaseModel):
-    answer: str
-    facts: list[Fact]
-    selected_nodes: list[dict] = []
-    spans: list[dict] = []
-
-
-class TopicsRequest(BaseModel):
-    query: str
-    group_ids: list[str] | None = None
-
-
-class TopicNode(BaseModel):
-    doc_id: str
-    id: str
-    title: str
-
-
-class TopicsResponse(BaseModel):
-    l1_topics: list[TopicNode]
 
 
 def _build_response(result: dict) -> dict:

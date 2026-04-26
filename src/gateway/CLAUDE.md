@@ -13,6 +13,8 @@ direct access to knowledge or any other backend service.
 ```
 main.py             App factory. Wires vertexai init and chat router. No logic.
 config.py           All tunable constants. Reads env vars at startup; raises on missing.
+models.py           API boundary models: ChatRequest, FeedbackRequest
+                    — contract-tested in tests/contracts/test_gateway_contract.py
 routers/
   chat.py           POST /chat — full streaming pipeline (SSE)
 services/

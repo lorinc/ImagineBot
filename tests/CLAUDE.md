@@ -48,36 +48,31 @@ pytest tests/contracts/ tests/unit/ tests/integration/ -v
 ```
 
 ## Contract tests — what they are and why
-Contract tests import actual model/schema classes and assert field names and types exist.
-They cannot be faked. When a model field is renamed, they break immediately.
+Contract tests import actual model/schema classes from `src/<service>/models.py` and assert
+every field by name. They cannot be faked. When a model field is renamed, they break immediately.
+
+**Import pattern:** All three services have a file named `models.py`. Running all contract tests
+in one pytest invocation would cause `sys.modules['models']` collision if the tests used
+`sys.path.insert`. Instead, use `importlib.util.spec_from_file_location` with a unique
+module name per service:
 
 ```python
-# tests/contracts/test_query_contract.py
-from src.gateway.models.query import QueryRequest, QueryResponse
-from src.knowledge.models.chunk import Chunk
+import importlib.util, os
 
-def test_query_request_fields():
-    fields = QueryRequest.model_fields
-    assert 'query' in fields
-    assert 'session_id' in fields
+_path = os.path.join(os.path.dirname(__file__), "../../src/gateway/models.py")
+_spec = importlib.util.spec_from_file_location("gateway.models", _path)
+_mod = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_mod)
 
-def test_query_response_fields():
-    fields = QueryResponse.model_fields
-    assert 'answer' in fields
-    assert 'sources' in fields
-    assert 'session_id' in fields
-
-def test_chunk_fields():
-    fields = Chunk.model_fields
-    assert 'chunk_id' in fields
-    assert 'source_id' in fields
-    assert 'content' in fields
-    assert 'score' in fields
+ChatRequest = _mod.ChatRequest
 ```
 
-One contract test file per API boundary the gateway exposes.
-When you add a field: add it to the model, then add it to the contract test.
-When you rename a field: rename in model, rename in contract test, find all usages.
+Use `"gateway.models"`, `"knowledge.models"`, `"channel_web.models"` as the name argument
+so each service's models live under a distinct key in `sys.modules`.
+
+One contract test file per service. When you add a model field: add it to `models.py`,
+then add an assertion to the contract test. When you rename a field: rename in `models.py`,
+rename in the contract test, grep for all usages across all services.
 
 ## Test isolation rules
 - Each test is independent. No shared state between tests.
