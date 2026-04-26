@@ -109,6 +109,22 @@ forward retrieval hints derived from the query understanding stage.
 
 ## Bugs
 
+- **`KNOWLEDGE_SERVICE_URL` defaults to empty string** — silent misconfiguration: the service
+  starts and all knowledge calls silently fail. Add a startup assertion:
+  `if not KNOWLEDGE_SERVICE_URL: raise RuntimeError("KNOWLEDGE_SERVICE_URL is not set")`.
+  One line in `config.py` or `main.py` startup.
+
+- **Synchronous identity token fetch in async path** — `google.auth.transport.requests`
+  token refresh is blocking I/O called from an async handler, stalling the event loop
+  under concurrent load. Wrap with `asyncio.run_in_executor(None, ...)` or switch to
+  `google.auth.transport.aiohttp`.
+
+- **Corpus summary never expires** — the classifier's corpus outline is fetched from the
+  knowledge service once and cached in memory for the lifetime of the process. After an
+  index rebuild + redeploy of the knowledge service, the gateway continues classifying
+  against the stale outline until it is also restarted. Add a TTL (e.g. 10 min) or
+  invalidate on knowledge service version change.
+
 - **Feedback buttons missing on short-circuit exits** — Out-of-scope and vague (Tier 2/3)
   responses do not emit a `trace_id` in the SSE stream, so the frontend never renders thumb
   buttons. This is wrong: feedback is most valuable when the classifier made the wrong call.

@@ -149,6 +149,27 @@ content — it belongs in the UI layer.
 
 ---
 
+---
+
+## Housekeeping / correctness
+
+- **Synchronous token ops block async event loop** — `google.auth` token refresh is
+  blocking I/O called from an async handler. Wrap with `asyncio.run_in_executor(None, ...)`
+  or switch to an async-native credentials implementation.
+
+- **No token refresh on expiry** — if a user's Google identity token expires mid-session
+  they receive a 401 and must reload the page. Fix: use GIS silent refresh
+  (`google.accounts.id.prompt`) on the frontend and retry the failed request.
+
+- **`ALLOWED_EMAILS` requires restart to update** — adding or removing a user requires
+  redeploying the service. Fix: move the allowed-user list to Firestore (or delegate to
+  the auth service when it exists) and read it per-request or with a short cache TTL.
+
+- **Auth lives in channel_web, not gateway** — authentication is enforced only in this
+  channel. A second channel (WhatsApp, Slack, etc.) would have to re-implement it.
+  Auth enforcement belongs in the gateway (Sprint 3+, auth service). Track here as a
+  reminder not to deepen the channel_web auth path in the meantime.
+
 ### Out of scope for MVP
 
 - Aggregated feedback dashboard

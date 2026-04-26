@@ -21,6 +21,20 @@ manual ingest trigger → knowledge service GCS read → scheduled polling (v2).
 
 ---
 
+## Housekeeping
+
+- **Delete `pipeline/steps/step6_ingest.py`** — Graphiti/Neo4j ingest step. Dead code:
+  nothing in the pipeline calls it, the Neo4j dependency is gone, and it was never
+  part of the production path. Safe to delete outright.
+
+- **Verify Step 4 output path feeds `build_index.py`** — `run.py` writes table-to-prose
+  output into `data/pipeline/latest/03_chunked/`. Confirm that `build_index.py` reads
+  from that same directory and not directly from `02_ai_cleaned/`. A one-time trace
+  through both scripts; no code change expected, but needs explicit verification before
+  any chunking work.
+
+---
+
 ## SPIKE: multilingual corpus — EN → ES translation quality
 
 This task is unavoidable once real users are active. The current approach (let the synthesis

@@ -47,7 +47,11 @@ See `gap_analysis.md` §Gate 3.
 
 ## Bugs
 
-_No known bugs at UAT entry (2026-04-22)._
+- **`/search` (non-streaming) duplicates the pipeline** — `POST /search` and
+  `POST /search/stream` run the same retrieval + synthesis pipeline in parallel
+  code paths. Any prompt or logic change must be applied twice. Deprecate `/search`
+  once all callers (currently: gateway non-streaming path) have migrated to
+  `/search/stream`. Track remaining callers before removing.
 
 ---
 
