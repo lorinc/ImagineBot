@@ -39,6 +39,16 @@ and any sharp edges. Do not log session history or bug narrative here — only c
 - If the file doesn't exist yet and you changed that service, create it
 - If nothing structural changed: skip
 
+### docs/ARCHITECTURE.md
+
+If this session changed any cross-cutting concern — system topology, service-to-service
+protocol, SSE event shape, Firestore trace schema, access control chain, span model,
+secret management pattern, or any cross-service invariant — update `docs/ARCHITECTURE.md`.
+
+- Only update if something cross-cutting actually changed
+- Do not add session history or rationale — only current truth
+- If nothing cross-cutting changed: skip
+
 ### docs/PROJECT_PLAN.md
 
 If a phase completed, started, or was significantly scoped this session, update the
