@@ -1,5 +1,8 @@
 # src/gateway/ — Claude Code context
 
+## Read first
+Read `ARCHITECTURE.md` in this directory before making any changes to this service.
+
 ## Purpose
 Single entry point for all channels. Orchestrates the full request pipeline:
 sanitize → classify → rewrite → retrieve → stream. Auth, access control, and

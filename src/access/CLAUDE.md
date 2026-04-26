@@ -1,5 +1,8 @@
 # src/access/ — Claude Code context
 
+## Read first
+Read `ARCHITECTURE.md` in this directory before making any changes to this service.
+
 ## Purpose
 User-to-data-source mapping. Given a user ID, returns the set of source IDs that user
 is permitted to query. Called by the gateway's access middleware after auth passes.

@@ -260,11 +260,60 @@ async def query_multi_index(
                 "content_preview": n.content[:400] + ("…" if n.char_count > 400 else ""),
             })
 
-    sections_text = (
-        "\n\n---\n\n".join(section_parts)
-        if section_parts
-        else f"(no sections selected)\n\n{routing_outline}"
-    )
+    if not section_parts:
+        # No nodes retrieved — skip synthesis entirely to prevent the LLM from
+        # answering from training data using the routing outline as a knowledge hint.
+        emit_span("knowledge.synthesis_started", {"chunk_count": 0, "total_chars": 0}, duration_ms=None)
+        emit_span("knowledge.synthesis_done", {"answer_chars": 0}, duration_ms=0)
+        no_content_answer = "The knowledge base does not contain relevant information for this question."
+        sel_cost = cost_usd(
+            getattr(quality_model, "_name", MODEL_QUALITY),
+            sum(v.get("input_tokens", 0) for v in per_doc_raw.values()),
+            sum(v.get("output_tokens", 0) for v in per_doc_raw.values()),
+        )
+        route_cost = cost_usd(
+            getattr(structural_model, "_name", MODEL_STRUCTURAL),
+            route_usage.get("input_tokens", 0),
+            route_usage.get("output_tokens", 0),
+        )
+        per_doc_selection = {
+            doc_id: {k: v for k, v in sel.items() if k != "_nodes"}
+            for doc_id, sel in per_doc_raw.items()
+        }
+        return {
+            "question": question,
+            "routing": {
+                "routing_outline_char_count": len(routing_outline),
+                "routing_outline": routing_outline,
+                "selected_doc_ids": resolved_docs,
+                "unresolved_doc_ids": unresolved_docs,
+                "reasoning": route_reasoning,
+                "input_tokens": route_usage.get("input_tokens", 0),
+                "output_tokens": route_usage.get("output_tokens", 0),
+                "latency_ms": route_ms,
+                "cost_usd": route_cost,
+            },
+            "per_doc_selection": per_doc_selection,
+            "synthesis": {
+                "selected_nodes": [],
+                "sections_text_char_count": 0,
+                "sections_text": "",
+                "prompt_char_count": 0,
+                "raw_response": no_content_answer,
+                "answer": no_content_answer,
+                "input_tokens": 0,
+                "output_tokens": 0,
+                "latency_ms": 0,
+                "cost_usd": 0.0,
+            },
+            "total_input_tokens": route_usage.get("input_tokens", 0),
+            "total_output_tokens": route_usage.get("output_tokens", 0),
+            "cost_usd": route_cost + sel_cost,
+            "chars_to_synthesis": 0,
+            "total_latency_ms": route_ms,
+        }
+
+    sections_text = "\n\n---\n\n".join(section_parts)
 
     synth_prompt = (
         make_overview_synthesize_prompt(question, sections_text)

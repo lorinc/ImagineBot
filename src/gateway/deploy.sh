@@ -70,5 +70,9 @@ GATEWAY_URL=$(gcloud run services describe gateway \
   --region="${REGION}" --project="${PROJECT}" \
   --format="value(status.url)")
 echo "Gateway URL: ${GATEWAY_URL}"
+
+echo "=== Cleaning up old revisions ==="
+bash "$(dirname "$0")/../../tools/cleanup_revisions.sh"
+
 echo ""
 echo "Next step: bash src/channel_web/deploy.sh"

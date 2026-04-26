@@ -969,3 +969,40 @@ If not found, the replacement silently failed and must be retried with the corre
 anchor string.
 SOLUTION: Used the Edit tool directly with the correct anchor string (read from the file
 first), which succeeded immediately.
+
+[2026-04-26]
+CATEGORY: RETRIEVAL_BUG
+SERVICE: src/knowledge
+TASK: UAT of thinking panel — question "How do Montessori materials facilitate the move
+      from concrete to abstract learning?" produced a plausible-looking answer despite
+      routing selecting 0 nodes.
+SYMPTOM: Trace showed "Topics: (0 total)", "Selected 0 chunks", "Sending 0 chunks
+         (11582 chars) to LLM", "Answer synthesized (1928 chars)". Answer was coherent
+         but hallucinated — sourced from LLM training data, not the corpus.
+ROOT_CAUSE: When `section_parts` was empty after node selection, `multi.py` constructed
+            `sections_text` as `"(no sections selected)\n\n{routing_outline}"`. The
+            synthesis prompt's instruction "Answer using ONLY the sections above" was
+            insufficient — the routing outline acted as a plausible knowledge hint and
+            the LLM answered from training data rather than refusing.
+PREVENTED_BY: Integration test: after a query that routes to 0 nodes, assert the response
+              answer matches the canned no-content string exactly. Do not assert only
+              that `selected_nodes == []` — verify the answer text too, because the LLM
+              may still produce output if any context is passed.
+SOLUTION: Short-circuit in `multi.py` before synthesis: if `section_parts` is empty,
+          return the canned response directly without any LLM call. The routing outline
+          is never passed as synthesis context under any circumstances.
+          Fixed in: src/knowledge/indexer/multi.py (2026-04-26). Deployed as revision
+          knowledge-00012-4n7.
+
+[2026-04-26]
+CATEGORY: OTHER
+SERVICE: cross-cutting
+TASK: Cloud Run revision accumulation — 30+ old revisions found across all three services.
+SYMPTOM: `gcloud run revisions list` showed all revisions since project start, all in
+         "Ready: True" state. None had traffic allocation but they existed indefinitely.
+ROOT_CAUSE: Cloud Run keeps all revisions by default. There is no automatic pruning.
+PREVENTED_BY: `tools/cleanup_revisions.sh` now runs automatically at the end of each
+              `src/*/deploy.sh`. Script deletes all revisions with 0% traffic allocation.
+              Supports `--dry-run` flag.
+SOLUTION: Wrote `tools/cleanup_revisions.sh`; added call to all three deploy.sh scripts.
+          Ran manually to clear the 30+ backlog (2026-04-26).

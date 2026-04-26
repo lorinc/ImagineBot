@@ -1,5 +1,8 @@
 # src/admin/ — Claude Code context
 
+## Read first
+Read `ARCHITECTURE.md` in this directory before making any changes to this service.
+
 ## Purpose
 Management plane for multi-tenant operation. Handles everything that changes the
 system's configuration: tenant registration, user management, source (corpus)

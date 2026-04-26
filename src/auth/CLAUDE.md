@@ -1,5 +1,8 @@
 # src/auth/ — Claude Code context
 
+## Read first
+Read `ARCHITECTURE.md` in this directory before making any changes to this service.
+
 ## Purpose
 Authentication. Issues and validates tokens for all users across all tenants.
 Called by the gateway's auth middleware on every request. Users never call this directly.

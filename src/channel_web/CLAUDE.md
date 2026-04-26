@@ -1,5 +1,8 @@
 # src/channel_web/ — Claude Code context
 
+## Read first
+Read `ARCHITECTURE.md` in this directory before making any changes to this service.
+
 ## Purpose
 Web UI channel. The first user-facing surface. Thin client: formats requests for the
 gateway, renders responses. No business logic here — all pipeline logic lives in the gateway.

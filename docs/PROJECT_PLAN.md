@@ -366,7 +366,27 @@ its own spans via a ContextVar. Gateway aggregates + persists. Display prose liv
   `[gateway]` classify, rewrite.skipped, topics, breadth.focused
   `[knowledge]` knowledge.routing, knowledge.selection, knowledge.synthesis_started, knowledge.synthesis_done
 
-**Status:** DEPLOYED 2026-04-25 (commits 7215269, 310bc16, b7943ab). Browser UAT pending.
+**Status:** DEPLOYED 2026-04-25 (commits 7215269, 310bc16, b7943ab). Browser UAT PASSED 2026-04-26.
+
+### Phase 2.5.1 — 0-chunk synthesis hallucination fix — DEPLOYED 2026-04-26
+
+**Bug:** When routing selected 0 nodes, `multi.py` passed the routing outline as fallback
+synthesis context. LLM answered from training data with no retrieval. Answer looked valid;
+trace showed "Selected 0 chunks (11582 chars) to LLM".
+
+**Fix:** Short-circuit in `multi.py` before synthesis call: if `section_parts` is empty,
+return canned `"The knowledge base does not contain relevant information for this question."`
+directly. Routing outline is never passed as synthesis context under any circumstances.
+
+**Files:** `src/knowledge/indexer/multi.py`
+**Status:** DEPLOYED 2026-04-26 (revision knowledge-00012-4n7).
+
+### Cross-cutting — ARCHITECTURE.md authored 2026-04-26
+
+ARCHITECTURE.md created for all 8 `src/` modules. Documents boundaries, contracts,
+guardrails derived from code + heuristics. Surfaced 4 new issues (see SESSION.md).
+
+**Status:** Written. Not yet committed.
 
 ### Phase 3.1 — GDrive integration UAT plan — SCOPED 2026-04-24
 

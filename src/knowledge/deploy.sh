@@ -48,3 +48,6 @@ gcloud run services describe "${SERVICE}" \
   --project="${PROJECT}" \
   --region="${REGION}" \
   --format="value(status.url)"
+
+echo "=== Cleaning up old revisions ==="
+bash "${REPO_ROOT}/tools/cleanup_revisions.sh"

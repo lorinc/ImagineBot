@@ -28,6 +28,17 @@ Use copy-paste runnable commands, not narrative.
 
 Set HEURISTICS_WRITTEN: yes / no accordingly.
 
+### src/<service>/ARCHITECTURE.md
+
+For each service you touched this session, update its `ARCHITECTURE.md` if the session
+changed anything about its structure, interfaces, or key invariants. Write from the
+perspective of a new engineer reading cold: components, data flow, external dependencies,
+and any sharp edges. Do not log session history or bug narrative here — only current truth.
+
+- Only update services you actually touched
+- If the file doesn't exist yet and you changed that service, create it
+- If nothing structural changed: skip
+
 ### docs/PROJECT_PLAN.md
 
 If a phase completed, started, or was significantly scoped this session, update the

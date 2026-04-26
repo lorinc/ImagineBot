@@ -1,5 +1,8 @@
 # src/ingestion/ — Claude Code context
 
+## Read first
+Read `ARCHITECTURE.md` in this directory before making any changes to this service.
+
 ## Purpose
 Convert school documents from Google Drive into a PageIndex that the knowledge service
 can query. Runs on demand — not on the user request path. Currently a local CLI pipeline;

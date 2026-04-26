@@ -1,5 +1,8 @@
 # src/knowledge/ — Claude Code context
 
+## Read first
+Read `ARCHITECTURE.md` in this directory before making any changes to this service.
+
 ## Purpose
 Retrieval layer. Given a query and an optional set of permitted source IDs,
 returns a cited answer. Called by channel_web (Sprint 1) / gateway (Sprint 2+).

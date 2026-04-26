@@ -1,5 +1,8 @@
 # src/security/ — Claude Code context
 
+## Read first
+Read `ARCHITECTURE.md` in this directory before making any changes to this service.
+
 ## Purpose
 Rate limiting, abuse detection, and malicious input screening. Imported as a library
 by the gateway — not a deployed HTTP service. A round-trip before every user request

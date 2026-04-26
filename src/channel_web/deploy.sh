@@ -49,3 +49,6 @@ echo "Done."
 gcloud run services describe channel-web \
   --region="${REGION}" --project="${PROJECT}" \
   --format="value(status.url)"
+
+echo "=== Cleaning up old revisions ==="
+bash "$(dirname "$0")/../../tools/cleanup_revisions.sh"
