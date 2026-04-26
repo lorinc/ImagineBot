@@ -85,6 +85,10 @@ a small delay is expected.
 
 **Implementation:** 30-line bash script. No Python required. Run after any pipeline rebuild.
 
+**Implementation note:** The `<!-- prose -->` marker spec (check #4) was aspirational — `step4_table_to_prose.py`
+does not insert this marker. Check #4 is instead implemented as: `03_chunked/*_prose.md` files exist,
+which is the actual output of step 4.
+
 ### 2.4 UI perception — `tests/smoke/test_ui_playwright.py`
 
 **Purpose:** Verify the channel_web frontend renders and is interactive.
@@ -221,6 +225,11 @@ Provide the user with:
 
 ## 5. Coverage targets (not yet achieved)
 
+**Dependency:** The eval harness (§3) and unit coverage targets below assume acceptance criteria
+are authored independently of the agent's implementation. This depends on the
+"Story-driven spec → design transition" spike (see `docs/PROJECT_PLAN.md` Spike Track).
+Until that spike completes, tests written by the agent ratify implementation, not intent.
+
 These are the targets, not the current state. Implement layer by layer.
 
 | Layer | Target | Current |
@@ -230,7 +239,7 @@ These are the targets, not the current state. Implement layer by layer.
 | integration | gateway→knowledge full request cycle against real Firestore emulator | ❌ none |
 | smoke | `test_gateway_smoke.py` + `test_trace_firestore.py` after every staging deploy | ✅ both passing |
 | eval | `run_eval.py` against golden.jsonl before any knowledge/prompt change | ❌ none |
-| pipeline | `check_pipeline.sh` after any ingestion run | ❌ none |
+| pipeline | `check_pipeline.sh` after any ingestion run | ✅ `tools/check_pipeline.sh` — 4 checks, all passing |
 | UI | `test_ui_playwright.py` after any channel_web deploy | ❌ blocked on auth |
 
 Milestone: when contracts + unit + smoke are all ✅, autonomy is sufficient for most maturity improvements.

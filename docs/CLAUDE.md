@@ -18,6 +18,7 @@ Do not create new documentation files without explicit discussion.
 | DELIVERY.md | Dense log: features, tests, deploys, breaking changes | Narrative, explanation |
 | DEPLOYMENT.md | Deploy commands, Cloud Run config, rollback procedure | Architecture rationale |
 | spikes/ | One file per spike — options, tradeoffs, decision | Implementation |
+| specs/ | **Human-owned** acceptance criteria (per module) + cross-cutting principles | Agent never modifies without approval |
 
 ## DELIVERY.md format
 Dense. Facts only. No prose.
@@ -69,6 +70,7 @@ Status: COMPLETE | IN_PROGRESS
 | Infrastructure changed | ARCHITECTURE.md and/or DEPLOYMENT.md |
 | Spec changed | FUNCTIONAL_SPEC.md |
 | Spike completed | spikes/[topic].md → update relevant service CLAUDE.md |
+| Spec written or approved | specs/<module>.md or specs/PRINCIPLES.md — human authors, agent does not update |
 | Sprint boundary | PROJECT_PLAN.md |
 
 ## Current state

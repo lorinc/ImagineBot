@@ -412,6 +412,33 @@ guardrails derived from code + heuristics. Surfaced 4 new issues (see SESSION.md
 
 ---
 
+### Phase 2.7 — Pipeline integrity check + smoke dep pinning — COMPLETE 2026-04-26
+
+**What was built:**
+- `tools/check_pipeline.sh` — 4-check bash script: 02_ai_cleaned non-empty, all indexed sources present, node count ≥10, step 4 prose files in 03_chunked (SW_QA.md §2.3)
+- `tests/smoke/requirements.txt` — pinned `httpx>=0.27.2`, `google-cloud-firestore>=2.19.0`
+- Updated `docs/design/SW_QA.md`: pipeline row → ✅; documented prose marker spec deviation
+
+**Note:** SW_QA.md §2.3 spec called for a `<!-- prose -->` marker check; `step4_table_to_prose.py` does not emit this marker. Check #4 implemented as: `03_chunked/*_prose.md` files exist, which is the actual step 4 output.
+
+**Status:** COMPLETE 2026-04-26. bash tools/check_pipeline.sh → 4 passed, 0 failed.
+
+---
+
+### Phase 2.8 — Eval harness question set design — COMPLETE 2026-04-26
+
+**What was produced:**
+- `docs/design/BOT_QA.md` — complete question taxonomy for eval harness: 18 families, ~33 items, no fixed ceiling
+- Eval runner target changed from knowledge `/search` to gateway `/chat` (tests full gateway+knowledge pipeline)
+- Families added beyond SW_QA.md §3.3: exception omission, L1 vocabulary mismatch, procedure truncation, dual-version synthesis blend, model knowledge supplement, in-scope undocumented, scope gate false positive, multi-turn follow-up
+- `golden.jsonl` schema extended with `prior_turns` for multi-turn items
+- Generation workflow: 4 LLM-assisted prompts + hand-curation gate, all specified in BOT_QA.md §Generation workflow
+- Architecture-specific failure modes (table carry-forward dropped — not a failure mode for PageIndex; replaced with parent-context loss + cross-doc routing miss)
+
+**Status:** COMPLETE 2026-04-26. Next: execute generation workflow (BOT_QA.md Steps 1–5) to produce draft `golden.jsonl` candidates for human review.
+
+---
+
 ### Phase 3.1 — GDrive integration UAT plan — SCOPED 2026-04-24
 
 **Plan:** `~/.claude/plans/awesome-do-a-gap-dynamic-stardust.md`
@@ -487,6 +514,35 @@ bash src/channel_web/deploy.sh
 | knowledge service ingress | Restore `--ingress=internal` (changed to `all` for local testing) | After channel_web E2E validated |
 
 ---
+
+---
+
+## Spike Track — Process and Tooling
+
+### Spike: Story-driven spec → design transition — NOT STARTED
+
+**Question:** How do we author per-module acceptance criteria and cross-cutting principles
+such that tests are derived from human intent, not from agent implementation?
+
+**Why this matters:** Currently the agent authors both implementations and tests in the
+same session, creating circularity — tests ratify what was built, not what was intended.
+`docs/specs/` stub exists but all principles are currently status STUB (derived from
+implementation). The eval harness (SW_QA.md §3) and any future acceptance-criteria-driven
+test work depend on this being resolved first.
+
+**Dependency:** SW_QA.md §3 (eval harness), SW_QA.md §5 unit coverage targets.
+
+**Scope of the spike:**
+- What is the right authoring workflow? (human writes specs up front; agent flags conflicts)
+- How do per-module specs (`docs/specs/<module>.md`) integrate with the SW_QA.md autonomy protocol?
+- How do PRINCIPLES.md invariants get enforced in tests without agent circular authorship?
+- What does the review/approval gate look like in practice?
+
+**Output:** Updated `docs/specs/PRINCIPLES.md` status → APPROVED (reviewed with human);
+one pilot module spec (gateway or knowledge) at APPROVED status; updated SW_QA.md §4
+autonomy protocol to reference specs as the authoritative input for acceptance criteria.
+
+**Status:** NOT STARTED — pending human availability to co-author specs.
 
 ---
 

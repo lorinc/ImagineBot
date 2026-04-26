@@ -15,10 +15,13 @@ At the start of every session, before anything else:
 | `.claude/HEURISTICS.log` | Append-only institutional memory | Never edit past entries. `tail -40` to review recent. |
 | `docs/ARCHITECTURE.md` | Cross-cutting topology, protocols, invariants, guardrails | Read at session start. Update when cross-service contracts change. |
 | `docs/PROJECT_PLAN.md` | Sprint breakdown and phase status | Update when phases complete or are added. |
+| `docs/specs/` | **Human-owned acceptance criteria and principles** | Read before implementing. Never modify without explicit approval. Surface conflicts — do not resolve them. |
 | `src/<service>/CLAUDE.md` | Service-level context, architecture, current state | Read before touching that service. |
 | `src/<service>/TODO.md` | Service-level backlog | Append-only. Strike through resolved items. |
 
 Each file has a purpose header with its own format rules. CLAUDE.md does not duplicate them.
+
+**Conflict rule:** If an implementation or test disagrees with anything in `docs/specs/`, stop and surface the conflict. Do not adapt the spec or the test to match the code.
 
 Use `/wrap` at the end of each session to update SESSION.md, HEURISTICS.log, and PROJECT_PLAN.md consistently.
 

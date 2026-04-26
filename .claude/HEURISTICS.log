@@ -1046,3 +1046,45 @@ PREVENTED_BY: When multiple services share a module filename, never use sys.path
               in tests/CLAUDE.md.
 SOLUTION: Replaced sys.path.insert approach with importlib.util.spec_from_file_location
           in all three contract test files. All 35 tests pass in a single invocation.
+
+[2026-04-26]
+CATEGORY: DEPLOYMENT_BUG
+SERVICE: src/gateway
+TASK: Deploy gateway after extracting models.py from routers/chat.py.
+SYMPTOM: Cloud Run revision failed immediately on startup with
+         `ModuleNotFoundError: No module named 'models'`.
+ROOT_CAUSE: models.py was extracted from inline definitions in routers/chat.py
+            (last session) and committed, but the Dockerfile was not updated to
+            include a COPY instruction for the new file. Only main.py, config.py,
+            routers/, and services/ were being copied into the image.
+PREVENTED_BY: Whenever a new top-level .py file is created in a service directory,
+              immediately check that service's Dockerfile for a corresponding COPY
+              instruction. Pattern: grep the Dockerfile for every .py file in the
+              service root; they must all be present.
+SOLUTION: Added `COPY src/gateway/models.py .` to src/gateway/Dockerfile.
+          Fixed 2026-04-26.
+
+[2026-04-26]
+CATEGORY: TRACE_SCHEMA_BUG
+SERVICE: src/gateway
+TASK: Implement test_trace_firestore.py — assert trace["output"] contains facts.
+SYMPTOM: test_trace_firestore.py failed: `output.facts is not a list: {'answer': '...'}`.
+         The smoke test had passed (SSE answer event had non-empty facts), but the
+         Firestore trace showed output = {"answer": "..."} with no facts field.
+ROOT_CAUSE: In routers/chat.py, all three pipeline paths wrote:
+            `trace["output"] = {"answer": answer}`
+            omitting facts. The architecture spec (docs/ARCHITECTURE.md) requires
+            `output: { answer: str, facts: [...] }`. facts were only stored in
+            trace["knowledge"]["facts"] — not promoted to output.
+PREVENTED_BY: When adding a new field to the Firestore trace schema, grep for every
+              `trace["output"] =` assignment in routers/chat.py and verify each one
+              includes the full output shape. There are three paths: out_of_scope,
+              orientation, and the normal search path — all must be updated together.
+SOLUTION: Fixed all three paths in routers/chat.py:
+          - out_of_scope: {"answer": OUT_OF_SCOPE_REPLY, "facts": []}
+          - orientation: {"answer": ORIENTATION_RESPONSE, "facts": []}
+          - normal: {"answer": answer, "facts": (result or {}).get("facts", [])}
+          Gateway redeployed 2026-04-26 (revision gateway-00013-7pz).
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
