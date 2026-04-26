@@ -7,6 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/gateway/main.py .
 COPY src/gateway/config.py .
+COPY src/gateway/models.py .
 COPY src/gateway/routers/ routers/
 COPY src/gateway/services/ services/
 
