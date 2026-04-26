@@ -4,28 +4,8 @@
 At the start of every session, before anything else:
 1. Read `.claude/SESSION.md`
 2. Run `tail -40 .claude/HEURISTICS.log`
-3. Output a session brief — 3–5 sentences max: what was done last session, what comes next. No headers, no bullet trees, no essay.
-
-## Service map
-```
-src/
-  gateway/        Entry point for all channels. Routing, session, tracing, feedback.
-                  Deployed. Calls knowledge service directly (auth/access/security stubbed).
-
-  knowledge/      Retrieval layer. PageIndex + Gemini 2.5 Flash. Given a query + source IDs,
-                  returns cited answer. Deployed. Index loaded from GCS (or baked image fallback).
-
-  ingestion/      Document intake. CLI pipeline: Drive → Markdown → PageIndex → GCS.
-                  Not yet deployed as a service. See gdrive_integration_plan.md for roadmap.
-
-  channel_web/    Web UI. Jinja2 SSR. Thin client: calls gateway, renders SSE stream.
-                  Deployed. Google Sign-In auth, allowed-email list in Secret Manager.
-
-  admin/          Tenant + corpus management. [not yet implemented]
-  auth/           Token issuance and validation. [not yet implemented]
-  access/         User-to-source mapping. [not yet implemented]
-  security/       Rate limiting and input screening. [not yet implemented]
-```
+3. Read `docs/ARCHITECTURE.md`
+4. Output a session brief — 3–5 sentences max: what was done last session, what comes next. No headers, no bullet trees, no essay.
 
 ## Operational files
 
