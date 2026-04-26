@@ -1088,3 +1088,4 @@ SOLUTION: Fixed all three paths in routers/chat.py:
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
