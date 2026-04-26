@@ -152,7 +152,7 @@ async def chat(body: ChatRequest):
 
         if not in_scope:
             trace["pipeline_path"] = "out_of_scope"
-            trace["output"] = {"answer": OUT_OF_SCOPE_REPLY}
+            trace["output"] = {"answer": OUT_OF_SCOPE_REPLY, "facts": []}
             trace["spans"] = spans.spans()
             asyncio.create_task(write_trace(trace))
             yield f'event: answer\ndata: {json.dumps({"answer": OUT_OF_SCOPE_REPLY, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
@@ -160,7 +160,7 @@ async def chat(body: ChatRequest):
 
         if not specific_enough:
             trace["pipeline_path"] = "orientation"
-            trace["output"] = {"answer": ORIENTATION_RESPONSE}
+            trace["output"] = {"answer": ORIENTATION_RESPONSE, "facts": []}
             trace["spans"] = spans.spans()
             asyncio.create_task(write_trace(trace))
             yield f'event: answer\ndata: {json.dumps({"answer": ORIENTATION_RESPONSE, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
@@ -277,7 +277,7 @@ async def chat(body: ChatRequest):
             answer = BROAD_QUERY_PREFIX + answer
 
         trace["pipeline_path"] = "broad" if overview else "specific"
-        trace["output"] = {"answer": answer}
+        trace["output"] = {"answer": answer, "facts": (result or {}).get("facts", [])}
         trace["spans"] = spans.spans()
         asyncio.create_task(write_trace(trace))
 
