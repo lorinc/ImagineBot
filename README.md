@@ -4,85 +4,57 @@ A multi-service Q&A system for school communities. Documents are ingested and ke
 current; users ask questions through a web UI and receive cited answers drawn from
 those documents. Access is controlled per user per data source.
 
-## What runs beneath the surface
-
-This project is built with Claude Code as the primary development agent. Managing that
-well requires infrastructure that goes beyond the code itself: the agent needs to know
-what decisions were made and why, what has failed before and how to avoid repeating it,
-and what invariants cut across service boundaries. The operational files below are that
-infrastructure.
-
-### `.claude/HEURISTICS.log` — institutional memory
-
-An append-only structured log of every significant failure mode discovered during
-development. Each entry records: category, affected service, symptom, root cause, and
-— most importantly — a `PREVENTED_BY` field that encodes a structural change, not just
-advice to "be careful." The log is read at the start of every session. It outlives every
-conversation and is the primary mechanism for not making the same mistake twice.
-
-Example categories recorded so far: contract violations between services, silent data
-pipeline gaps (step wrote to the wrong directory for weeks), Cloud Run revision
-accumulation, async/sync boundary bugs, SSE framing issues, and Firestore write
-semantics.
-
-### `docs/ARCHITECTURE.md` — cross-cutting invariants and guardrails
-
-Not an overview document — a set of enforced constraints that no single service owns.
-Topology invariants (`channel_web` never calls `knowledge` directly), authentication
-flow separation (user tokens never leave `channel_web`), access control rules (no
-partial enforcement, pre-filter only), SSE event protocol (all three services change
-atomically), secret mount pattern, test isolation requirements, and coding agent
-guardrails.
-
-The document is read at every session start. Any change to a cross-service contract
-triggers an update here.
-
-### `docs/PROJECT_PLAN.md` + `docs/SAAS_MATURITY_FRAMEWORK.md`
-
-Sprint breakdowns are anchored to a maturity framework that maps every operational
-dimension (auth, access, ingestion, observability, tenancy, etc.) to four levels.
-Before planning work, the framework identifies which dimensions are at L0 and block
-the next milestone. This prevents building features on top of missing foundations.
-
-### `src/<service>/CLAUDE.md` and `src/<service>/TODO.md`
-
-Every service has a `CLAUDE.md` loaded before any change to that service: current
-architecture, known gaps, invariants specific to that service. `TODO.md` is
-append-only — resolved items are struck through, never deleted. Together they provide
-continuity across sessions without requiring the agent to re-derive state from git history.
-
-### `.claude/SESSION.md`
-
-Overwritten at the start of each session via `/wrap`. Records what was completed, what
-was left open, and what comes next. Not committed — it's working state, not history.
-
----
-
-## Development approach
-
-**Spikes before production.** The retrieval architecture was validated through two poc
-phases (`poc1_single_doc`, `openkb_eval`) before any code was promoted to `src/`. The
-poc directory was deleted once the architecture graduated. What remains in `src/` is
-the production path; what informed the design is in the git history and `HEURISTICS.log`.
-
-**Conservative dependencies.** Before adding any package: state what problem it solves,
-state what three lines of Python would do instead, get explicit approval. The frontend
-is served without a build step.
-
-**Production deploy is always a manual trigger.** No CI pipeline, no merge hook, no
-script may deploy to production without an explicit human action. Every service has a
-`deploy.sh` that builds, pushes, and deploys locally.
-
-**Architecture violations are named, not assumed.** Known gaps in the current
-implementation (inline auth in `channel_web`, `group_ids=null`, synchronous I/O in
-async paths) are documented with their exact location and the condition under which
-they become blocking. Nothing is swept under the rug.
-
----
-
 ## Stack
 
 Python 3.12 · FastAPI · Firestore · Vertex AI (Gemini 2.5 Flash) · GCP Cloud Run · GCS
+
+---
+
+## SaaS maturity dimensions
+
+Current state marked with `◀ now`. Target is L2 across all dimensions for a
+production-grade single-tenant deployment; L3 for multi-tenant self-service.
+
+| Dimension | Current | L2 target | L3 target |
+|---|---|---|---|
+| **User authentication** | Email allowlist in Secret Manager; redeploy to add user `◀` | Cloud IAP + Firestore; no redeploy | Per-tenant OIDC; tenant-scoped token claims |
+| **Service-to-service auth** | Cloud Run Invoker role per service `◀` | All internal services unreachable from internet | Per-tenant service account scoping |
+| **Tenant model** | No tenant concept `◀` | Tenant ID in every request + write | Self-service tenant registration |
+| **Access control** | `group_ids` always null; all users see all documents `◀` | Pre-retrieval filter enforced in index selection | Per-tenant ACL admin UI + invite flow |
+| **Corpus ingestion** | Laptop CLI; personal OAuth token `◀` | Scheduled Cloud Run Job; ops-triggered | Admin UI; any authorized user connects a Drive folder |
+| **Index lifecycle** | Index baked into Docker image; update = redeploy `◀` | Index in GCS; hot-reload on update | Per-tenant index namespace; version tracked in Firestore |
+| **Corpus freshness** | `valid_at` always null `◀` | Last-updated timestamp per source in Firestore | Staleness alert; per-tenant freshness dashboard |
+| **Structured logging** | Default uvicorn logs `◀` | `trace_id` + service version in all log lines | `tenant_id`, `user_id` in every line; Cloud Logging queries |
+| **Distributed tracing** | Custom OTel-inspired spans in Firestore `◀` | `X-Trace-Id` across all service hops | Cloud Trace integration; per-service latency breakdown |
+| **Alerting** | None `◀` | Error rate + service unavailability alerts | Tenant-aware error budget breach notifications |
+| **Cost attribution** | Vertex AI calls untagged `◀` | Calls labelled by service + environment | Per-tenant cost report; per-tenant query quota |
+| **LLM quality monitoring** | 👍/👎 feedback collected in Firestore `◀` | Weekly thumbs-down rate report by topic | Automated regression alert on feedback spike |
+| **CI/CD** | Manual `deploy.sh` only `◀` | CI runs lint + unit tests on push; blocks merge | Staging auto-deploy on merge; production manual trigger with smoke tests |
+| **Rollback** | No documented procedure `◀` | Cloud Run traffic splitting; rollback tested each sprint | Canary deploys; auto-rollback on error-rate spike |
+
+Full framework: `docs/SAAS_MATURITY_FRAMEWORK.md`
+
+---
+
+## What runs beneath the surface
+
+Architecture and operational decisions are grounded in a set of design documents in
+`docs/design/`: a RAG system design covering the document corpus model and retrieval
+architecture; a pre-retrieval harness framework (sanitization, classification, query
+rewriting, access enforcement); a mature infrastructure gap analysis benchmarking the
+current system against reliable multi-tenant SaaS; UX and conversational design
+frameworks; and observability design based on OpenTelemetry conventions.
+
+Development is driven by Claude Code as the primary agent. Keeping that coherent across
+sessions requires more than code: `docs/ARCHITECTURE.md` holds cross-cutting invariants
+and guardrails (topology, auth flows, SSE protocol, access control chain) that no single
+service owns. `.claude/HEURISTICS.log` is an append-only record of every significant
+failure mode, structured so the `PREVENTED_BY` field encodes a structural fix, not advice.
+Each service has its own `CLAUDE.md` (current state, known gaps) and `TODO.md`
+(append-only backlog). `docs/PROJECT_PLAN.md` anchors sprint work to the maturity
+framework above.
+
+---
 
 ## Services
 
@@ -97,14 +69,12 @@ security      Rate limiting and input screening. [planned]
 admin         Tenant + corpus management. [planned]
 ```
 
-## Request flow
+## Development
 
 ```
 User → channel_web → gateway → knowledge → Vertex AI → response
                    ↘ Firestore (traces + feedback, fire-and-forget)
 ```
-
-## Development
 
 See `CLAUDE.md` for session protocol and service-level context.
 See `.claude/HEURISTICS.log` for recorded failure modes and root causes.
