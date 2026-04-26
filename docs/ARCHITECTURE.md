@@ -1,234 +1,310 @@
 # Architecture
 
+This document covers only cross-cutting concerns: system topology, shared protocols,
+cross-service invariants, and constraints that no single service owns. Every service
+has its own `ARCHITECTURE.md` — start there for service-specific decisions.
+
+**Do not duplicate service-level decisions here. Do not let this file drift from the code.**
+
+---
+
+## Module map
+
+| Service | Type | Ingress | Status |
+|---|---|---|---|
+| `src/channel_web/` | Cloud Run service | public HTTPS | deployed |
+| `src/gateway/` | Cloud Run service | public HTTPS | deployed |
+| `src/knowledge/` | Cloud Run service | `--no-allow-unauthenticated`, ingress=all | deployed |
+| `src/ingestion/` | Cloud Run Job (future) | n/a (offline CLI now) | CLI only |
+| `src/auth/` | Cloud Run service | internal | not implemented |
+| `src/access/` | Cloud Run service | internal | not implemented |
+| `src/security/` | library (imported by gateway) | n/a | not implemented |
+| `src/admin/` | Cloud Run service | separate ingress, admin auth | not implemented |
+
+→ Each service's decisions: `src/<service>/ARCHITECTURE.md`
+
+---
+
+## System topology
+
+```
+Browser
+  │  HTTPS (Google ID token in Authorization header)
+  ▼
+channel_web  (Cloud Run, public)
+  │  HTTPS (Cloud Run identity token, service-to-service)
+  ▼
+gateway  (Cloud Run, public)
+  │  HTTPS (Cloud Run identity token)           writes
+  ├──────────────────────────────────────────▶  Firestore  traces/{trace_id}
+  │  HTTPS (Cloud Run identity token, X-Trace-Id header)
+  ▼
+knowledge  (Cloud Run, no-allow-unauthenticated)
+  │  gRPC / HTTPS
+  ▼
+Vertex AI  (Gemini 2.5 Flash / Flash Lite)
+```
+
+**Invariant: channel_web never calls knowledge directly.** All queries flow through
+the gateway. If you find a direct channel_web → knowledge call, it is an architecture
+violation.
+
+**Stubs on the gateway's request path (not yet wired):**
+```
+gateway  →  auth service    (token validation — currently inline in channel_web)
+        →  access service   (group_ids resolution — currently null)
+        →  security library (rate limiting + input screening — currently absent)
+```
+
+---
+
 ## GCP project structure
 
-**Decision: 2 projects, not 4.**
-
+Two projects:
 ```
-img-dev   — all services, development + staging environment
-img-prod  — all services, production environment
+img-dev   — all services, development + staging
+img-prod  — all services, production (not yet provisioned)
 ```
 
-Rejected: one project per service (ingestion / knowledge / llm / channel_web).
+One Cloud Run service per `src/` service. One service account per service, minimum
+permissions. Services call each other via HTTPS (Cloud Run URL), never via shared databases.
+Billing attribution via resource labels, not project splits.
 
-**Why rejected:**
-- Cross-project service-to-service calls require cross-project IAM + networking — significantly more complex than same-project IAM roles
-- Workload Identity Federation must be set up once per project — 4 projects = 4x CI/CD setup
-- Shared resources (Firestore, Secret Manager, Neo4j credentials) have no natural home across projects
-- Firestore: one instance per project — cannot split across projects without a cross-project API boundary
-- Service isolation at MVP scale is fully achievable via per-service service accounts within one project
+Per-project resources: Cloud Run, Cloud Run Jobs, Firestore, Secret Manager,
+Artifact Registry, Cloud Storage, Vertex AI, Workload Identity Federation.
 
-**Service isolation within a project (not via project boundaries):**
-- One Cloud Run service per `src/` service
-- One service account per Cloud Run service, minimum permissions
-  - e.g., `ingestion-sa@img-dev.iam.gserviceaccount.com` — only: Neo4j write, GCS read, Vertex AI
-  - e.g., `knowledge-sa@img-dev.iam.gserviceaccount.com` — only: Neo4j read, Vertex AI
-  - e.g., `gateway-sa@img-dev.iam.gserviceaccount.com` — only: Cloud Run invoker on downstream services
-- Services call each other via HTTPS (Cloud Run URL), not shared databases
-- Billing attribution via resource labels, not project splits
+**Deploy path: local Docker, not Cloud Build.** Cloud Build API is not enabled on
+`img-dev`. Pattern: `docker build → docker push → gcloud run deploy`. All services
+have a `deploy.sh`. Never use `gcloud builds submit`.
 
-**Reference:** `REFERENCE_REPOS/MD2RAG/ISSUE-GEMINI-AUTH.md` — the prior project's pain was Gemini API key vs Vertex AI service account confusion, not project structure. Avoided here by using Vertex AI consistently (never the public Gemini API key endpoint).
+**Production deploy is always a manual trigger.** Automatic deploy to production is
+prohibited — no CI pipeline, no merge hook, no script may deploy to `img-prod` without
+an explicit human action.
 
 ---
 
-## Per-project resources
+## Dependency policy
 
-Each project (`img-dev`, `img-prod`) contains:
+This project is deliberately conservative on dependencies. Before adding any package:
+1. State what problem it solves
+2. State what the alternative without it would be
+3. Get explicit approval
 
-| Resource | Purpose |
-|---|---|
-| Cloud Run (per service) | Each `src/` service runs as a Cloud Run service |
-| Cloud Run Jobs (ingestion) | Ingestion runs on schedule/webhook, not always-on |
-| Firestore | User data, access control mapping, session state |
-| Secret Manager | Neo4j credentials, API keys — never in code or env files |
-| Artifact Registry | Docker images for all services |
-| Cloud Storage | Markdown staging bucket (Drive → GCS → ingestion) |
-| Vertex AI | Embeddings (text-embedding-004) + LLM calls at ingestion (Gemini Flash) |
-| Workload Identity Federation | CI/CD auth — one pool per project, no stored keys |
-
-**Not in GCP:**
-- Neo4j Aura Free — managed by Neo4j (one instance per environment, `console.neo4j.io`)
+Never add a package to solve a problem that three lines of Python would solve.
+Never add a Node.js toolchain dependency. The frontend must be serveable without a build step.
 
 ---
 
-## Service deployment model
+## Service-to-service authentication
 
+All internal calls use **Cloud Run identity tokens** fetched via ADC:
+```python
+google.oauth2.id_token.fetch_id_token(auth_req, TARGET_SERVICE_URL)
 ```
-src/gateway/      → Cloud Run service  (always on, public HTTPS)
-src/ingestion/    → Cloud Run Job      (scheduled or webhook-triggered, not on request path)
-src/knowledge/    → Cloud Run service  (internal only — not public)
-src/security/     → Cloud Run service  (internal only)
-src/auth/         → Cloud Run service  (internal only)
-src/access/       → Cloud Run service  (internal only)
-src/channel_web/  → Cloud Run service  (public HTTPS)
-```
+The receiving service is protected with `--no-allow-unauthenticated`. Cloud Run IAM
+validates the token; the service never validates it manually.
 
-Internal services are only reachable by other services with the Cloud Run Invoker role — not exposed to the public internet.
+**Two distinct token flows — never confuse them:**
+
+| Flow | Token type | Issued by | Validated by |
+|---|---|---|---|
+| Browser → channel_web | Google OAuth2 ID token | Google Sign-In | channel_web (`verify_oauth2_token`) |
+| Service → service | Cloud Run identity token | ADC / service account | Cloud Run IAM |
+
+The user's Google ID token never leaves channel_web. It is never forwarded to the gateway.
 
 ---
 
-## Knowledge service: retrieval architecture
+## SSE event protocol (gateway → channel_web → browser)
 
-**Retrieval backend: Vertex AI Context Caching (Gemini 2.5 Flash)**
-
-Decision: 2026-03-23. Graphiti + Neo4j retired. See heuristics.log for rationale.
+Defined by the gateway. channel_web proxies verbatim — no rewriting.
 
 ```
-Markdown files (data/pipeline/latest/02_ai_cleaned/ — 7 canonical files, ~100K tokens)
-    ↓ ingestion service: Steps 1–4 (DOCX → GDocs → baseline MD → AI cleaned → table-to-prose)
-    ↓ knowledge service: create/refresh Vertex AI Context Cache on corpus update
-Vertex AI Context Cache (Gemini 2.5 Flash, full corpus, ~100K tokens, TTL managed)
-    ↑ knowledge service (Cloud Run)
-    ↑ Gemini 2.5 Flash: full-context generation, cached_content passed per request
+event: progress   data: {"key": "received"|"contacting"|"querying_ai"|"processing"}
+event: thinking   data: {"text": str, "ms": int|null}
+event: answer     data: {"answer": str, "facts": [...], "session_id": str, "trace_id": str,
+                          "warning": str|null}
+event: error      data: {"error": str}
 ```
 
-**Why full-context beats RAG for this corpus:**
-The entire corpus fits in ~10% of Gemini 2.5 Flash's 1M context window.
-No retrieval step = no retrieval errors, no chunking artefacts, no graph construction failures.
-Matches how NotebookLM works.
-
-**Access control with full-context:**
-group_id filtering via Graphiti is eliminated. Per-user source filtering (Sprint 2) is implemented
-as prompt-level instruction: "Answer only from these documents: X, Y, Z." For a corpus of 7 docs
-and a small user base, prompt-level filtering is sufficient and avoids the cost of per-group caches.
-
-**Citation model:**
-Gemini is instructed to return structured JSON via Vertex AI `response_schema`:
+**`facts` shape (shared across gateway, knowledge, channel_web):**
 ```json
-{ "answer": str, "citations": [{ "document": str, "excerpt": str }] }
+[{ "fact": str, "source_id": str, "valid_at": null }]
 ```
-`document` is the canonical source_id (e.g. `en_policy1_child_protection`).
-`excerpt` is the verbatim sentence(s) Gemini drew from — quote-level, not edge-level.
-Knowledge service maps this to the existing `facts` shape channel_web already renders:
-`{ answer: str, facts: [{ fact: str, source_id: str }] }` — `fact` = excerpt, `source_id` = document.
-No UI changes required.
+`valid_at` is always `null` until the structured citation feature is built.
+Do not change this shape in any single service — all three must change atomically.
 
-**Cache lifecycle:**
-- Cache created/refreshed by the knowledge service at startup if no valid cache exists.
-- TTL: set to cover expected idle periods (minimum 1 hour, extend as needed).
-- Corpus update triggers cache invalidation + recreation (delete old cache, create new).
-- Cache ID stored in Firestore (or env var for Sprint 2) so all instances share one cache.
-
-**Ingestion pipeline (simplified — Steps 1–4 only, no chunking, no Graphiti):**
-```
-Step 1: DOCX → Google Docs (Drive API, OAuth)
-Step 2: Google Docs → baseline MD (Docs export)
-Step 3: AI header cleanup (Gemini Flash Lite) — preserves tables
-Step 4: table_to_prose (src/ingestion/table_to_prose.py)
-→ Output: data/pipeline/latest/02_ai_cleaned/<source_id>.md (7 canonical files)
-→ Trigger: knowledge service cache refresh
-```
-Step 5 (semantic chunking) and Step 6 (Graphiti ingestion) are removed.
+**`thinking` events** are emitted once per span, in arrival order. Gateway emits its own
+spans. Knowledge spans arrive via `POST /search/stream` and are relayed verbatim by the
+gateway — no rewriting, no aggregation delay.
 
 ---
 
-## Ingestion pipeline: local data layout
+## Observability: spans and traces
 
-DOCX source files are **not stored in the repo**. Google Drive is the authoritative source.
-`data/` is gitignored entirely.
+### Span model
 
-**Staged directory layout — one subfolder per pipeline run:**
+Each service owns its own span emission. Spans are per-request, isolated by `ContextVar`.
 
+**Knowledge service spans** (emitted via `indexer/observability.py`):
 ```
-data/
-  pipeline/
-    2026-03-22_001/         ← run ID: YYYY-MM-DD_NNN (sortable, human-readable)
-      00_docx/              ← downloaded from Drive (source, untouched)
-      01_baseline_md/       ← after DOCX→GDocs→MD export
-      02_ai_cleaned/        ← after Gemini Flash Lite AI cleanup
-      03_chunked/           ← after section splitting + table-to-prose
-      04_ingested/          ← marker files (e.g. family-manual.done) after Graphiti
-      manifest.json         ← per-file state: step, chunk count, edge count, ingested_at
-    2026-03-22_002/         ← re-run after fixing a step — previous run preserved
-    latest -> 2026-03-22_001/  ← symlink updated by pipeline; downstream code uses this
+knowledge.routing, knowledge.selection, knowledge.synthesis_started, knowledge.synthesis_done
 ```
 
-**Why run ID subfolders (not file prefixes):**
-- Each step is independently inspectable: `ls 03_chunked/` shows one run's files cleanly
-- Cross-run diffing: `diff 001/02_ai_cleaned/ 002/02_ai_cleaned/` shows exactly what changed
-- Deleting a run: `rm -rf 2026-03-22_001/` — no grep-and-delete across mixed files
-- `latest/` symlink decouples downstream code from run IDs
-
-**Manifest schema (`manifest.json`):**
-```json
-{
-  "family-manual.docx": {
-    "step": "ingested",
-    "chunks": 14,
-    "edges": 28,
-    "ingested_at": "2026-03-22T10:00Z"
-  }
-}
+**Gateway spans** (emitted via `services/observability.py`):
+```
+gateway.classify, gateway.rewrite.skipped, gateway.topics, gateway.breadth.focused
+(and others — see SpanCollector in gateway/services/observability.py)
 ```
 
-**Pipeline idempotency:** Presence of `04_ingested/<name>.done` skips re-ingestion.
-Re-ingest by deleting the marker file and re-running.
+Span wire format: `{ "service": str, "name": str, "attributes": dict, "duration_ms": int }`
 
-**Test fixtures:** A small representative doc lives in `tests/fixtures/pipeline/` (committed).
-Full corpus never goes in git.
+**Display text for all spans lives in `gateway/services/step_messages.py`.** No service
+other than gateway ever produces human-readable span labels. When adding a new span anywhere
+in the pipeline, add its display text to `step_messages.py`.
+
+### X-Trace-Id header
+
+The gateway sets `X-Trace-Id: <trace_id>` on every call to the knowledge service.
+The knowledge service reads it for correlation. No other service propagates this header yet.
+
+### Firestore trace schema
+
+Collection: `traces/{trace_id}`
+
+```
+trace_id        str       UUID, set by gateway at request start
+session_id      str
+timestamp       datetime
+versions        { gateway: str, knowledge: str }   — git SHAs from deploy
+pipeline_path   str       e.g. "classify→rewrite→topics→search"
+input           { raw: str, sanitized: str }
+classifier      { in_scope: bool, specific_enough: bool }
+rewrite         { standalone: str } | null
+topics          { l1_topics: [...] }
+knowledge       { answer: str, facts: [...], selected_nodes: [...] }
+output          { answer: str, facts: [...] }
+feedback        { score: int, comment: str, updated_at: datetime } | null
+spans           list[Span]
+```
+
+Traces are written **fire-and-forget**. A Firestore outage must never degrade query
+response time or produce a user-visible error. If a trace write fails, it is dropped silently.
 
 ---
 
-## Sprint 1 — simplified architecture (POC, no gateway)
+## Access control chain
+
+The full enforcement chain when implemented:
 
 ```
-Browser → channel_web (Cloud Run, --allow-unauthenticated)
-        → knowledge service (Cloud Run, --no-allow-unauthenticated, ingress=all TEMPORARILY)
-        → Neo4j Aura Free (external)        ← BEING REPLACED in Sprint 2
-        → OpenAI gpt-4o-mini (external)     ← BEING REPLACED in Sprint 2
+auth service  →  validates token, returns user_id + tenant_id
+access service  →  returns permitted_source_ids for user_id
+gateway  →  passes permitted_source_ids as group_ids to knowledge service
+knowledge service  →  enforces group_ids as pre-retrieval filter (not post-filter)
 ```
 
-**Sprint 2 replaces the knowledge service backend:**
-Graphiti + Neo4j + OpenAI → Vertex AI Context Caching + Gemini 2.5 Flash.
-API contract (`POST /search` → `{ answer, facts }`) is preserved — no channel_web changes.
+**Current state (partial stub):** auth is inline in channel_web. `group_ids` is always
+`null`. Knowledge service accepts `group_ids` but ignores it.
 
-**Deliberate omissions vs target architecture:**
-- No gateway — channel_web calls knowledge service directly via identity token
-- No auth service — Google Sign-In in browser + ID token validation in channel_web (Phase 1.4)
-- No access service — group_ids=null (all users see all sources)
-- No security service — no rate limiting or input screening
-- No CI/CD — manual deploy scripts only (`src/*/deploy.sh`)
+**Invariant: no partial implementation.** Do not add group_ids enforcement to the
+knowledge service in isolation. Do not add auth enforcement to the gateway without the
+auth service. Any partial implementation creates auditable gaps with no corresponding
+protection. The chain must be implemented end-to-end or not at all.
 
-**TODO before Sprint 2:** restore knowledge service `--ingress=internal`
-(currently `all` for development access — change after channel_web E2E validated).
+**Post-filter is never acceptable.** Access control must be a pre-filter on retrieval,
+not a post-filter on results. Post-filtering silently degrades recall when top results
+happen to be from unpermitted sources.
 
 ---
 
-## Iteration 1 — local validation (pre-GCP)
+## Corpus and index lifecycle
 
-Before provisioning any GCP resources, validate Graphiti works against the actual corpus:
+```
+Google Drive  →  ingestion pipeline (local CLI, Steps 1–5)
+                 → data/pipeline/latest/02_ai_cleaned/<source_id>.md
+              →  tools/build_index.py
+                 → data/index/multi_index.json + per-doc index files
+              →  (baked into knowledge Docker image, or GCS upload — Phase 3.1)
+              →  knowledge service loads at startup, holds in memory
+```
 
-**Input:** `REFERENCE_REPOS/MD2RAG/markdowns/` — 6 policy/manual markdown files, already processed and extraction-ready.
+**Knowledge service never calls ingestion.** They are coupled only through the
+filesystem (local now) or GCS (Phase 3.1).
 
-**Goal:** Confirm Graphiti correctly:
-1. Ingests the markdown files as episodes
-2. Extracts entities and temporal relationships
-3. Returns cited answers to representative queries
+**Corpus update = redeploy (currently).** To serve a new index: run the pipeline, build
+the image, deploy. No hot-reload exists yet. When GCS-backed index is implemented,
+hot-reload becomes possible — do not add TTL-expiry logic until then.
 
-**Acceptance (observable):** Running `python validate.py` produces a cited answer for at least one temporal query (e.g. policy + exception pattern) without hallucination, with source episode reference.
-
-**Stack for local validation:**
-- `graphiti-core` Python package
-- Neo4j Aura Free instance (dev) — provisioned manually before the session
-- Gemini Flash via Vertex AI OR OpenAI (decision: confirm with user before session)
-- `text-embedding-004` via Vertex AI OR OpenAI embeddings (same decision)
-- Local Python script only — no FastAPI, no Cloud Run
-
-**Outcome of validation determines:**
-- Whether Graphiti's entity extraction actually resolves cross-document references in this corpus
-- Whether the `group_id` filtering works as documented
-- Whether temporal edges are created for date-bounded facts in newsletter-style text
-- Any ingestion cost surprises
-
-**If validation fails:** Write findings to `.claude/HEURISTICS.log`, reassess retrieval mechanism in a new spike.
+**Drive is authoritative. `data/` is scratch.** Any local pipeline artifact can be
+regenerated from Drive. Do not treat `data/` as a canonical store.
 
 ---
 
-## LLM provider decision: pending user confirmation
+## Secret management
 
-The retrieval spike specified Vertex AI (Gemini Flash) for entity extraction. For local validation:
+All secrets via Secret Manager volume mounts. Pattern:
+```
+/secrets/<secret_name>/<SECRET_NAME>  ←  mounted by Cloud Run
+```
 
-- **Option A:** Vertex AI (Gemini Flash + text-embedding-004) — matches production config, requires GCP project + service account setup before validation
-- **Option B:** OpenAI (gpt-4o-mini + text-embedding-3-small) — faster to start locally, replaced by Vertex AI before any deployment
+**Never share a parent directory across two secrets.** Cloud Run rejects it.
+`/secrets/my_secret/SECRET_NAME=SECRET_NAME:latest` — each secret gets its own
+parent directory.
 
-This decision is required at the start of the local validation session.
+**Secrets loaded at startup, not on each request.** Rotation requires a service restart
+unless the service explicitly re-reads the file on a schedule. `ALLOWED_EMAILS` in
+channel_web is the canonical example of a startup-only load. Document this limitation
+in any service that loads a secret at startup.
+
+**`google-auth` requires `requests` as a co-dependency.** Pin both in every service's
+`requirements.txt`. google-auth does not declare `requests` as a hard dependency but
+fails silently without it.
+
+---
+
+## Cross-service test isolation
+
+**Never run gateway and channel_web tests in the same pytest invocation.** Both services
+have a `main.py`. Python's module cache (`sys.modules`) serves the wrong `main` to
+whichever suite loads second. Always run separately:
+```
+pytest tests/gateway/
+pytest tests/channel_web/
+```
+
+**Patch imports at their binding site.** If `routers/chat.py` uses
+`from services.scope_gate import classify`, the test must patch `routers.chat.classify`,
+not `services.scope_gate.classify`.
+
+---
+
+## Coding agent guardrails
+
+These rules cut across all services. Violating them creates cross-service breakage.
+
+**Never construct LLM prompts outside `services/` modules.** Routers sequence steps;
+services own prompts. This applies to the gateway; the same separation principle applies
+everywhere.
+
+**Never put display text in pipeline code.** Human-readable labels for spans, step names,
+and user-facing error descriptions live in `gateway/services/step_messages.py`.
+Pipeline code emits structured data (span name + attributes); display text is separate.
+
+**Never expose stack traces to the browser.** All error responses are `{"error": str}`.
+The error string is a safe message, never a Python traceback.
+
+**Never write tenant, user, or source configuration directly to Firestore outside the
+admin service.** When admin is implemented, it is the sole writer of those collections.
+Direct writes from other services are an architecture violation.
+
+**Do not implement partial access control.** See "Access control chain" above.
+
+**Synchronous calls inside async handlers are latent bugs.** `verify_oauth2_token()`,
+`fetch_id_token()`, and `google.auth.transport.requests.Request()` are all synchronous
+and block the event loop. They are present in channel_web and gateway today and are
+known issues. Do not add new synchronous I/O in async paths.
+
+**`ContextVar` contents must be mutated in-place, never reassigned.** A bare
+reassignment inside a reset function returns a stale reference to any code that captured
+the old value. See `knowledge/indexer/observability.py` for the reference pattern.

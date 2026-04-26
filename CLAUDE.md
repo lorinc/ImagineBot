@@ -41,27 +41,5 @@ Each file has a purpose header with its own format rules. CLAUDE.md does not dup
 
 Use `/wrap` at the end of each session to update SESSION.md, HEURISTICS.log, and PROJECT_PLAN.md consistently.
 
-## Dependency policy
-This project is deliberately conservative on dependencies.
-Before adding any package:
-1. State what problem it solves
-2. State what the alternative without it would be
-3. Get explicit approval
-
-Never add a package to solve a problem that three lines of Python would solve.
-Never add a Node.js toolchain dependency. Frontend must be serveable without a build step.
-
-## External enforcement checklist
-- [ ] CI runs on every push (lint → contracts → unit → integration)
-- [ ] CI blocks merge on failure (branch protection on main)
-- [ ] Integration tests run against Firestore emulator in CI
-- [ ] Staging deploy is automatic on merge to main
-- [ ] Staging smoke tests run after deploy, open GitHub issue on failure
-- [ ] Production deploy is manual trigger only
-- [ ] Secrets in environment variables only — never in code
-- [ ] `.claude/SESSION.md` is in `.gitignore`
-- [ ] `.claude/settings.local.json` is in `.gitignore`
-- [ ] Contract tests exist for every field the gateway exposes
-
 ## Per-service context
 Load the CLAUDE.md in the service directory before making changes to that service.
