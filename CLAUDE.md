@@ -13,6 +13,7 @@ At the start of every session, before anything else:
 |------|---------|----------|
 | `.claude/SESSION.md` | Per-session working state | Read at session start. Overwrite each new session. Gitignored. |
 | `.claude/HEURISTICS.log` | Append-only institutional memory | Never edit past entries. `tail -40` to review recent. |
+| `docs/ARCHITECTURE.md` | Cross-cutting topology, protocols, invariants, guardrails | Read at session start. Update when cross-service contracts change. |
 | `docs/PROJECT_PLAN.md` | Sprint breakdown and phase status | Update when phases complete or are added. |
 | `src/<service>/CLAUDE.md` | Service-level context, architecture, current state | Read before touching that service. |
 | `src/<service>/TODO.md` | Service-level backlog | Append-only. Strike through resolved items. |
