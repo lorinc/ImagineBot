@@ -396,6 +396,22 @@ guardrails derived from code + heuristics. Surfaced 4 new issues (see SESSION.md
 
 **Status:** Written. Not yet committed.
 
+### Phase 2.6 — Smoke tests + trace output fix — COMPLETE 2026-04-26
+
+**What was built:**
+- `tests/smoke/test_gateway_smoke.py` — asserts HTTP 200, SSE shape, progress→answer ordering, facts non-empty, trace_id present (SW_QA.md §2.1)
+- `tests/smoke/test_trace_firestore.py` — polls Firestore traces/{trace_id}, asserts all required fields, output.answer + facts, spans non-empty (SW_QA.md §2.2)
+- Fixed `trace["output"]` bug in `src/gateway/routers/chat.py`: all three pipeline paths now include `facts` in output per architecture spec
+- Fixed `src/gateway/Dockerfile`: missing `COPY src/gateway/models.py .` caused ModuleNotFoundError on Cloud Run
+
+**Coverage matrix after this phase:**
+- gateway smoke: ✅ `test_gateway_smoke.py`
+- knowledge smoke: ✅ `test_trace_firestore.py` (covers knowledge indirectly via gateway)
+
+**Status:** DEPLOYED 2026-04-26 (gateway revision gateway-00013-7pz). Tests: 2/2 passing in 18s.
+
+---
+
 ### Phase 3.1 — GDrive integration UAT plan — SCOPED 2026-04-24
 
 **Plan:** `~/.claude/plans/awesome-do-a-gap-dynamic-stardust.md`
