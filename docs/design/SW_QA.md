@@ -11,8 +11,8 @@ Legend: ✅ exists and meaningful | 🟡 exists but shallow | ❌ absent
 
 | Service | contracts | unit | integration | smoke | eval |
 |---|---|---|---|---|---|
-| gateway | ✅ `test_gateway_contract.py` — ChatRequest, FeedbackRequest | 🟡 `test_chat_flow, test_sanitize, test_scope_gate` — mocked deps, no SSE shape assertions | ❌ | ❌ | ❌ |
-| knowledge | ✅ `test_knowledge_contract.py` — SearchRequest, SearchResponse, Fact, TopicsRequest, TopicsResponse, TopicNode | 🟡 `test_knowledge.py` — tests old context-cache version; stale | ❌ | ❌ | ❌ |
+| gateway | ✅ `test_gateway_contract.py` — ChatRequest, FeedbackRequest | 🟡 `test_chat_flow, test_sanitize, test_scope_gate` — mocked deps, no SSE shape assertions | ❌ | ✅ `test_gateway_smoke.py` — HTTP 200, SSE shape, progress→answer ordering, facts non-empty, trace_id | ❌ |
+| knowledge | ✅ `test_knowledge_contract.py` — SearchRequest, SearchResponse, Fact, TopicsRequest, TopicsResponse, TopicNode | 🟡 `test_knowledge.py` — tests old context-cache version; stale | ❌ | ✅ `test_trace_firestore.py` — Firestore trace fields, output.answer + facts, spans non-empty (covers knowledge indirectly via gateway) | ❌ |
 | channel_web | ✅ `test_channel_web_contract.py` — ChatRequest, FeedbackRequest | 🟡 `test_channel_web.py` — auth mocked | ❌ | ❌ | ❌ |
 | ingestion | ❌ | ✅ `test_table_to_prose.py` — step 4 only; steps 1-3, 5 uncovered | ❌ | ❌ | ❌ |
 
@@ -228,7 +228,7 @@ These are the targets, not the current state. Implement layer by layer.
 | contracts | One file per API boundary (gateway /chat, knowledge /search) | ✅ 35 tests, all passing |
 | unit | All business logic covered; mocks only at service boundaries | 🟡 partial |
 | integration | gateway→knowledge full request cycle against real Firestore emulator | ❌ none |
-| smoke | `test_gateway_smoke.py` + `test_trace_firestore.py` after every staging deploy | ❌ none |
+| smoke | `test_gateway_smoke.py` + `test_trace_firestore.py` after every staging deploy | ✅ both passing |
 | eval | `run_eval.py` against golden.jsonl before any knowledge/prompt change | ❌ none |
 | pipeline | `check_pipeline.sh` after any ingestion run | ❌ none |
 | UI | `test_ui_playwright.py` after any channel_web deploy | ❌ blocked on auth |
