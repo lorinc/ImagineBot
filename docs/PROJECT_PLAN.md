@@ -3,6 +3,14 @@
 # Does not record bug fixes or session details — those go in .claude/HEURISTICS.log.
 # Current session state lives in .claude/SESSION.md, not here.
 
+## Priority guidance
+
+Sprint priorities are guided by `docs/SAAS_MATURITY_FRAMEWORK.md`.
+That document maps every operational dimension to four maturity levels (L0–L3) and marks current state.
+Before planning a sprint, use it to identify which L0 dimensions block the next milestone:
+- **L2 across all dimensions** = production-grade single-tenant deployment
+- **L3 across all dimensions** = second customer without engineering involvement
+
 ## Sprint Overview
 
 | Sprint | Duration | Focus | Status |
