@@ -55,6 +55,22 @@ If a phase completed, started, or was significantly scoped this session, update 
 relevant section. Add a DONE entry with the date. Do not record session details or
 bug fixes here — those belong in HEURISTICS.log.
 
+### src/<service>/TODO.md
+
+For each service touched this session, strike through any items completed
+(`~~item text~~ DONE YYYY-MM-DD`). Do not add new items here.
+
+- Only update services you actually touched
+- If no items were completed: skip
+
+### .claude/SPRINT.md
+
+Check off any sprint items completed this session (`- [x]`). On a deploy+UAT
+session where UAT passed, ensure the item is checked. Do not add or reorder
+items — only update checkboxes.
+
+- If nothing changed: skip
+
 ## What not to do
 
 - Do not update CLAUDE.md with session history — it holds structure, not state

@@ -25,9 +25,41 @@ Each file has a purpose header with its own format rules. CLAUDE.md does not dup
 
 **Conflict rule:** If an implementation or test disagrees with anything in `docs/specs/`, stop and surface the conflict. Do not adapt the spec or the test to match the code.
 
-Use `/wrap` at the end of each session to update SESSION.md, HEURISTICS.log, and PROJECT_PLAN.md consistently.
+Use `/wrap` at the end of each session to update all operational files consistently (see wrap checklist below).
 
-**One sprint item per session.** After a sprint item is committed: stop, update SESSION.md with the completed item and NEXT_SESSION for the following item, then wait. Do not start the next sprint item. Do not run `/wrap` or end the session — the user does that.
+## Sprint item lifecycle
+
+Each sprint item runs across two sessions. Do not merge or skip phases without explicit user instruction.
+
+### Session 1 — Plan + Implement
+
+1. Read the sprint item (SPRINT.md + relevant TODO.md entry).
+2. Draft a plan: which files change, what the logic is, how it will be tested.
+3. **Ask for approval. Do not proceed until the user explicitly approves.**
+   Revise and re-ask if feedback is given. Repeat until settled.
+4. Implement the change and write tests. Run tests to confirm they pass.
+5. Summarize: what changed, what tests cover, what the observable behavior is.
+6. **Ask for approval. Do not commit until approved.**
+   Revise, re-run tests, re-summarize, re-ask if feedback is given.
+7. Once approved: commit, then run `/wrap`.
+   Set SESSION.md NEXT_SESSION = deploy + UAT for this service.
+8. Tell the user to run `/clear`.
+
+_If planning is large enough to pollute context, the user may ask for implementation in a fresh session. Otherwise plan and implement in the same session._
+
+### Session 2 — Deploy + UAT
+
+1. Deploy the changed service (`./deploy.sh`). If deploy fails, diagnose and fix autonomously.
+2. Run `pytest tests/<service>/` and confirm pass.
+3. Update SESSION.md and SPRINT.md to reflect deploy complete.
+4. Determine whether the change touches a user-facing scenario:
+   - **If yes:** name the exact scenario and ask the user to test it on the frontend. Wait for confirmation.
+   - **If no:** state this explicitly, confirm smoke tests passed, and ask the user to confirm no UAT is needed before wrapping.
+5. On pass (UAT confirmed or UAT skipped with user confirmation):
+   run `/wrap`, set SESSION.md NEXT_SESSION for the next sprint item's Plan phase.
+   Tell the user to run `/clear`.
+6. On UAT fail: add a bug item to the top of SPRINT.md Active,
+   update SESSION.md accordingly. Tell the user to run `/clear`.
 
 ## Per-service context
 Load the CLAUDE.md in the service directory before making changes to that service.
