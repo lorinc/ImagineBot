@@ -115,10 +115,9 @@ structured data (span name + attributes), never prose.
 which causes `httpx.InvalidURL` at call time with no clear error. If you add startup
 validation, fail loudly when this is unset or empty.
 
-**Identity token fetch blocks the event loop.** `knowledge_client._get_identity_token()`
-calls `google.auth.transport.requests.Request()` — a synchronous HTTP call inside an
-async handler. This is a latent performance issue under load. Fix with
-`asyncio.get_event_loop().run_in_executor(None, ...)` before this service scales.
+**Identity token fetch is non-blocking.** `knowledge_client._get_identity_token()` runs
+`_fetch_identity_token_sync` via `run_in_executor` so it never blocks the event loop.
+Token is cached with a 55-minute TTL (`_TOKEN_CACHE`); refresh happens in a thread pool.
 
 **Do not run gateway tests and channel_web tests in the same pytest invocation.**
 Both services have a file named `main.py`. Python's module cache (`sys.modules`) will
@@ -147,9 +146,6 @@ a hard dependency but fails silently without it. See HEURISTICS.log [2026-03-21 
 
 | Gap | Impact | Fix |
 |---|---|---|
-| In-memory sessions | Lost on instance restart or scale-out | Firestore-backed sessions |
-| Corpus summary never expires | Stale classifier after index rebuild without restart | Add TTL when GCS index lands |
-| Synchronous identity token fetch in async path | Event loop stall under load | `run_in_executor` |
+| In-memory sessions not shared across instances | Lost on scale-out (TTL eviction works per-instance) | Firestore-backed sessions |
 | No auth enforcement in gateway | Any `run.invoker`-bound SA can call gateway | Auth middleware (Sprint 3+) |
 | No rate limiting | Abuse possible | Security library import (Sprint 3+) |
-| `KNOWLEDGE_SERVICE_URL` defaults to empty string | Silent misconfiguration | Fail on startup if unset |
