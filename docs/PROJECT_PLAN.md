@@ -439,6 +439,19 @@ guardrails derived from code + heuristics. Surfaced 4 new issues (see SESSION.md
 
 ---
 
+### Phase 2.9 — Benchmark question candidates — COMPLETE 2026-04-27
+
+**What was produced:**
+- `docs/design/BENCHMARK_QUESTIONS.md` — 37 question candidates across 19 families; all TBD source verifications resolved
+- `tests/eval/golden.jsonl` — 37 items, 35 active, 2 skipped (rg-001, pt-001: separate Fire Safety Policy not indexed)
+- `tests/eval/run_eval.py` — SSE-aware eval harness stub; flags: --gateway, --filter, --verbose
+- Corpus gaps found: fire evacuation procedure ("See separate policy") not indexed; supervision ratios absent (us-001 reclassified out-of-corpus)
+- Workflow change: all candidates kept; empirical pass/fail determines redundancy
+
+**Status:** COMPLETE 2026-04-27. Eval harness ready to run against live gateway.
+
+---
+
 ### Phase 3.1 — GDrive integration UAT plan — SCOPED 2026-04-24
 
 **Plan:** `~/.claude/plans/awesome-do-a-gap-dynamic-stardust.md`

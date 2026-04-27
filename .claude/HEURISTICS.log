@@ -1089,3 +1089,98 @@ WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/H
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
 WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-26]
+CATEGORY: CORPUS_STRUCTURE
+SERVICE: cross-cutting (eval / docs)
+TASK: Generate BENCHMARK_QUESTIONS.md — compare en_family_manual_24_25 and es_family_manual_25_26.
+SYMPTOM: Version-authority eval questions were expected to have different factual values between
+         the two indexed family manuals. After full corpus comparison, nearly all policy values
+         (fees, hours, timetables, health rules, medication rules, payment terms) are identical
+         between them.
+ROOT_CAUSE: en_family_manual_24_25 is the English version and es_family_manual_25_26 is the
+            Spanish translation of the same school year's policies. They are not materially
+            different policy documents despite the different year labels. The year label difference
+            appears to reflect authoring/translation timing, not policy changes.
+ONLY_CONFIRMED_DIFFERENCE: Bus schedule impact statement:
+  24/25: "This change will NOT affect the arrival time at the stops"
+  25/26: "Este cambio afectará mínimamente al horario de llegada a las paradas" (will minimally affect)
+PREVENTED_BY: Before designing version-authority eval questions, run a diff on specific
+              numeric fields (fees, times, counts) across both manuals using the Python
+              extraction approach in this session. Do not assume different year labels mean
+              different content.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-27]
+CATEGORY: CORPUS_STRUCTURE
+SERVICE: cross-cutting (eval / docs)
+TASK: Verify benchmark question expected_facts against data/pipeline/latest/02_ai_cleaned/.
+SYMPTOM: Two eval items (rg-001 "What happens after a fire drill?", pt-001 "fire evacuation
+         steps") could not be verified — expected_facts ["headcount", "register"] absent
+         from policy3 fire procedure.
+ROOT_CAUSE: policy3 §2.4 (Health & Safety Policy) contains: "Q. Fire safety, including
+            testing of alarms and evacuation procedures — See separate policy: Fire Safety
+            Policy." The step-by-step staff evacuation procedure lives in an unreferenced
+            Fire Safety Policy document that is NOT indexed in the corpus. The section
+            headers §1.4–§1.7 in the Fire and Emergency Policy cover visitors/routes only.
+PREVENTED_BY: When designing eval items for a procedure-based query, grep the corpus for
+              the key action verbs (e.g. "headcount", "register", "muster") before
+              writing expected_facts. If absent, check for "see separate policy" notes
+              in the same section — they indicate corpus gaps.
+SOLUTION: rg-001 and pt-001 marked skip:true in golden.jsonl. Resolve by locating and
+          ingesting the referenced Fire Safety Policy document.
+
+[2026-04-27]
+CATEGORY: CORPUS_STRUCTURE
+SERVICE: cross-cutting (eval / docs)
+TASK: Verify supervision ratio question (us-001) premise — expected ratios for ≥2 stages.
+SYMPTOM: Corpus does not contain supervision ratios for any stage. The question was
+         categorised as "underspecified" (system should ask for clarification), but the
+         discriminating content (multiple different ratios per stage) does not exist.
+ROOT_CAUSE: policy4 §5 says "an appropriate staff-to-student ratio… must be maintained"
+            without specifying figures. policy3 §2.4 mentions first-aid ratio only.
+            No per-stage ratios exist anywhere in the corpus.
+PREVENTED_BY: Before categorising a question as "underspecified", verify that the
+              discriminating context (the multiple values the system could return) actually
+              exists in the corpus. A question is only underspecified if the corpus contains
+              ≥2 different answers depending on context. If the corpus has no answer at all,
+              the category is out-of-corpus, not underspecified.
+SOLUTION: us-001 reclassified to out-of-corpus. Query design needs revision.
+
+[2026-04-27]
+CATEGORY: TEST_TOOLING
+SERVICE: cross-cutting
+TASK: Run gateway tests via rtk proxy with -q flag.
+SYMPTOM: `rtk pytest tests/gateway/ -q` reported "No tests collected" with exit code 1,
+         even though all 20 tests were passing. Appeared as a genuine collection failure.
+ROOT_CAUSE: rtk filters/summarises pytest -q output and the summary was misread as a
+            failure. Running with -v or --tb=short produced "Pytest: 20 passed" clearly.
+PREVENTED_BY: Always run gateway tests with `-v` or `--tb=short`, never bare `-q`.
+              If "No tests collected" appears, re-run with `-v` before diagnosing further.
+
+[2026-04-27]
+CATEGORY: TEST_DRIFT
+SERVICE: src/gateway
+TASK: Update gateway tests after adding async identity token fix.
+SYMPTOM: `test_valid_school_question_returns_answer` and others were failing because
+         `knowledge_client.search` was mocked but `chat.py` actually calls
+         `knowledge_client.search_stream` (an async generator).
+ROOT_CAUSE: The router was updated to use `search_stream` at some point after the tests
+            were written. Tests passed before only because auth errors were being silently
+            swallowed — they were never actually exercising the knowledge path.
+PREVENTED_BY: When a router function is changed to call a different client method,
+              grep all test files for mocks of the old method name and update them.
+              Confirm tests exercise the actual code path, not a silently swallowed error.
+
+[2026-04-27]
+CATEGORY: DEPLOY_TOOLING
+SERVICE: cross-cutting (deploy scripts)
+TASK: Deploy gateway using ./deploy.sh.
+SYMPTOM: `./deploy.sh` returned exit code 126 (Permission denied) even though the file
+         exists and contains valid bash. Looked like a missing executable bit.
+ROOT_CAUSE: Git does not consistently preserve execute bits across checkouts/clones on
+            this machine. The script has no shebang or chmod step inside it.
+PREVENTED_BY: Always invoke deploy scripts with `bash src/<service>/deploy.sh`, never
+              `./deploy.sh`. No chmod needed; no exec bit dependency.

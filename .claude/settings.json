@@ -71,6 +71,17 @@
         ]
       }
     ],
+    "UserPromptSubmit": [
+      {
+        "description": "Block /exit and /clear if /wrap has not been run this session",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import sys,json,os; d=json.load(sys.stdin); p=d.get('prompt','').strip(); is_exit=p in('/exit','/clear') or p.startswith(('/exit ','/clear ')); s=(open('.claude/SESSION.md').read() if os.path.exists('.claude/SESSION.md') else '') if is_exit else ''; wrapped='\\nHEURISTICS_WRITTEN: yes' in '\\n'+s; (print(json.dumps({'decision':'block','reason':'SESSION.md HEURISTICS_WRITTEN is not yes — run /wrap before exiting.'})) or sys.exit(2)) if is_exit and not wrapped else None\""
+          }
+        ]
+      }
+    ],
     "SessionEnd": [
       {
         "description": "Warn if heuristics were not written this session",
