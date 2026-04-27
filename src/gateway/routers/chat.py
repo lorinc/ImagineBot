@@ -9,18 +9,21 @@ from fastapi import APIRouter
 from fastapi.responses import StreamingResponse
 
 from config import (
-    BROAD_QUERY_PREFIX,
     MAX_TOPIC_PATHS,
-    NO_EVIDENCE_REPLY,
-    ORIENTATION_RESPONSE,
-    OUT_OF_SCOPE_REPLY,
     OVERRIDE_TRIGGER_PHRASES,
     SERVICE_VERSION,
     SIBLING_COLLAPSE_THRESHOLD,
 )
+from services.prompts import (
+    BROAD_QUERY_PREFIX,
+    NO_EVIDENCE_REPLY,
+    ORIENTATION_RESPONSE,
+    OUT_OF_SCOPE_REPLY,
+)
 from services.sanitize import sanitize
 from services.scope_gate import classify
 from services.rewrite import rewrite_standalone
+from services.fallback_reply import fallback_reply
 from services import knowledge_client
 from services.observability import SpanCollector
 from services.step_messages import format_span
@@ -330,10 +333,23 @@ async def chat(body: ChatRequest):
 
         facts = (result or {}).get("facts", [])
         if not (result or {}).get("selected_nodes"):
-            answer = NO_EVIDENCE_REPLY
             facts = []
             trace["knowledge"]["facts"] = []
             trace["pipeline_path"] = "in_scope_no_evidence"
+            if override_active:
+                answer = await fallback_reply(query, True)
+                trace["fallback_reply"] = True
+            else:
+                answer = NO_EVIDENCE_REPLY
+        elif not answer.strip():
+            facts = []
+            trace["knowledge"]["facts"] = []
+            trace["pipeline_path"] = "in_scope_no_synthesis"
+            if override_active:
+                answer = await fallback_reply(query, True)
+                trace["fallback_reply"] = True
+            else:
+                answer = NO_EVIDENCE_REPLY
         elif overview:
             answer = BROAD_QUERY_PREFIX + answer
             trace["pipeline_path"] = "broad"

@@ -322,3 +322,73 @@ def test_no_evidence_returns_canned_reply(client):
     data = answer_events[0]["data"]
     assert "contact the school office" in data["answer"]
     assert data["facts"] == []
+
+
+def test_gate3a_override_active_calls_fallback_not_canned(client):
+    """Override active + no selected_nodes → fallback_reply called; NO_EVIDENCE_REPLY not yielded."""
+    import routers.chat as chat_mod
+    import time
+
+    session_id = "gate3a-fallback-001"
+    chat_mod._sessions[session_id] = {
+        "turns": [],
+        "last_active": time.monotonic(),
+        "last_pipeline_path": "out_of_scope",
+        "last_query": "What is the fee schedule?",
+    }
+
+    mock_fallback = AsyncMock(return_value="I searched but found nothing. I can look up the right contact person for fees if you'd like.")
+
+    with (
+        patch("routers.chat.fallback_reply", mock_fallback),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
+        patch("services.knowledge_client.search_stream", _make_search_stream(_NO_EVIDENCE_RESULT)),
+    ):
+        resp = client.post("/chat", json={"message": "look it up", "session_id": session_id})
+
+    assert resp.status_code == 200
+    mock_fallback.assert_called_once()
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    data = answer_events[0]["data"]
+    assert "contact the school office" not in data["answer"]
+    assert data["facts"] == []
+
+
+def test_gate3b_override_active_empty_synthesis_calls_fallback(client):
+    """Override active + nodes selected but empty synthesis → fallback_reply called."""
+    import routers.chat as chat_mod
+    import time
+
+    session_id = "gate3b-fallback-001"
+    chat_mod._sessions[session_id] = {
+        "turns": [],
+        "last_active": time.monotonic(),
+        "last_pipeline_path": "out_of_scope",
+        "last_query": "What is the uniform policy?",
+    }
+
+    empty_synthesis_result = {
+        "answer": "",
+        "facts": [],
+        "selected_nodes": ["node1"],
+    }
+
+    mock_fallback = AsyncMock(return_value="The search found some sections but couldn't extract an answer. I can look up who to contact about this.")
+
+    with (
+        patch("routers.chat.fallback_reply", mock_fallback),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
+        patch("services.knowledge_client.search_stream", _make_search_stream(empty_synthesis_result)),
+    ):
+        resp = client.post("/chat", json={"message": "check", "session_id": session_id})
+
+    assert resp.status_code == 200
+    mock_fallback.assert_called_once()
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    assert answer_events[0]["data"]["facts"] == []
