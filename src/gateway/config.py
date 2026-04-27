@@ -37,3 +37,9 @@ BROAD_QUERY_PREFIX = (
     "Your question covers several school policy areas. "
     "Here's a high-level overview:\n\n"
 )
+
+NO_EVIDENCE_REPLY = (
+    "Your question is about a school topic, but I don't have specific "
+    "documentation to answer it from the knowledge base. "
+    "Please contact the school office directly for this information."
+)

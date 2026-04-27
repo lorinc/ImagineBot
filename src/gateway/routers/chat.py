@@ -11,6 +11,7 @@ from fastapi.responses import StreamingResponse
 from config import (
     BROAD_QUERY_PREFIX,
     MAX_TOPIC_PATHS,
+    NO_EVIDENCE_REPLY,
     ORIENTATION_RESPONSE,
     OUT_OF_SCOPE_REPLY,
     SERVICE_VERSION,
@@ -292,17 +293,24 @@ async def chat(body: ChatRequest):
             "latency_ms": int((time.monotonic() - t_knowledge) * 1000),
         }
 
-        if overview:
+        facts = (result or {}).get("facts", [])
+        if not (result or {}).get("selected_nodes"):
+            answer = NO_EVIDENCE_REPLY
+            facts = []
+            trace["knowledge"]["facts"] = []
+            trace["pipeline_path"] = "in_scope_no_evidence"
+        elif overview:
             answer = BROAD_QUERY_PREFIX + answer
-
-        trace["pipeline_path"] = "broad" if overview else "specific"
-        trace["output"] = {"answer": answer, "facts": (result or {}).get("facts", [])}
+            trace["pipeline_path"] = "broad"
+        else:
+            trace["pipeline_path"] = "specific"
+        trace["output"] = {"answer": answer, "facts": facts}
         trace["spans"] = spans.spans()
         asyncio.create_task(write_trace(trace))
 
         payload = {
             "answer": answer,
-            "facts": (result or {}).get("facts", []),
+            "facts": facts,
             "session_id": session_id,
             "trace_id": trace_id,
         }

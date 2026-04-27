@@ -37,6 +37,13 @@ def parse_sse(text: str) -> list[dict]:
 _KNOWLEDGE_RESULT = {
     "answer": "After a fire drill, staff must complete a personnel headcount.",
     "facts": [{"fact": "Personnel check", "source_id": "policy1", "valid_at": None}],
+    "selected_nodes": ["node1"],
+}
+
+_NO_EVIDENCE_RESULT = {
+    "answer": "Some answer the LLM hallucinated.",
+    "facts": [{"fact": "Spurious fact", "source_id": "policy1", "valid_at": None}],
+    "selected_nodes": [],
 }
 
 # classify returns (in_scope, specific_enough)
@@ -183,3 +190,21 @@ def test_session_id_persists_across_requests(client):
     events2 = parse_sse(resp2.text)
     answer2 = next(e["data"] for e in events2 if e["type"] == "answer")
     assert answer2["session_id"] == session_id
+
+
+def test_no_evidence_returns_canned_reply(client):
+    with (
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
+        patch("services.knowledge_client.search_stream", _make_search_stream(_NO_EVIDENCE_RESULT)),
+    ):
+        resp = client.post("/chat", json={"message": "What is the fee schedule?"})
+
+    assert resp.status_code == 200
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    data = answer_events[0]["data"]
+    assert "contact the school office" in data["answer"]
+    assert data["facts"] == []
