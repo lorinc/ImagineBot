@@ -14,6 +14,7 @@ from config import (
     NO_EVIDENCE_REPLY,
     ORIENTATION_RESPONSE,
     OUT_OF_SCOPE_REPLY,
+    OVERRIDE_TRIGGER_PHRASES,
     SERVICE_VERSION,
     SIBLING_COLLAPSE_THRESHOLD,
 )
@@ -139,41 +140,69 @@ async def chat(body: ChatRequest):
 
         yield 'event: progress\ndata: {"key": "received"}\n\n'
 
-        # 2. Classify: scope + specificity in one LLM call
-        corpus_summary = await _get_corpus_summary()
-        t_classify = time.monotonic()
-        try:
-            in_scope, specific_enough = await classify(query, corpus_summary)
-        except Exception as e:
-            logger.error("Classifier error: %s", e)
-            in_scope, specific_enough = True, True  # fail open
+        # Gate 1 override: if last turn was OOS and user asserts "search anyway"
+        session = _sessions.get(session_id, {})
+        user_query = query  # preserve the actual user message before any substitution
+        override_active = (
+            session.get("last_pipeline_path") == "out_of_scope"
+            and len(query.split()) < 15
+            and any(phrase in query.lower() for phrase in OVERRIDE_TRIGGER_PHRASES)
+        )
+        if override_active:
+            query = session["last_query"]
+            in_scope, specific_enough = True, True
+            classify_ms = 0
+            trace["classifier"] = {"in_scope": True, "specific_enough": True,
+                                   "override_active": True, "latency_ms": 0}
+            span = spans.record("classify.override",
+                                {"override_active": True, "retried_query": query},
+                                duration_ms=0)
+            if msg := _thinking_sse(span):
+                yield msg
 
-        classify_ms = int((time.monotonic() - t_classify) * 1000)
-        trace["classifier"] = {
-            "in_scope": in_scope,
-            "specific_enough": specific_enough,
-            "latency_ms": classify_ms,
-        }
+        # 2. Classify: scope + specificity in one LLM call (skipped when override is active)
+        if not override_active:
+            corpus_summary = await _get_corpus_summary()
+            t_classify = time.monotonic()
+            try:
+                in_scope, specific_enough = await classify(query, corpus_summary)
+            except Exception as e:
+                logger.error("Classifier error: %s", e)
+                in_scope, specific_enough = True, True  # fail open
 
-        if not in_scope:
-            span = spans.record("classify.out_of_scope",
-                                {"in_scope": in_scope, "specific_enough": specific_enough},
-                                duration_ms=classify_ms)
-        elif not specific_enough:
-            span = spans.record("classify.not_specific",
-                                {"in_scope": in_scope, "specific_enough": specific_enough},
-                                duration_ms=classify_ms)
-        else:
-            span = spans.record("classify",
-                                {"in_scope": in_scope, "specific_enough": specific_enough},
-                                duration_ms=classify_ms)
-        if msg := _thinking_sse(span):
-            yield msg
+            classify_ms = int((time.monotonic() - t_classify) * 1000)
+            trace["classifier"] = {
+                "in_scope": in_scope,
+                "specific_enough": specific_enough,
+                "latency_ms": classify_ms,
+            }
+
+            if not in_scope:
+                span = spans.record("classify.out_of_scope",
+                                    {"in_scope": in_scope, "specific_enough": specific_enough},
+                                    duration_ms=classify_ms)
+            elif not specific_enough:
+                span = spans.record("classify.not_specific",
+                                    {"in_scope": in_scope, "specific_enough": specific_enough},
+                                    duration_ms=classify_ms)
+            else:
+                span = spans.record("classify",
+                                    {"in_scope": in_scope, "specific_enough": specific_enough},
+                                    duration_ms=classify_ms)
+            if msg := _thinking_sse(span):
+                yield msg
 
         if not in_scope:
             trace["pipeline_path"] = "out_of_scope"
             trace["output"] = {"answer": OUT_OF_SCOPE_REPLY, "facts": []}
             trace["spans"] = spans.spans()
+            existing = _sessions.get(session_id, {})
+            _sessions[session_id] = {
+                "turns": existing.get("turns", []),
+                "last_active": time.monotonic(),
+                "last_pipeline_path": "out_of_scope",
+                "last_query": user_query,
+            }
             asyncio.create_task(write_trace(trace))
             yield f'event: answer\ndata: {json.dumps({"answer": OUT_OF_SCOPE_REPLY, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
             return
@@ -182,6 +211,13 @@ async def chat(body: ChatRequest):
             trace["pipeline_path"] = "orientation"
             trace["output"] = {"answer": ORIENTATION_RESPONSE, "facts": []}
             trace["spans"] = spans.spans()
+            existing = _sessions.get(session_id, {})
+            _sessions[session_id] = {
+                "turns": existing.get("turns", []),
+                "last_active": time.monotonic(),
+                "last_pipeline_path": "orientation",
+                "last_query": user_query,
+            }
             asyncio.create_task(write_trace(trace))
             yield f'event: answer\ndata: {json.dumps({"answer": ORIENTATION_RESPONSE, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
             return
@@ -193,7 +229,7 @@ async def chat(body: ChatRequest):
         final_query = query
         rewritten: str | None = None
         t_rewrite = time.monotonic()
-        if history:
+        if history and not override_active:
             try:
                 final_query = await rewrite_standalone(query, history)
                 logger.info("Rewrote query: %r → %r", query, final_query)
@@ -281,10 +317,9 @@ async def chat(body: ChatRequest):
 
         yield 'event: progress\ndata: {"key": "processing"}\n\n'
 
-        # 6. Update session history
+        # 6. Update session history and pipeline path
         answer = (result or {}).get("answer", "")
         history = history + [{"q": query, "a": answer}]
-        _sessions[session_id] = {"turns": history[-_MAX_HISTORY:], "last_active": time.monotonic()}
 
         trace["knowledge"] = {
             "nodes_selected": (result or {}).get("selected_nodes", []),
@@ -304,6 +339,14 @@ async def chat(body: ChatRequest):
             trace["pipeline_path"] = "broad"
         else:
             trace["pipeline_path"] = "specific"
+
+        _sessions[session_id] = {
+            "turns": history[-_MAX_HISTORY:],
+            "last_active": time.monotonic(),
+            "last_pipeline_path": trace["pipeline_path"],
+            "last_query": user_query,
+        }
+
         trace["output"] = {"answer": answer, "facts": facts}
         trace["spans"] = spans.spans()
         asyncio.create_task(write_trace(trace))

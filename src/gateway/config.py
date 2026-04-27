@@ -43,3 +43,21 @@ NO_EVIDENCE_REPLY = (
     "documentation to answer it from the knowledge base. "
     "Please contact the school office directly for this information."
 )
+
+# Gate 1 override: phrases that signal "retry my previous OOS question" rather than a new query.
+# All lowercase — matched against query.lower(). Message must also be < 15 words.
+OVERRIDE_TRIGGER_PHRASES = [
+    "look it up",
+    "look that up",
+    "check",
+    "search",
+    "check anyway",
+    "try anyway",
+    "just search",
+    "check the docs",
+    "in the documentation",
+    "that is about the school",
+    "please check",
+    "please search",
+    "please look",
+]

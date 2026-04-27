@@ -192,6 +192,120 @@ def test_session_id_persists_across_requests(client):
     assert answer2["session_id"] == session_id
 
 
+def test_gate1_override_bypasses_classify_and_retries_prior_query(client):
+    """Prior OOS + trigger phrase → classify not called, prior query retried."""
+    import routers.chat as chat_mod
+    import time
+
+    session_id = "override-test-001"
+    prior_query = "What time does school start?"
+    chat_mod._sessions[session_id] = {
+        "turns": [],
+        "last_active": time.monotonic(),
+        "last_pipeline_path": "out_of_scope",
+        "last_query": prior_query,
+    }
+
+    mock_classify = AsyncMock(return_value=_IN_SCOPE)
+
+    with (
+        patch("routers.chat.classify", mock_classify),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
+        patch("services.knowledge_client.search_stream", _make_search_stream()),
+    ):
+        resp = client.post("/chat", json={"message": "look it up", "session_id": session_id})
+
+    assert resp.status_code == 200
+    mock_classify.assert_not_called()
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    assert answer_events[0]["data"]["answer"]
+
+
+def test_gate1_override_does_not_fire_without_prior_oos(client):
+    """No prior OOS in session → trigger phrase goes through normal classify."""
+    import routers.chat as chat_mod
+    import time
+
+    session_id = "override-test-002"
+    chat_mod._sessions[session_id] = {
+        "turns": [],
+        "last_active": time.monotonic(),
+        "last_pipeline_path": "specific",
+        "last_query": "What time does school start?",
+    }
+
+    mock_classify = AsyncMock(return_value=_OUT_OF_SCOPE)
+
+    with (
+        patch("routers.chat.classify", mock_classify),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+    ):
+        resp = client.post("/chat", json={"message": "just check", "session_id": session_id})
+
+    assert resp.status_code == 200
+    mock_classify.assert_called_once()
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    assert "school policies" in answer_events[0]["data"]["answer"]
+
+
+def test_gate1_override_does_not_fire_for_long_message(client):
+    """Prior OOS but message > 14 words → no override, classify called normally."""
+    import routers.chat as chat_mod
+    import time
+
+    session_id = "override-test-003"
+    chat_mod._sessions[session_id] = {
+        "turns": [],
+        "last_active": time.monotonic(),
+        "last_pipeline_path": "out_of_scope",
+        "last_query": "What time does school start?",
+    }
+
+    mock_classify = AsyncMock(return_value=_IN_SCOPE)
+
+    with (
+        patch("routers.chat.classify", mock_classify),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
+        patch("services.knowledge_client.search_stream", _make_search_stream()),
+    ):
+        long_msg = "Actually I was asking about something that is definitely a school topic so please check"
+        resp = client.post("/chat", json={"message": long_msg, "session_id": session_id})
+
+    assert resp.status_code == 200
+    mock_classify.assert_called_once()
+
+
+def test_gate1_override_does_not_fire_for_unrelated_message(client):
+    """Prior OOS but message has no trigger phrase → no override, classify called normally."""
+    import routers.chat as chat_mod
+    import time
+
+    session_id = "override-test-004"
+    chat_mod._sessions[session_id] = {
+        "turns": [],
+        "last_active": time.monotonic(),
+        "last_pipeline_path": "out_of_scope",
+        "last_query": "What time does school start?",
+    }
+
+    mock_classify = AsyncMock(return_value=_OUT_OF_SCOPE)
+
+    with (
+        patch("routers.chat.classify", mock_classify),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+    ):
+        resp = client.post("/chat", json={"message": "How do I bake a cake?", "session_id": session_id})
+
+    assert resp.status_code == 200
+    mock_classify.assert_called_once()
+
+
 def test_no_evidence_returns_canned_reply(client):
     with (
         patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),
