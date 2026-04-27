@@ -306,8 +306,9 @@ Direct writes from other services are an architecture violation.
 
 **Synchronous calls inside async handlers are latent bugs.** `verify_oauth2_token()`,
 `fetch_id_token()`, and `google.auth.transport.requests.Request()` are all synchronous
-and block the event loop. They are present in channel_web and gateway today and are
-known issues. Do not add new synchronous I/O in async paths.
+and block the event loop. `fetch_id_token` in gateway is fixed (run_in_executor + TTL cache
+in `knowledge_client.py`). `verify_oauth2_token` in channel_web is still a known issue.
+Do not add new synchronous I/O in async paths.
 
 **`ContextVar` contents must be mutated in-place, never reassigned.** A bare
 reassignment inside a reset function returns a stale reference to any code that captured

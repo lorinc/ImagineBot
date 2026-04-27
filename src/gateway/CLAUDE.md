@@ -83,7 +83,9 @@ GET /health
 | 1a — Focused | in scope, specific, `topic_count ≤ MAX_TOPIC_PATHS` | Yes (full synthesis) |
 
 ## Session management
-In-memory: `session_id → last 10 turns [{q, a}]`. Lost on instance restart.
+In-memory: `session_id → {"turns": [{q, a}], "last_active": float}`. Lost on instance restart.
+Max 10 turns per session. Sessions idle for 30+ minutes are evicted by a background sweeper
+task (`start_session_sweeper()`, started in `main.py` lifespan, runs every 5 min).
 Cloud Run may spin down idle instances. Firestore-backed sessions deferred until
 multi-instance scaling requires it.
 
