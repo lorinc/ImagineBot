@@ -28,9 +28,28 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
-# In-memory session store: session_id -> last 10 turns [{q, a}]
-_sessions: dict[str, list[dict]] = {}
+# In-memory session store: session_id -> {"turns": [...], "last_active": float}
+_sessions: dict[str, dict] = {}
 _MAX_HISTORY = 10
+_SESSION_TTL = 30 * 60  # seconds — evict sessions idle longer than this
+_SESSION_SWEEP_INTERVAL = 5 * 60  # seconds — how often the sweeper runs
+
+
+def _evict_expired_sessions() -> None:
+    cutoff = time.monotonic() - _SESSION_TTL
+    expired = [sid for sid, s in _sessions.items() if s["last_active"] < cutoff]
+    for sid in expired:
+        del _sessions[sid]
+
+
+async def _session_sweeper() -> None:
+    while True:
+        await asyncio.sleep(_SESSION_SWEEP_INTERVAL)
+        _evict_expired_sessions()
+
+
+def start_session_sweeper() -> asyncio.Task:
+    return asyncio.create_task(_session_sweeper())
 
 # Cached corpus summary for the classifier prompt. Refreshed every 10 minutes so a
 # knowledge service redeploy with a new index is picked up without restarting the gateway.
@@ -169,7 +188,7 @@ async def chat(body: ChatRequest):
         yield 'event: progress\ndata: {"key": "contacting"}\n\n'
 
         # 3. Resolve session + standalone rewrite
-        history = _sessions.get(session_id, [])
+        history = _sessions.get(session_id, {}).get("turns", [])
         final_query = query
         rewritten: str | None = None
         t_rewrite = time.monotonic()
@@ -264,7 +283,7 @@ async def chat(body: ChatRequest):
         # 6. Update session history
         answer = (result or {}).get("answer", "")
         history = history + [{"q": query, "a": answer}]
-        _sessions[session_id] = history[-_MAX_HISTORY:]
+        _sessions[session_id] = {"turns": history[-_MAX_HISTORY:], "last_active": time.monotonic()}
 
         trace["knowledge"] = {
             "nodes_selected": (result or {}).get("selected_nodes", []),

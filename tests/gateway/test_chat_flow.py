@@ -150,6 +150,20 @@ def test_broad_query_triggers_overview_mode(client):
     assert "overview" in answer_events[0]["data"]["answer"].lower()
 
 
+def test_expired_session_drops_history(client):
+    import routers.chat as chat_mod
+    import time
+
+    # Manually insert a stale session
+    stale_session_id = "stale-session-001"
+    chat_mod._sessions[stale_session_id] = {
+        "turns": [{"q": "old question", "a": "old answer"}],
+        "last_active": time.monotonic() - chat_mod._SESSION_TTL - 1,
+    }
+    chat_mod._evict_expired_sessions()
+    assert stale_session_id not in chat_mod._sessions
+
+
 def test_session_id_persists_across_requests(client):
     with (
         patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),

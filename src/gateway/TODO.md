@@ -243,9 +243,7 @@ forward retrieval hints derived from the query understanding stage.
 
 ## Session management
 
-- **Session expiry** — Current in-memory sessions never expire; they accumulate until container
-  restart. Add a TTL: evict sessions older than N minutes (default: 30 min). Simple: store
-  `{turns, last_active}` per session, sweep in a background task.
+- ~~**Session expiry**~~ DONE 2026-04-27. 30-min TTL; sweeper task runs every 5 min via `start_session_sweeper()` in lifespan.
 
 - **Persistent sessions** — For multi-instance deployments, in-memory sessions are not shared
   across containers. Firestore-backed sessions would fix this. Defer until scaling requires it.
