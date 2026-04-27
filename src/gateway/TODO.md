@@ -34,10 +34,11 @@ no vocabulary bridging, no completeness check, no multi-hop detection.
   No separate classifier model needed — a prompt-based judge is sufficient at this corpus scale.
 
 - **Multi-question decomposition** — A single message can contain multiple distinct questions.
-  Example: "My son lost his hat, who can I call?" contains two questions: (1) what is the
-  lost-items policy, and (2) who is the person responsible for lost items. The current pipeline
-  treats the message as one query and typically answers whichever sub-question the retrieval
-  selects — the second is silently dropped.
+  Example (confirmed real failure 2026-04-27): "My son has lost his hoodie. Who should I talk to?"
+  contains two questions: (1) what is the lost-items policy (location + monthly display schedule),
+  and (2) who is the named contact for lost & found (María Luisa / Madhu, Secretaries). The
+  current pipeline treats the message as one query and typically answers whichever sub-question
+  the retrieval selects — the second is silently dropped. Tracked in eval as ce-001.
 
   Mitigation: after the scope gate passes, run a decomposition prompt: "Does this message
   contain more than one distinct question? If so, list each as a standalone query." If the
@@ -49,22 +50,41 @@ no vocabulary bridging, no completeness check, no multi-hop detection.
   section", there is no follow-up retrieval pass. A post-synthesis check for these phrases
   could trigger a second retrieval round. See Stage 4 cross-reference item.
 
-- **Language detection and response language enforcement** — The LLM currently chooses the
-  response language on its own and makes mistakes. Detect whether the question is Spanish or
-  English, then explicitly instruct synthesis to respond in that language.
+- **Language detection (prerequisite for translation)** — Extend the existing classifier
+  call in `scope_gate.py` to also return `"language": "es" | "en" | "other"` — zero extra
+  LLM cost since the classifier already reads the full query. Thread `language` through the
+  pipeline so downstream steps can use it. This is a prerequisite only; it does not fix
+  translation quality on its own (see item below).
 
-  Cheapest implementation: extend the existing classifier call in `scope_gate.py` to also
-  return `"language": "es" | "en" | "other"` — zero extra LLM cost since the classifier
-  already reads the full query. Thread `language` through to the knowledge search request
-  and inject `"Respond in Spanish." / "Respond in English."` into the synthesis prompt.
-
-  Edge cases to handle:
-  - `"other"`: fall back to English (or the corpus language) — do not leave it to the LLM.
+  Edge cases:
+  - `"other"`: default to English.
   - Canned responses (`ORIENTATION_RESPONSE`, `OUT_OF_SCOPE_REPLY`, `BROAD_QUERY_PREFIX`)
-    are hardcoded strings and must be localized. Add `_ES` / `_EN` variants in `config.py`
-    and select by detected language.
-  - Mixed-language queries: treat the dominant language as authoritative; if truly ambiguous,
-    default to English.
+    are hardcoded strings and must have `_ES` / `_EN` variants in `config.py`.
+  - Mixed-language queries: treat the dominant language as authoritative.
+
+- **Translation quality — Spanish (Castellano)** — Simply instructing the LLM to "respond
+  in Spanish" is insufficient and has already been observed to produce poor results. This
+  school is English-medium, but ~80% of families are Spanish-speaking and many have limited
+  English. Translation quality — including correct Castilian/Latin-American register — is
+  a first-class correctness requirement, not a style preference.
+
+  The problem is unsolved. Known candidate approaches being evaluated:
+  1. **Term dictionary** — A curated glossary of school-specific terms with verified
+     Spanish translations (e.g. "Infant Community" → "Comunidad Infantil"). Injected into
+     the synthesis prompt. Deterministic and auditable. Does not help with full-sentence
+     fluency or idiomatic phrasing.
+  2. **Bilingual document enrichment** — Ingest translated versions of key documents
+     alongside the English originals, and allow synthesis to draw on Spanish source text
+     directly rather than translating English output. Preserves idiom and phrasing but
+     requires translation of source documents.
+  3. **Post-synthesis translation pass** — After synthesis produces an English answer,
+     run a second dedicated translation call with school-specific context. More expensive;
+     translation errors can compound synthesis errors.
+
+  Next step: empirical evaluation. Run a set of Spanish-language queries through each
+  approach and score the outputs with native Castilian speakers. Do not commit to an
+  architecture before that data exists. Track evaluation results in a spike doc when
+  the work begins.
 
 - **Corpus-grounded glossary** (low priority — PRF is strictly more general) — One offline
   LLM job over the index that produces a term→label mapping (e.g. "fire drill" → "evacuation
@@ -114,10 +134,7 @@ forward retrieval hints derived from the query understanding stage.
   `if not KNOWLEDGE_SERVICE_URL: raise RuntimeError("KNOWLEDGE_SERVICE_URL is not set")`.
   One line in `config.py` or `main.py` startup.~~ DONE 2026-04-26.
 
-- **Synchronous identity token fetch in async path** — `google.auth.transport.requests`
-  token refresh is blocking I/O called from an async handler, stalling the event loop
-  under concurrent load. Wrap with `asyncio.run_in_executor(None, ...)` or switch to
-  `google.auth.transport.aiohttp`.
+- ~~**Synchronous identity token fetch in async path**~~ DONE 2026-04-27. `run_in_executor` + 55-min TTL cache in `knowledge_client.py`.
 
 - ~~**Corpus summary never expires**~~ DONE 2026-04-26. 10-minute TTL added to
   `_get_corpus_summary()` in `routers/chat.py`. Falls back to stale value (not fallback string)
@@ -148,6 +165,40 @@ forward retrieval hints derived from the query understanding stage.
   to retrieved chunks before generating the answer and instruct the LLM to cite by number only.
 
 
+
+- **Answer relevance judge** — After synthesis, run a single Flash Lite call that checks
+  two things: (1) does the answer actually address the user's question (Grice's Relation
+  maxim — the "lost hoodie / who to contact" failure mode), and (2) is the answer in the
+  language detected by the scope gate. Distinct from NLI faithfulness: faithfulness checks
+  groundedness against retrieved documents; relevance checks whether the question was
+  answered at all.
+
+  Implementation notes:
+  - Lives in `services/answer_judge.py`. Returns a structured `AnswerJudgement` dataclass:
+    `addressed: bool`, `language_correct: bool`. Prompt lives in `services/prompts.py` —
+    this file does not yet exist in the gateway; create it as the canonical home for all
+    gateway LLM prompts (migrate `scope_gate._PROMPT` and `rewrite._PROMPT` there too,
+    importing them back into their respective modules). Keeps prompts findable and testable.
+  - Called in `chat.py` after step 6 (search result received), before step 7 (stream answer).
+  - On `addressed=False`: emit answer with `warning` field set; log the failure; record
+    in trace.
+  - On `language_correct=False`: one retry — re-issue the search request with an explicit
+    language instruction; if it fails again, emit with warning. Never loop more than once.
+  - Extensibility: `AnswerJudgement` is a dataclass — add new check fields as the judge
+    grows without changing call sites. The prompt in `prompts.py` is the single place to
+    add new criteria.
+
+  Observability — full pipeline integration required:
+  - Record a `gateway.answer.judge` span via `SpanCollector.record()` with attributes
+    `{"addressed": bool, "language_correct": bool}` and duration_ms.
+  - Add entries to `step_messages.py`:
+    `"gateway.answer.judge"` → `"Answer checked: relevant · correct language"` (happy path)
+    `"gateway.answer.judge.not_addressed"` → `"Answer may not fully address your question"`
+    `"gateway.answer.judge.wrong_language"` → `"Language mismatch detected — retrying"`
+  - Span emitted via `_thinking_sse()` in `chat.py` so it appears in the WebUI progress
+    sequence between "processing" and the final answer event.
+  - Include `judge: {addressed, language_correct, latency_ms}` in the Firestore trace doc
+    and in the BigQuery trace schema (add to the Stage 3 observability section above).
 
 - **NLI faithfulness post-check** — After synthesis, run a second LLM prompt: "Does this
   answer contradict or omit any condition present in the retrieved sections?" Flag as a

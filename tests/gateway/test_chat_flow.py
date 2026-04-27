@@ -45,6 +45,16 @@ _OUT_OF_SCOPE = (False, True)
 _NOT_SPECIFIC = (True, False)
 
 
+def _make_search_stream(result=None):
+    """Return an async generator that yields a single answer event."""
+    payload = result if result is not None else _KNOWLEDGE_RESULT
+
+    async def _gen(*args, **kwargs):
+        yield ("answer", payload, "test-version")
+
+    return _gen
+
+
 @pytest.fixture
 def client():
     with TestClient(main.app) as c:
@@ -54,8 +64,9 @@ def client():
 def test_valid_school_question_returns_answer(client):
     with (
         patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
         patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
-        patch("services.knowledge_client.search", new_callable=AsyncMock, return_value=_KNOWLEDGE_RESULT),
+        patch("services.knowledge_client.search_stream", _make_search_stream()),
     ):
         resp = client.post("/chat", json={"message": "What happens after a fire drill?"})
 
@@ -70,7 +81,10 @@ def test_valid_school_question_returns_answer(client):
 
 
 def test_out_of_scope_returns_refusal(client):
-    with patch("routers.chat.classify", new_callable=AsyncMock, return_value=_OUT_OF_SCOPE):
+    with (
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_OUT_OF_SCOPE),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+    ):
         resp = client.post("/chat", json={"message": "How do I bake a cake?"})
 
     assert resp.status_code == 200
@@ -82,7 +96,10 @@ def test_out_of_scope_returns_refusal(client):
 
 
 def test_vague_question_returns_orientation(client):
-    with patch("routers.chat.classify", new_callable=AsyncMock, return_value=_NOT_SPECIFIC):
+    with (
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_NOT_SPECIFIC),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+    ):
         resp = client.post("/chat", json={"message": "What are the rules?"})
 
     assert resp.status_code == 200
@@ -109,10 +126,17 @@ def test_broad_query_triggers_overview_mode(client):
         {"doc_id": f"doc_{i}", "id": "1", "title": f"Topic {i}"}
         for i in range(6)
     ]
+    captured: dict = {}
+
+    async def _capture_stream(*args, **kwargs):
+        captured.update(kwargs)
+        yield ("answer", _KNOWLEDGE_RESULT, "test-version")
+
     with (
         patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
         patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=many_topics),
-        patch("services.knowledge_client.search", new_callable=AsyncMock, return_value=_KNOWLEDGE_RESULT) as mock_search,
+        patch("services.knowledge_client.search_stream", _capture_stream),
     ):
         resp = client.post("/chat", json={"message": "What are all the school rules?"})
 
@@ -120,8 +144,8 @@ def test_broad_query_triggers_overview_mode(client):
     events = parse_sse(resp.text)
     answer_events = [e for e in events if e["type"] == "answer"]
     assert len(answer_events) == 1
-    # search must be called with overview=True
-    mock_search.assert_called_once_with(mock.ANY, overview=True)
+    # search_stream must be called with overview=True
+    assert captured.get("overview") is True
     # answer should be prefixed with broad-query text
     assert "overview" in answer_events[0]["data"]["answer"].lower()
 
@@ -129,8 +153,9 @@ def test_broad_query_triggers_overview_mode(client):
 def test_session_id_persists_across_requests(client):
     with (
         patch("routers.chat.classify", new_callable=AsyncMock, return_value=_IN_SCOPE),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
         patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
-        patch("services.knowledge_client.search", new_callable=AsyncMock, return_value=_KNOWLEDGE_RESULT),
+        patch("services.knowledge_client.search_stream", _make_search_stream()),
     ):
         resp1 = client.post("/chat", json={"message": "What is the fire drill procedure?"})
         events1 = parse_sse(resp1.text)
