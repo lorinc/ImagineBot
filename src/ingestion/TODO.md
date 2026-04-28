@@ -4,6 +4,54 @@ _Append-only. Resolve items by striking through and noting the outcome._
 
 ---
 
+## Drive polling stub — single-folder, personal OAuth, GCS index
+
+Prototype for the long-term multi-tenant Drive integration. One hardcoded folder,
+personal `token.json` auth, full rebuild on any DOCX change.
+Full requirements: session notes 2026-04-28.
+
+- [ ] **R-1 — GCS bucket + IAM**
+      Create `gs://img-dev-index/` bucket. Grant the Cloud Run Job service account
+      `storage.objectAdmin` on the bucket.
+
+- [ ] **R-2 — Cloud Run Job scaffold**
+      New `src/ingestion/job/` package. Entrypoint reads `DRIVE_FOLDER_ID` and
+      `SOURCE_ID` from env vars. Exits 0 on no-op, exits non-zero on pipeline failure.
+
+- [ ] **R-3 — Change detection**
+      On each invocation: list top-level `.docx` files in the Drive folder (names +
+      last-modified timestamps). Download manifest from
+      `gs://img-dev-index/<SOURCE_ID>/manifest.json` (treat missing as empty).
+      Trigger rebuild if: any file is new, removed, or has a newer modified timestamp.
+
+- [ ] **R-4 — Full pipeline on change**
+      When change detected: run Steps 1–5 (existing pipeline code) scoped to the
+      configured folder, then run `build_index.py`. Reuse existing pipeline steps
+      unchanged; the job is a thin wrapper.
+
+- [ ] **R-5 — Upload intermediaries to Drive**
+      After a successful pipeline run, upload all `data/pipeline/latest/` subfolders
+      back to the Drive folder as named subfolders (`1-native-gdocs/`, `02_baseline_md/`,
+      `03_ai_cleaned/`, `04_chunked/`). Also upload a copy of `multi_index.json`
+      to an `index/` subfolder in Drive.
+
+- [ ] **R-6 — Write index + manifest to GCS**
+      Upload `data/index/multi_index.json` to
+      `gs://img-dev-index/<SOURCE_ID>/multi_index.json`.
+      Write updated manifest (file names + timestamps + run timestamp) to
+      `gs://img-dev-index/<SOURCE_ID>/manifest.json`.
+
+- [ ] **R-7 — Knowledge service reads index from GCS**
+      Add `INDEX_GCS_PATH` env var. On startup, if set, download
+      `multi_index.json` from GCS into memory instead of reading local disk.
+      Local disk path remains the fallback (dev/test compatibility).
+
+- [ ] **R-8 — Cloud Scheduler + Cloud Run Job trigger**
+      Create Cloud Scheduler job: fires every minute, HTTP POST to the Cloud Run Job
+      trigger URL. Wire up IAM so Scheduler can invoke the job.
+
+---
+
 ## DESIGN: multi-tenant corpus management via Google Drive
 
 Full design in `src/ingestion/gdrive_integration_plan.md`.

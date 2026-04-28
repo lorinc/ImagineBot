@@ -452,6 +452,86 @@ guardrails derived from code + heuristics. Surfaced 4 new issues (see SESSION.md
 
 ---
 
+### Phase 2.10 — Gate 3 evidence (no-evidence canned reply) — DEPLOYED 2026-04-27
+
+**What was built:** (see Phase 2.x impl notes in commit 4eba7a4)
+- `src/gateway/config.py` — `NO_EVIDENCE_REPLY` constant
+- `src/gateway/routers/chat.py` — Gate 3 check: if `selected_nodes == []`, substitute canned reply, `facts=[]`, `pipeline_path=in_scope_no_evidence`
+- `tests/gateway/test_chat_flow.py` — `test_no_evidence_returns_canned_reply`
+
+**UAT finding:** Gate 3 fires correctly for zero-retrieval case. Gap identified: does not fire
+when retrieval finds a topically adjacent chunk but synthesis concludes it cannot answer. Root
+cause: `has_evidence` reflects retrieval success, not synthesis success. Fix requires a gateway
+conversation policy spec before any further patching. See HEURISTICS.log [2026-04-27] GATE_SEMANTICS.
+
+**Status:** DEPLOYED 2026-04-27 (gateway-00015-xtv). 22 tests passing.
+
+---
+
+### Phase 2.12 — Gate 1 scope override — COMMITTED 2026-04-27
+
+**What was built:**
+- `src/gateway/config.py` — `OVERRIDE_TRIGGER_PHRASES` list (13 phrases)
+- `src/gateway/routers/chat.py` — Gate 1 override detection before `classify()`; session state
+  (`last_pipeline_path`, `last_query`) persisted at all exit points (OOS, orientation, in-scope)
+- `tests/gateway/test_chat_flow.py` — 4 new tests (26 total); all passing
+
+**Status:** DEPLOYED 2026-04-27 (gateway-00016-74p). UAT PASSED. UAT finding: Gate 3 canned reply is bad on override path — sprint item L added (Gate 3 LLM fallback reply).
+
+---
+
+### Phase 2.13 — Gate 3 LLM fallback reply + reply strings moved to services/prompts — COMMITTED 2026-04-27
+
+**What was built:**
+- `src/gateway/services/prompts.py` (new) — canonical home for all user-facing reply strings (`OUT_OF_SCOPE_REPLY`, `ORIENTATION_RESPONSE`, `BROAD_QUERY_PREFIX`, `NO_EVIDENCE_REPLY`) and LLM prompt constructors (`gate3_fallback_prompt`)
+- `src/gateway/services/fallback_reply.py` (new) — `async def fallback_reply(query, override_context)`: one Gemini Flash Lite call; acknowledges miss, offers to find contact person — no general-knowledge answers
+- `src/gateway/routers/chat.py` — Gate 3a: calls `fallback_reply` when `override_active`; Gate 3b (new): empty synthesis detected, same guard; both set `trace["fallback_reply"] = True`
+- `src/gateway/config.py` — reply strings removed; only tunable parameters remain
+- 3 new tests (28 total, all passing)
+
+**Status:** COMMITTED 2026-04-27 (126d6ca). Deploy + UAT next session.
+
+---
+
+### Phase 2.14 — Gate H: classifier schema expansion — COMMITTED 2026-04-28
+
+**What was built:**
+- `src/gateway/services/scope_gate.py` — `ClassifyResult` dataclass replaces `(in_scope, specific_enough)` tuple; new `query_type` enum field: "answerable" | "underspecified" | "overspecified" | "multiple"; `sub_questions` and `missing_variable` fields; updated prompt and JSON schema
+- `src/gateway/services/rewrite.py` — `async def generalize_overspecified(query)`: strips over-specific constraints via LLM, returns more general query
+- `src/gateway/services/prompts.py` — `ORIENTATION_RESPONSE` removed; `UNDERSPECIFIED_CLARIFICATION_TEMPLATE` and `OVERSPECIFIED_NOTE` added
+- `src/gateway/routers/chat.py` — Gate 2 branches on `query_type`: underspecified → clarification request; overspecified → generalize + retrieve + note prefix; multiple → fall-through to pipeline (item I adds orchestration); answerable → unchanged
+- 36 tests passing (16 flow + 14 scope gate + 6 other)
+
+**Status:** COMMITTED 2026-04-28 (f689443). Deploy + UAT next session.
+
+---
+
+### Phase 2.11 — Gateway conversation policy spec — PLANNED
+
+**Goal:** `docs/specs/gateway.md` — human-approved decision policy that defines the complete
+gateway decision tree and required system behavior at every branch.
+
+**Why:** Gate 3 gap (Phase 2.10) is a symptom of implementing gates without a spec. Three
+design sources (Erika Hall / Gricean maxims, UX framework five-gate model, BOT_QA families)
+agree on the framework but no approved spec exists. Every Stage 0–3 implementation item in
+gateway/TODO.md is an implementation waiting for this spec.
+
+**Gates to specify:**
+- Gate 1 — Scope: in-remit criteria; scope boundary copy
+- Gate 2 — Specificity: underspecified criteria; clarification request policy (one question, one variable)
+- Gate 3 — Evidence: "evidence present" at synthesis level, not retrieval level
+- Gate 4 — Relevance: answer addresses question; behavior on failure (answer relevance judge)
+- Gate 5 — Groundedness: corpus-grounded vs. model-knowledge supplement
+
+**Process:** Draft gate-by-gate; user approves each gate. Commit as APPROVED when all gates signed off.
+
+**Unblocks:** answer relevance judge, query completeness check, in-scope-undocumented /
+underspecified / false-presupposition eval families.
+
+**Status:** PLANNED 2026-04-27. Next sprint item (F).
+
+---
+
 ### Phase 3.1 — GDrive integration UAT plan — SCOPED 2026-04-24
 
 **Plan:** `~/.claude/plans/awesome-do-a-gap-dynamic-stardust.md`

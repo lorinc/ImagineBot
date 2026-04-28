@@ -23,6 +23,68 @@ _Done: Gateway derives this from `selected_nodes` directly — no separate flag 
 
 ---
 
+### Gate 3a — Routing candidates on retrieval miss
+
+**Required by:** `src/gateway/TODO.md §Conversation policy — Gate 3a` (sprint item K).
+
+When Gate 3a fires (`selected_nodes == []`), the gateway needs to know which documents Stage 1
+routed to and what L1 sections exist in those documents, so it can surface adjacent topics to
+the parent instead of returning a canned no-evidence reply.
+
+**Change:** Add `routing_candidates: list[dict] | None` to `SearchResponse` in `models.py`.
+
+Populate in `query_multi_index` inside the `if not section_parts:` early-return branch
+(around line 263 of `indexer/multi.py`). At that point `resolved_docs` and `docs_by_id` are
+available. For each `doc_id` in `resolved_docs`:
+```python
+{
+  "doc_name": doc_id.replace("_", " ").replace("-", " ").title(),
+  "l1_sections": [n["title"] for n in docs_by_id[doc_id]["l1_nodes"]]  # cap at 10
+}
+```
+
+`routing_candidates` is `None` when `selected_nodes` is non-empty (normal answer or Gate 3b).
+Additive field — no breaking change to existing callers.
+
+Pass it through `_build_response()` in `main.py` to the caller.
+
+**Files:** `models.py` (routing_candidates on SearchResponse), `indexer/multi.py` (populate
+in the no-section-parts branch), `main.py` (_build_response passes it through).
+
+---
+
+### Gate 3b — `has_answer` flag
+
+**Required by:** `src/gateway/TODO.md §Conversation policy — Gate 3b` (sprint item J).
+
+When synthesis runs but concludes the retrieved sections don't answer the question, the gateway
+has no structured signal — the abstention text is returned as if it were a real answer. This
+caused the confirmed UAT failure on 2026-04-27 (tree climbing / health & safety chunk).
+
+**Change:** Add `has_answer: bool` to `SearchResponse` in `models.py`.
+
+Set in `_build_response()` in `main.py`:
+- `False` when `synthesis_nodes` (i.e. `selected_nodes`) is empty — Gate 3a path, synthesis skipped
+- `False` when `result["synthesis"]["answer"].strip()` starts with the abstention prefix defined
+  in `make_synthesize_prompt`: `"The provided sections do not answer this question."`
+- `True` otherwise
+
+**Coupling to maintain:** The prefix checked here MUST match the abstention instruction in
+`indexer/prompts.py make_synthesize_prompt`. Define a module-level constant in `main.py`:
+```python
+# COUPLING: must match the abstention instruction in indexer/prompts.py make_synthesize_prompt
+_SYNTHESIS_ABSTENTION_PREFIX = "The provided sections do not answer this question."
+```
+Add a matching comment in `prompts.py` at the relevant line so the two locations stay in sync
+when the prompt is edited.
+
+`has_answer` defaults to `True` if the field is absent — additive, no breaking change.
+
+**Files:** `models.py` (has_answer on SearchResponse), `main.py` (_build_response +
+abstention constant), `indexer/prompts.py` (cross-reference comment on abstention string).
+
+---
+
 ## Bugs
 
 - **`/search` (non-streaming) duplicates the pipeline** — `POST /search` and

@@ -1384,3 +1384,34 @@ PREVENTED_BY: When a service step needs session history to understand the input,
               the problem is "context resolution" (belongs in rewrite) or "scope classification"
               (belongs in classify). If context resolution, move or extend rewrite instead of
               adding history to the classifier.
+
+[2026-04-28]
+CATEGORY: OPERATIONS
+SERVICE: src/gateway
+TASK: Deploy during sprint session
+SYMPTOM: Running deploy.sh inside a session consumed ~50% of the context window in minutes.
+         Docker push emits hundreds of "Layer X: Waiting" lines — one per layer per push
+         attempt, repeated across parallel streams. Combined with IAM policy JSON dumps,
+         a single deploy can produce 500+ lines of noise into the context window.
+ROOT_CAUSE: deploy.sh output is captured verbatim into context. Docker push progress and
+            gcloud IAM output are high-volume, low-information noise.
+PREVENTED_BY: Always deploy at session end (after /wrap), never mid-session. If deploy must
+              happen mid-session, pipe through: `bash deploy.sh 2>&1 | grep -E '(===|Done|Service|Error|Deploying|Revision)' `
+              to suppress layer noise and IAM dumps. Never run deploy.sh unfiltered mid-session.
+
+[2026-04-28]
+CATEGORY: ARCHITECTURE
+SERVICE: src/gateway
+TASK: Sprint H+Q UAT — override + overspecified interaction
+SYMPTOM: When override_active=True and the previous query is overspecified, the pipeline
+         runs the overspecified generalization+note path instead of bypassing straight to
+         retrieval. override_active bypasses Gate 1 (OOS check) but not Gate 2 (overspecified/
+         underspecified check). User got a generalization note when they explicitly asked to
+         retry the original query.
+ROOT_CAUSE: A bypass flag (override_active) was added to skip one gate but not audited against
+            all downstream gates. Gate 2 branches on clf.query_type without checking override_active,
+            so an overspecified classify result still triggers generalization regardless of override.
+PREVENTED_BY: When adding a bypass flag to any pipeline, enumerate every gate/branch downstream
+              and explicitly decide: does this bypass flag apply here? Add the guard at each gate,
+              not just the one that prompted the flag. Document which gates the flag bypasses in
+              a comment at the flag's definition site.
