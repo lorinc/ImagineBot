@@ -1,9 +1,19 @@
 import json
+from dataclasses import dataclass, field
 
 import vertexai
 from vertexai.generative_models import GenerationConfig, GenerativeModel
 
 from config import GCP_PROJECT, REGION, MODEL
+
+
+@dataclass
+class ClassifyResult:
+    in_scope: bool
+    query_type: str  # "answerable" | "underspecified" | "overspecified" | "multiple"
+    sub_questions: list[str] = field(default_factory=list)
+    missing_variable: str | None = None
+
 
 _PROMPT = """\
 You are a classifier for a school information assistant.
@@ -11,15 +21,24 @@ You are a classifier for a school information assistant.
 The assistant has access to school documents covering:
 {corpus_summary}
 
-Given the question below, output JSON with two fields:
+Given the question below, output JSON with these fields:
 - "in_scope": true if the question is about this school — its policies, procedures, rules, \
 staff, students, events, or any topic referenced in the document outline above; false for \
 unrelated topics (recipes, stock prices, general trivia, etc.)
-- "specific_enough": true if the question has a clear topic anchor that can be searched \
-(e.g. "dress code", "fire drill", "balls", "fees", "pick-up time", "what happens if my child \
-is sick"); false if the question is too vague to retrieve a meaningful answer \
-(e.g. "What are the rules?", "What do I need to know?", "How does it work?", \
-"Tell me about the school", "What is important?")
+- "query_type": one of:
+  - "answerable" — the question has a clear topic anchor that can be searched \
+(e.g. "dress code", "fire drill", "fees", "pick-up time", "what happens if my child is sick")
+  - "underspecified" — the question is too vague to retrieve a meaningful answer because a \
+required parameter is missing (e.g. "What are the rules?", "What do I need to know?", \
+"How does it work?", "Tell me about the school"). Only use this when no topic is identified.
+  - "overspecified" — the question has overly specific constraints unlikely to appear in \
+policy documents (e.g. "sick leave policy for primary teachers hired before 2020 on probation"). \
+The core topic is clear but the constraints are too narrow.
+  - "multiple" — the message contains two or more distinct questions that require separate \
+lookups (e.g. "My son lost his hoodie. Who should I contact?")
+- "sub_questions": list of standalone questions when query_type is "multiple"; empty list otherwise
+- "missing_variable": short phrase naming the missing parameter when query_type is \
+"underspecified" (e.g. "the specific topic or area", "the school level"); null otherwise
 
 {prior_exchange}Question: {query}"""
 
@@ -34,13 +53,22 @@ def _prior_exchange_block(history: list[dict]) -> str:
     lines.append("")
     return "\n".join(lines) + "\n"
 
+
 _SCHEMA = {
     "type": "object",
     "properties": {
         "in_scope": {"type": "boolean"},
-        "specific_enough": {"type": "boolean"},
+        "query_type": {
+            "type": "string",
+            "enum": ["answerable", "underspecified", "overspecified", "multiple"],
+        },
+        "sub_questions": {
+            "type": "array",
+            "items": {"type": "string"},
+        },
+        "missing_variable": {"type": "string", "nullable": True},
     },
-    "required": ["in_scope", "specific_enough"],
+    "required": ["in_scope", "query_type", "sub_questions"],
 }
 
 _model: GenerativeModel | None = None
@@ -54,8 +82,8 @@ def _get_model() -> GenerativeModel:
     return _model
 
 
-async def classify(query: str, corpus_summary: str, history: list[dict] | None = None) -> tuple[bool, bool]:
-    """Return (in_scope, specific_enough). Fails open on error."""
+async def classify(query: str, corpus_summary: str, history: list[dict] | None = None) -> ClassifyResult:
+    """Return ClassifyResult. Fails open (answerable) on error."""
     config = GenerationConfig(
         response_mime_type="application/json",
         response_schema=_SCHEMA,
@@ -69,5 +97,10 @@ async def classify(query: str, corpus_summary: str, history: list[dict] | None =
         ),
         generation_config=config,
     )
-    result = json.loads(response.text)
-    return result.get("in_scope", True), result.get("specific_enough", True)
+    raw = json.loads(response.text)
+    return ClassifyResult(
+        in_scope=raw.get("in_scope", True),
+        query_type=raw.get("query_type", "answerable"),
+        sub_questions=raw.get("sub_questions") or [],
+        missing_variable=raw.get("missing_variable") or None,
+    )

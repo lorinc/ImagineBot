@@ -12,6 +12,14 @@ History:
 
 Follow-up: {query}"""
 
+_GENERALIZE_PROMPT = """\
+The following question contains overly specific constraints that are unlikely to appear \
+verbatim in a school policy document. Rewrite it as a more general question that covers \
+the core topic, removing constraints like employment dates, contract types, or edge-case \
+conditions. Output ONLY the rewritten question, nothing else.
+
+Question: {query}"""
+
 _model: GenerativeModel | None = None
 
 
@@ -39,3 +47,14 @@ async def rewrite_standalone(query: str, history: list[dict]) -> str:
     )
     rewritten = response.text.strip()
     return rewritten if rewritten else query
+
+
+async def generalize_overspecified(query: str) -> str:
+    """Strip over-specific constraints from a query, returning a more general form."""
+    config = GenerationConfig(temperature=0.0)
+    response = await _get_model().generate_content_async(
+        _GENERALIZE_PROMPT.format(query=query),
+        generation_config=config,
+    )
+    generalized = response.text.strip()
+    return generalized if generalized else query

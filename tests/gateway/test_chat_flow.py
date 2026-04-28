@@ -13,6 +13,8 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), "../../src/gateway"))
 with mock.patch("vertexai.init"):
     import main  # noqa: E402
 
+from services.scope_gate import ClassifyResult
+
 
 def parse_sse(text: str) -> list[dict]:
     events = []
@@ -46,10 +48,17 @@ _NO_EVIDENCE_RESULT = {
     "selected_nodes": [],
 }
 
-# classify returns (in_scope, specific_enough)
-_IN_SCOPE = (True, True)
-_OUT_OF_SCOPE = (False, True)
-_NOT_SPECIFIC = (True, False)
+_IN_SCOPE = ClassifyResult(in_scope=True, query_type="answerable")
+_OUT_OF_SCOPE = ClassifyResult(in_scope=False, query_type="answerable")
+_UNDERSPECIFIED = ClassifyResult(
+    in_scope=True, query_type="underspecified", missing_variable="the specific topic or area"
+)
+_OVERSPECIFIED = ClassifyResult(in_scope=True, query_type="overspecified")
+_MULTIPLE = ClassifyResult(
+    in_scope=True,
+    query_type="multiple",
+    sub_questions=["What is the lost-items policy?", "Who is the contact for lost and found?"],
+)
 
 
 def _make_search_stream(result=None):
@@ -102,9 +111,9 @@ def test_out_of_scope_returns_refusal(client):
     assert answer_events[0]["data"]["facts"] == []
 
 
-def test_vague_question_returns_orientation(client):
+def test_underspecified_returns_clarification_request(client):
     with (
-        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_NOT_SPECIFIC),
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_UNDERSPECIFIED),
         patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
     ):
         resp = client.post("/chat", json={"message": "What are the rules?"})
@@ -113,9 +122,52 @@ def test_vague_question_returns_orientation(client):
     events = parse_sse(resp.text)
     answer_events = [e for e in events if e["type"] == "answer"]
     assert len(answer_events) == 1
-    assert answer_events[0]["data"]["facts"] == []
-    # orientation response should prompt user to be more specific
-    assert "?" in answer_events[0]["data"]["answer"]
+    data = answer_events[0]["data"]
+    assert data["facts"] == []
+    assert "?" in data["answer"]
+    assert "know" in data["answer"].lower()
+
+
+def test_overspecified_runs_generalized_query(client):
+    """Overspecified query → generalize_overspecified called, OVERSPECIFIED_NOTE prepended."""
+    mock_generalize = AsyncMock(return_value="sick leave policy for primary teachers")
+
+    with (
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_OVERSPECIFIED),
+        patch("routers.chat.generalize_overspecified", mock_generalize),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
+        patch("services.knowledge_client.search_stream", _make_search_stream()),
+    ):
+        resp = client.post("/chat", json={
+            "message": "What is the sick leave policy for primary teachers hired before 2020 on probation?"
+        })
+
+    assert resp.status_code == 200
+    mock_generalize.assert_called_once()
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    data = answer_events[0]["data"]
+    assert "specific" in data["answer"].lower()
+    assert "generali" in data["answer"].lower()
+
+
+def test_multiple_questions_falls_through_to_pipeline(client):
+    """Multiple query_type → Gate 2 passes; retrieval runs on original query."""
+    with (
+        patch("routers.chat.classify", new_callable=AsyncMock, return_value=_MULTIPLE),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
+        patch("services.knowledge_client.search_stream", _make_search_stream()),
+    ):
+        resp = client.post("/chat", json={"message": "My son lost his hoodie. Who should I contact?"})
+
+    assert resp.status_code == 200
+    events = parse_sse(resp.text)
+    answer_events = [e for e in events if e["type"] == "answer"]
+    assert len(answer_events) == 1
+    assert answer_events[0]["data"]["answer"]
 
 
 def test_empty_message_returns_error(client):

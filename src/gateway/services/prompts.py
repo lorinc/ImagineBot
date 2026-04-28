@@ -6,17 +6,14 @@ OUT_OF_SCOPE_REPLY = (
     "or administrative operations."
 )
 
-ORIENTATION_RESPONSE = (
-    "I'd be happy to help with school information! "
-    "Could you be a bit more specific about what you'd like to know? "
-    "For example, you could ask about:\n\n"
-    "- Daily logistics — drop-off times, attendance, late pick-up\n"
-    "- Health & wellbeing — illness rules, allergies, meals\n"
-    "- Behaviour & values — expectations, dress code, conflict resolution\n"
-    "- Curriculum & learning — how lessons work, assessments, progress reports\n"
-    "- Technology — device policies, online safety\n"
-    "- Fees & enrolment — payment schedules, what's included\n\n"
-    "What would you like to know about?"
+UNDERSPECIFIED_CLARIFICATION_TEMPLATE = (
+    "To answer this, I need to know: {missing_variable}. Could you tell me?"
+)
+
+OVERSPECIFIED_NOTE = (
+    "Your question was very specific, so I looked up a more general answer. "
+    "If you think I've made a mistake with this generalization, please say so "
+    "and I'll try to answer your original question.\n\n"
 )
 
 BROAD_QUERY_PREFIX = (

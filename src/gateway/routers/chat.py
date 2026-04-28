@@ -17,12 +17,13 @@ from config import (
 from services.prompts import (
     BROAD_QUERY_PREFIX,
     NO_EVIDENCE_REPLY,
-    ORIENTATION_RESPONSE,
+    OVERSPECIFIED_NOTE,
     OUT_OF_SCOPE_REPLY,
+    UNDERSPECIFIED_CLARIFICATION_TEMPLATE,
 )
 from services.sanitize import sanitize
-from services.scope_gate import classify
-from services.rewrite import rewrite_standalone
+from services.scope_gate import classify, ClassifyResult
+from services.rewrite import rewrite_standalone, generalize_overspecified
 from services.fallback_reply import fallback_reply
 from services import knowledge_client
 from services.observability import SpanCollector
@@ -151,11 +152,11 @@ async def chat(body: ChatRequest):
             and len(query.split()) < 15
             and any(phrase in query.lower() for phrase in OVERRIDE_TRIGGER_PHRASES)
         )
+        clf: ClassifyResult | None = None
         if override_active:
             query = session["last_query"]
-            in_scope, specific_enough = True, True
             classify_ms = 0
-            trace["classifier"] = {"in_scope": True, "specific_enough": True,
+            trace["classifier"] = {"in_scope": True, "query_type": "answerable",
                                    "override_active": True, "latency_ms": 0}
             span = spans.record("classify.override",
                                 {"override_active": True, "retried_query": query},
@@ -163,34 +164,38 @@ async def chat(body: ChatRequest):
             if msg := _thinking_sse(span):
                 yield msg
 
-        # 2. Classify: scope + specificity in one LLM call (skipped when override is active)
+        # 2. Classify: scope + query type in one LLM call (skipped when override is active)
+        in_scope = True
         if not override_active:
             corpus_summary = await _get_corpus_summary()
             t_classify = time.monotonic()
             try:
-                in_scope, specific_enough = await classify(query, corpus_summary, history=session.get("turns", [])[-2:])
+                clf = await classify(query, corpus_summary, history=session.get("turns", [])[-2:])
             except Exception as e:
                 logger.error("Classifier error: %s", e)
-                in_scope, specific_enough = True, True  # fail open
+                clf = ClassifyResult(in_scope=True, query_type="answerable")  # fail open
 
             classify_ms = int((time.monotonic() - t_classify) * 1000)
+            in_scope = clf.in_scope
             trace["classifier"] = {
-                "in_scope": in_scope,
-                "specific_enough": specific_enough,
+                "in_scope": clf.in_scope,
+                "query_type": clf.query_type,
+                "sub_questions": clf.sub_questions,
+                "missing_variable": clf.missing_variable,
                 "latency_ms": classify_ms,
             }
 
-            if not in_scope:
+            if not clf.in_scope:
                 span = spans.record("classify.out_of_scope",
-                                    {"in_scope": in_scope, "specific_enough": specific_enough},
+                                    {"in_scope": clf.in_scope, "query_type": clf.query_type},
                                     duration_ms=classify_ms)
-            elif not specific_enough:
-                span = spans.record("classify.not_specific",
-                                    {"in_scope": in_scope, "specific_enough": specific_enough},
+            elif clf.query_type != "answerable":
+                span = spans.record("classify.gate2",
+                                    {"in_scope": clf.in_scope, "query_type": clf.query_type},
                                     duration_ms=classify_ms)
             else:
                 span = spans.record("classify",
-                                    {"in_scope": in_scope, "specific_enough": specific_enough},
+                                    {"in_scope": clf.in_scope, "query_type": clf.query_type},
                                     duration_ms=classify_ms)
             if msg := _thinking_sse(span):
                 yield msg
@@ -210,20 +215,29 @@ async def chat(body: ChatRequest):
             yield f'event: answer\ndata: {json.dumps({"answer": OUT_OF_SCOPE_REPLY, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
             return
 
-        if not specific_enough:
-            trace["pipeline_path"] = "orientation"
-            trace["output"] = {"answer": ORIENTATION_RESPONSE, "facts": []}
+        if clf is not None and clf.query_type == "underspecified":
+            missing_var = clf.missing_variable or "the specific topic or area"
+            reply = UNDERSPECIFIED_CLARIFICATION_TEMPLATE.format(missing_variable=missing_var)
+            trace["pipeline_path"] = "underspecified"
+            trace["output"] = {"answer": reply, "facts": []}
             trace["spans"] = spans.spans()
             existing = _sessions.get(session_id, {})
             _sessions[session_id] = {
                 "turns": existing.get("turns", []),
                 "last_active": time.monotonic(),
-                "last_pipeline_path": "orientation",
+                "last_pipeline_path": "underspecified",
                 "last_query": user_query,
             }
             asyncio.create_task(write_trace(trace))
-            yield f'event: answer\ndata: {json.dumps({"answer": ORIENTATION_RESPONSE, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
+            yield f'event: answer\ndata: {json.dumps({"answer": reply, "facts": [], "session_id": session_id, "trace_id": trace_id})}\n\n'
             return
+
+        if clf is not None and clf.query_type == "overspecified":
+            try:
+                query = await generalize_overspecified(query)
+                logger.info("Generalized overspecified query to: %r", query)
+            except Exception as e:
+                logger.warning("generalize_overspecified failed, using original: %s", e)
 
         yield 'event: progress\ndata: {"key": "contacting"}\n\n'
 
@@ -350,6 +364,9 @@ async def chat(body: ChatRequest):
                 trace["fallback_reply"] = True
             else:
                 answer = NO_EVIDENCE_REPLY
+        elif clf is not None and clf.query_type == "overspecified":
+            answer = OVERSPECIFIED_NOTE + answer
+            trace["pipeline_path"] = "overspecified_generalized"
         elif overview:
             answer = BROAD_QUERY_PREFIX + answer
             trace["pipeline_path"] = "broad"
