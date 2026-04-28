@@ -168,7 +168,7 @@ async def chat(body: ChatRequest):
             corpus_summary = await _get_corpus_summary()
             t_classify = time.monotonic()
             try:
-                in_scope, specific_enough = await classify(query, corpus_summary)
+                in_scope, specific_enough = await classify(query, corpus_summary, history=session.get("turns", [])[-2:])
             except Exception as e:
                 logger.error("Classifier error: %s", e)
                 in_scope, specific_enough = True, True  # fail open

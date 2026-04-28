@@ -21,7 +21,18 @@ is sick"); false if the question is too vague to retrieve a meaningful answer \
 (e.g. "What are the rules?", "What do I need to know?", "How does it work?", \
 "Tell me about the school", "What is important?")
 
-Question: {query}"""
+{prior_exchange}Question: {query}"""
+
+
+def _prior_exchange_block(history: list[dict]) -> str:
+    if not history:
+        return ""
+    lines = ["Prior exchange:"]
+    for turn in history:
+        lines.append(f"User: {turn['q']}")
+        lines.append(f"Assistant: {turn['a']}")
+    lines.append("")
+    return "\n".join(lines) + "\n"
 
 _SCHEMA = {
     "type": "object",
@@ -43,7 +54,7 @@ def _get_model() -> GenerativeModel:
     return _model
 
 
-async def classify(query: str, corpus_summary: str) -> tuple[bool, bool]:
+async def classify(query: str, corpus_summary: str, history: list[dict] | None = None) -> tuple[bool, bool]:
     """Return (in_scope, specific_enough). Fails open on error."""
     config = GenerationConfig(
         response_mime_type="application/json",
@@ -51,7 +62,11 @@ async def classify(query: str, corpus_summary: str) -> tuple[bool, bool]:
         temperature=0.0,
     )
     response = await _get_model().generate_content_async(
-        _PROMPT.format(corpus_summary=corpus_summary, query=query),
+        _PROMPT.format(
+            corpus_summary=corpus_summary,
+            prior_exchange=_prior_exchange_block(history or []),
+            query=query,
+        ),
         generation_config=config,
     )
     result = json.loads(response.text)
