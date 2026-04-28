@@ -41,7 +41,7 @@ gcloud run deploy "${SERVICE}" \
   --min-instances=0 \
   --max-instances=3 \
   --memory=1Gi \
-  --set-env-vars="GCP_PROJECT_ID=${PROJECT},VERTEX_AI_LOCATION=${REGION},KNOWLEDGE_INDEX_PATH=/app/index/multi_index.json,MODULE_GIT_REV=${MODULE_GIT_REV}"
+  --set-env-vars="GCP_PROJECT_ID=${PROJECT},VERTEX_AI_LOCATION=${REGION},KNOWLEDGE_INDEX_PATH=/app/index/multi_index.json,INDEX_GCS_PATH=gs://img-dev-index/tech_poc,MODULE_GIT_REV=${MODULE_GIT_REV}"
 
 echo "=== Done ==="
 gcloud run services describe "${SERVICE}" \
