@@ -8,8 +8,6 @@ Environment variables (see config.py for defaults):
   DRIVE_FOLDER_ID   — Google Drive folder ID to watch
   SOURCE_ID         — GCS path prefix and group_id in the index
   GCS_BUCKET        — GCS bucket name (default: img-dev-index)
-  OAUTH_TOKEN_PATH  — path to token.pickle (default: oauth/token.pickle)
-  GEMINI_API_KEY    — required for Step 3 (AI header cleanup)
 """
 import json
 import subprocess
@@ -17,13 +15,20 @@ import sys
 from datetime import date
 from pathlib import Path
 
+import google.auth
 from google.cloud import storage as gcs
+from googleapiclient.discovery import build
 
-from .config import DRIVE_FOLDER_ID, SOURCE_ID, GCS_BUCKET, OAUTH_TOKEN_PATH
+from .advisory_lock import AlreadyRunning, advisory_lock
+from .config import DRIVE_FOLDER_ID, GCS_BUCKET, SOURCE_ID
 from .drive_sync import download_docx_to_local, list_docx_files, upload_intermediaries
 from .gcs_io import has_changes, load_manifest, save_manifest, upload_index
-from ..pipeline.auth_oauth import get_docs_service, get_drive_service
 from ..pipeline.config import DOCX_DIR, PIPELINE_DIR
+
+_DRIVE_SCOPES = [
+    "https://www.googleapis.com/auth/drive",
+    "https://www.googleapis.com/auth/documents.readonly",
+]
 
 
 def _next_run_id() -> str:
@@ -50,34 +55,28 @@ def _update_symlink(run_dir: Path) -> None:
     latest.symlink_to(run_dir.name)
 
 
-def main() -> None:
-    print(f"[ingestion-job] folder={DRIVE_FOLDER_ID} source={SOURCE_ID} bucket={GCS_BUCKET}")
-
-    drive_service = get_drive_service()
-    docs_service = get_docs_service()
-    gcs_client = gcs.Client()
-
-    files = list_docx_files(drive_service, DRIVE_FOLDER_ID)
+def _rebuild(gcs_client, drive_svc, docs_svc) -> None:
+    files = list_docx_files(drive_svc, DRIVE_FOLDER_ID)
     print(f"  Drive: {len(files)} DOCX file(s)")
 
     manifest = load_manifest(gcs_client, GCS_BUCKET, SOURCE_ID)
 
     if not has_changes(files, manifest):
         print("  No changes detected. Exiting.")
-        sys.exit(0)
+        return
 
     print("  Changes detected — running full rebuild.")
 
-    download_docx_to_local(drive_service, files, DOCX_DIR)
+    download_docx_to_local(drive_svc, files, DOCX_DIR)
 
     run_id, run_dir = _setup_run_dir()
     print(f"  Run ID: {run_id}  dir: {run_dir}")
 
     from ..pipeline.steps.step1_docx_to_gdocs import run as step1
-    gdocs = step1(drive_service, run_dir, parent_folder_id=DRIVE_FOLDER_ID)
+    gdocs = step1(drive_svc, run_dir, parent_folder_id=DRIVE_FOLDER_ID)
 
     from ..pipeline.steps.step2_gdocs_to_md import run as step2
-    stems = step2(drive_service, docs_service, run_dir, gdocs, parent_folder_id=DRIVE_FOLDER_ID)
+    stems = step2(drive_svc, docs_svc, run_dir, gdocs, parent_folder_id=DRIVE_FOLDER_ID)
 
     from ..pipeline.steps.step3_ai_cleanup import run as step3
     stems = step3(run_dir, stems)
@@ -98,7 +97,7 @@ def main() -> None:
 
     _update_symlink(run_dir)
 
-    upload_intermediaries(drive_service, run_dir, DRIVE_FOLDER_ID)
+    upload_intermediaries(drive_svc, run_dir, DRIVE_FOLDER_ID)
 
     index_dir = Path("data/index")
     upload_index(gcs_client, GCS_BUCKET, SOURCE_ID, index_dir)
@@ -106,6 +105,22 @@ def main() -> None:
     save_manifest(gcs_client, GCS_BUCKET, SOURCE_ID, files)
 
     print(f"[ingestion-job] Done. Index at gs://{GCS_BUCKET}/{SOURCE_ID}/multi_index.json")
+
+
+def main() -> None:
+    print(f"[ingestion-job] folder={DRIVE_FOLDER_ID} source={SOURCE_ID} bucket={GCS_BUCKET}")
+
+    creds, _ = google.auth.default(scopes=_DRIVE_SCOPES)
+    gcs_client = gcs.Client()
+
+    try:
+        with advisory_lock(gcs_client, GCS_BUCKET):
+            drive_svc = build("drive", "v3", credentials=creds)
+            docs_svc = build("docs", "v1", credentials=creds)
+            _rebuild(gcs_client, drive_svc, docs_svc)
+    except AlreadyRunning as e:
+        print(str(e))
+        sys.exit(0)
 
 
 if __name__ == "__main__":

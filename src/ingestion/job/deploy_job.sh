@@ -33,9 +33,10 @@ if gcloud run jobs describe "${JOB_NAME}" --region="${REGION}" --project="${PROJ
     --project="${PROJECT}" \
     --service-account="${JOB_SA}" \
     --memory=512Mi \
-    --task-timeout=10m \
-    --set-env-vars="SOURCE_ID=tech_poc,DRIVE_FOLDER_ID=1Fdq41yQyDlXgKUSyDBpGqCxo686ieXg3,GCS_BUCKET=img-dev-index,OAUTH_TOKEN_PATH=/secrets/oauth_token/token.pickle" \
-    --set-secrets="GEMINI_API_KEY=ingestion-gemini-key:latest,/secrets/oauth_token/token.pickle=ingestion-oauth-token:latest"
+    --task-timeout=3600s \
+    --set-env-vars="SOURCE_ID=tech_poc,DRIVE_FOLDER_ID=1Fdq41yQyDlXgKUSyDBpGqCxo686ieXg3,GCS_BUCKET=img-dev-index" \
+    --set-secrets="GEMINI_API_KEY=ingestion-gemini-key:latest" \
+    --clear-volumes --clear-volume-mounts
 else
   gcloud run jobs create "${JOB_NAME}" \
     --image="${IMAGE}" \
@@ -43,9 +44,9 @@ else
     --project="${PROJECT}" \
     --service-account="${JOB_SA}" \
     --memory=512Mi \
-    --task-timeout=10m \
-    --set-env-vars="SOURCE_ID=tech_poc,DRIVE_FOLDER_ID=1Fdq41yQyDlXgKUSyDBpGqCxo686ieXg3,GCS_BUCKET=img-dev-index,OAUTH_TOKEN_PATH=/secrets/oauth_token/token.pickle" \
-    --set-secrets="GEMINI_API_KEY=ingestion-gemini-key:latest,/secrets/oauth_token/token.pickle=ingestion-oauth-token:latest"
+    --task-timeout=3600s \
+    --set-env-vars="SOURCE_ID=tech_poc,DRIVE_FOLDER_ID=1Fdq41yQyDlXgKUSyDBpGqCxo686ieXg3,GCS_BUCKET=img-dev-index" \
+    --set-secrets="GEMINI_API_KEY=ingestion-gemini-key:latest"
 fi
 
 echo ""

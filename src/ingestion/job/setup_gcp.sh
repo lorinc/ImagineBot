@@ -44,23 +44,14 @@ gcloud storage buckets add-iam-policy-binding "gs://${BUCKET}" \
   --role="roles/storage.objectViewer"
 
 echo ""
-echo "=== 5-7. Secret: ingestion-oauth-token ==="
-gcloud secrets create ingestion-oauth-token \
-  --project="${PROJECT}" \
-  --replication-policy=automatic 2>&1 | grep -v "already exists" || true
-
-gcloud secrets versions add ingestion-oauth-token \
-  --project="${PROJECT}" \
-  --data-file="oauth/token.pickle"
-echo "ingestion-oauth-token version added"
-
-gcloud secrets add-iam-policy-binding ingestion-oauth-token \
-  --project="${PROJECT}" \
-  --member="serviceAccount:${JOB_SA}" \
-  --role="roles/secretmanager.secretAccessor"
+echo "=== 5. Drive folder access ==="
+echo "Share your Drive folder with the job service account:"
+echo "  ${JOB_SA}"
+echo "Open the folder in Drive → Share → paste the address above → Viewer."
+echo "(One-time manual step. No credentials stored anywhere.)"
 
 echo ""
-echo "=== 8-10. Secret: ingestion-gemini-key ==="
+echo "=== 6-8. Secret: ingestion-gemini-key ==="
 GEMINI_API_KEY=$(python3 - <<'EOF'
 import re, pathlib
 text = pathlib.Path('credentials').read_text()
@@ -87,14 +78,14 @@ gcloud secrets add-iam-policy-binding ingestion-gemini-key \
   --role="roles/secretmanager.secretAccessor"
 
 echo ""
-echo "=== 11. Service account: scheduler-invoker ==="
+echo "=== 9. Service account: scheduler-invoker ==="
 gcloud iam service-accounts create scheduler-invoker \
   --project="${PROJECT}" \
   --display-name="Cloud Scheduler Invoker" 2>&1 | grep -v "already exists" || true
 echo "${SCHEDULER_SA} ready"
 
 echo ""
-echo "=== 12. Grant scheduler-invoker: roles/run.invoker on project ==="
+echo "=== 10. Grant scheduler-invoker: roles/run.invoker on project ==="
 gcloud projects add-iam-policy-binding "${PROJECT}" \
   --member="serviceAccount:${SCHEDULER_SA}" \
   --role="roles/run.invoker" \

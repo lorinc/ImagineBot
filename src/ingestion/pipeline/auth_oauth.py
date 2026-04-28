@@ -40,13 +40,25 @@ def get_credentials():
         print("Refreshing OAuth credentials...")
         try:
             creds.refresh(Request())
-            _save(creds)
-            print("Credentials refreshed.")
-            return creds
         except Exception as e:
             print(f"Refresh failed: {e}")
+        else:
+            try:
+                _save(creds)
+            except Exception as e:
+                print(f"Warning: could not persist refreshed token: {e}")
+            print("Credentials refreshed.")
+            return creds
 
-    # Full browser flow
+    # Full browser flow — blocked in headless environments (Cloud Run sets CLOUD_RUN_JOB)
+    if os.getenv("CLOUD_RUN_JOB") or os.getenv("K_SERVICE"):
+        raise RuntimeError(
+            "OAuth token is invalid and cannot be renewed in a headless environment.\n"
+            "Operator runbook:\n"
+            "  python3 -m src.ingestion.pipeline.auth_oauth   # re-authorize locally\n"
+            "  gsutil cp oauth/token.pickle gs://img-dev-index/_auth/token.pickle"
+        )
+
     if not CREDENTIALS_FILE.exists():
         raise FileNotFoundError(
             f"credentials.json not found at {CREDENTIALS_FILE}\n"
