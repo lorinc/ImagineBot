@@ -1184,3 +1184,203 @@ ROOT_CAUSE: Git does not consistently preserve execute bits across checkouts/clo
             this machine. The script has no shebang or chmod step inside it.
 PREVENTED_BY: Always invoke deploy scripts with `bash src/<service>/deploy.sh`, never
               `./deploy.sh`. No chmod needed; no exec bit dependency.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-27]
+CATEGORY: GATE_SEMANTICS
+SERVICE: src/gateway
+TASK: UAT for Gate 3 (no-evidence canned reply)
+SYMPTOM: Gate 3 did not fire for "Are children allowed to climb trees in the school garden?"
+         Knowledge retrieved a Health/Safety chunk (selected_nodes non-empty), LLM synthesized
+         "The provided sections do not answer this question." — but the canned reply was not shown.
+ROOT_CAUSE: Gate 3 checks `selected_nodes == []` (retrieval found nothing). It does not check
+            whether synthesis produced a useful answer. `has_evidence` reflects retrieval success,
+            not synthesis success. A topically adjacent but answer-irrelevant chunk passes Gate 3.
+PREVENTED_BY: The correct fix is NOT a pattern-match on the answer text. It is a spec that
+              defines what "evidence present" means at the synthesis level, not the retrieval level.
+              Do not add answer-text pattern matching to gateway without an approved spec in
+              docs/specs/gateway.md. The answer relevance judge (gateway/TODO.md §Stage 3) is
+              the right implementation vehicle once the spec exists.
+
+[2026-04-27]
+CATEGORY: ARCHITECTURE
+SERVICE: src/gateway
+TASK: Conversation policy gate design session
+SYMPTOM: n/a — design session, no runtime failure
+ROOT_CAUSE: n/a
+INSIGHT: The classifier output (query_type) is not just a routing decision — it is a
+  description of the expected answer shape. Both synthesis (downstream) and evaluation
+  (feedback loop) depend on it. Without forwarding query_type to the knowledge service,
+  synthesis uses a generic prompt regardless of question type. Without passing query_type
+  to the answer relevance judge (Gate 4), the judge has no baseline: a high-level overview
+  answer is correct for a broad question but wrong for a direct fact lookup.
+  Dependency chain: classify(query_type) → synthesis prompt selection → answer shape expectation → judge criteria.
+  All three must share the same classification or they will contradict each other.
+PREVENTED_BY: Before implementing any answer quality judge, verify it receives query_type
+  from the classifier and applies type-specific pass criteria. Before adding synthesis
+  prompt variants to the knowledge service, ensure the gateway is forwarding query_type.
+  See gateway/TODO.md §Stage 2 (intent tag forwarding) and §Stage 3 (answer relevance judge).
+
+[2026-04-27]
+CATEGORY: TEST_AUTHORING
+SERVICE: tests/gateway
+TASK: Gate 1 override — test for long-message no-override case
+SYMPTOM: test_gate1_override_does_not_fire_for_long_message failed: classify.assert_called_once()
+         failed even though the message was intended to be "too long" to trigger override.
+ROOT_CAUSE: The override condition is `len(query.split()) < 15`. Test message
+            "Actually I was asking about something that is definitely a school topic please check"
+            has exactly 14 words — 14 < 15 is True, so the message triggered override despite
+            also containing "check" as a trigger phrase. Off-by-one: 14 words is still
+            "short" by the gate's definition.
+PREVENTED_BY: When writing boundary tests for word-count thresholds, always print
+              `len(msg.split())` to verify the test message actually crosses the boundary
+              in the intended direction. Don't rely on prose length intuition.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-27]
+CATEGORY: UX / GATE DESIGN
+SERVICE: src/gateway
+TASK: Gate 1 scope override — UAT
+SYMPTOM: After Gate 1 override fires and knowledge returns no evidence, the canned
+         NO_EVIDENCE_REPLY ("Your question is about a school topic, but I don't have
+         specific documentation...") feels jarring: the user explicitly insisted on
+         searching and was told "thanks, found nothing — call the school."
+ROOT_CAUSE: NO_EVIDENCE_REPLY was designed for normal in-scope queries. When the user
+            has already overridden the OOS gate, they know the search might come up empty
+            and deserve a more human, context-aware response.
+PREVENTED_BY: When designing gate fallback replies, consider whether the same canned
+              string works for both the normal path and the override path. If the user has
+              taken an explicit action (override, retry, force-search), route to an LLM
+              call instead of a canned string so the response can acknowledge that context.
+
+[2026-04-27]
+CATEGORY: PROMPT_AUTHORING
+SERVICE: src/gateway
+TASK: Sprint item L — Gate 3 LLM fallback reply
+SYMPTOM: Fallback prompt instructed the LLM to "answer from general knowledge if appropriate."
+ROOT_CAUSE: Failed to apply the project rule that all answers must be grounded in cited
+            documents from the knowledge base. When no evidence is found, the correct
+            behaviour is to acknowledge the miss and redirect — not to fill the gap with
+            general knowledge.
+PREVENTED_BY: Before writing any LLM prompt that handles a no-evidence or fallback case,
+              ask: does this prompt allow the model to answer without citing a document?
+              If yes, it violates the core principle. Redirect instead — e.g. offer to
+              look up the right contact person.
+
+[2026-04-27]
+CATEGORY: CODE_STRUCTURE
+SERVICE: src/gateway
+TASK: Sprint item L — Gate 3 LLM fallback reply
+SYMPTOM: Implemented sprint item L against NO_EVIDENCE_REPLY and other canned reply strings
+         in config.py without flagging that they were misplaced.
+ROOT_CAUSE: config.py is for tunable parameters backed by env vars (thresholds, model names,
+            URLs). User-facing prose (canned replies, prefixes, orientation text) is display
+            content, not configuration. Mixing them violates the same principle as putting
+            display text in pipeline code.
+PREVENTED_BY: When reading config.py before implementing, check whether it contains
+              user-facing prose strings. If it does, flag and move them to services/prompts.py
+              before touching the logic. Display content belongs in services/, not config.
+
+[2026-04-27]
+CATEGORY: PROACTIVE_REVIEW
+SERVICE: src/gateway
+TASK: Sprint item L — Gate 3 LLM fallback reply
+SYMPTOM: OVERRIDE_TRIGGER_PHRASES phrase-list + word-count heuristic was visible in chat.py
+         during planning. Used it without comment. User had to raise it as a separate
+         side question before it was flagged and queued as sprint item M.
+ROOT_CAUSE: Failed to apply the feedback rule: flag suboptimal approaches before proceeding.
+            This project uses LLM classifiers for every intent decision. A hardcoded phrase
+            list is the opposite of that and should have been immediately visible as wrong.
+PREVENTED_BY: When reading existing code before implementing, scan for intent detection that
+              uses string matching, keyword lists, regex, or word-count heuristics. These
+              are always wrong in this codebase — flag them before touching anything else,
+              even if they are not part of the current sprint item.
+
+[2026-04-28]
+CATEGORY: DESIGN_SCOPE
+SERVICE: src/gateway
+TASK: Sprint item N — Gate 3 fallback redesign
+SYMPTOM: Designed a "contact lookup" second-search as the Gate 3 fallback, tailored to
+         a school tenant ("who can I contact about X?"). User stopped implementation when
+         it became clear this is tenant-specific behaviour in a multi-tenant product.
+ROOT_CAUSE: Designed for the current pilot tenant without considering generalisability.
+            The feature was scoped as a gateway-level behaviour but embeds tenant-specific
+            language and intent.
+PREVENTED_BY: Before designing any fallback, error message, or recovery behaviour that
+              references tenant-specific entities (contacts, departments, org names),
+              ask: "Would this make sense for a different tenant?" If no, it must either
+              live in per-tenant config or be deferred until tenant config infrastructure
+              exists. Gateway-level behaviour must be tenant-agnostic.
+
+[2026-04-28]
+CATEGORY: DESIGN_SCOPE
+SERVICE: src/gateway
+TASK: Sprint item O — contextual classify
+SYMPTOM: Proposed to use item O (contextual classify with history) to handle override intent
+         ("look it up anyway") as well as affirmative follow-ups ("yes please"). Test
+         confirmed the classifier correctly returns OOS for "look it up anyway" even with
+         school-related history, because the message is a meta-command about pipeline
+         behavior, not a school topic question.
+ROOT_CAUSE: Conflated two different problems: (1) short affirmatives that inherit topic from
+            context ("yes", "go ahead") — these ARE handled by history; (2) override intent
+            ("look it up anyway") — this is never in_scope regardless of history because
+            scope_gate.classify() asks "is this about school topics?", not "should we search?".
+PREVENTED_BY: Before claiming a contextual classify change handles override intent, ask:
+              "Would this message be in_scope if asked with no prior context?" If no,
+              passing history into classify() will not help — it requires a separate classifier
+              framed around pipeline intent, not topic scope.
+
+[2026-04-28]
+CATEGORY: ARCHITECTURE
+SERVICE: src/gateway
+TASK: Sprint item N redesign
+SYMPTOM: Designed explicit session state machine (last_pipeline_path="offered_contact_lookup",
+         classify_contact_acceptance() classifier) to handle "yes" after a Gate 3 contact
+         offer. User flagged this as wrong: we already trust the LLM to interpret follow-ups
+         via classify()+rewrite() — adding per-intent classifiers and state machines duplicates
+         that work with worse tools.
+ROOT_CAUSE: Built gateway-level intent detection for a problem the LLM already solves when
+            given context. The LLM handles stochastic conversation; the gateway should not
+            try to deterministically parse it.
+PREVENTED_BY: Before adding a new per-intent classifier or session state branch, ask:
+              "Would passing session history into the existing classify()/rewrite() calls
+              solve this?" If yes, that is the fix. Gateway owns hard invariants (auth,
+              sanitization, routing) — not conversational intent detection.
+
+[2026-04-28]
+CATEGORY: TESTING
+SERVICE: src/gateway
+TASK: Sprint item H — Gate 2 classifier schema expansion
+SYMPTOM: Test `test_topic_anchor_is_specific_enough` used the query "What about balls?"
+         as a regression guard for specific_enough=True. After migrating to query_type,
+         the LLM correctly classified it as "underspecified" — there is no topic anchor
+         beyond the word "balls" and no aspect is specified (policy? rules? equipment?).
+         The test had been passing under the old boolean schema only because the LLM
+         was lenient about what counted as a "clear topic anchor".
+ROOT_CAUSE: The test example was borderline under the old bool but is legitimately
+            underspecified under the new enum. The migration exposed that the original
+            test was under-specified itself — it was asserting a particular LLM judgment
+            rather than a structural property of the query.
+PREVENTED_BY: When migrating a classifier schema from bool to enum, review every existing
+              classifier test query and ask: "Is this query structurally unambiguous under
+              the new taxonomy?" If the query is borderline, replace it with a concrete one
+              that the classifier will classify identically across all reasonable prompt
+              variants (e.g. "Are balls allowed on the playground?" instead of "What about balls?").
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-28]
+CATEGORY: ARCHITECTURE
+SERVICE: src/gateway
+TASK: Sprint item Q — Rewrite before classify
+INSIGHT: Moving rewrite() before classify() removes a hidden coupling: classify() no longer
+         needs session history because the rewrite step handles all context-dependent fragments
+         ("yes", "go ahead", "what about PE kit?") before the classifier ever sees them.
+         The classifier always receives a self-contained, corpus-native question.
+ROOT_CAUSE: The original order (classify → rewrite) forced history into classify() to handle
+            short affirmative follow-ups. That was an architectural leak — two pipeline steps
+            solving the same problem (context resolution) in different ways.
+PREVENTED_BY: When a service step needs session history to understand the input, ask whether
+              the problem is "context resolution" (belongs in rewrite) or "scope classification"
+              (belongs in classify). If context resolution, move or extend rewrite instead of
+              adding history to the classifier.

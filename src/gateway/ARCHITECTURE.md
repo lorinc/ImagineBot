@@ -19,18 +19,64 @@ The gateway currently trusts any caller with a valid Cloud Run identity token.
 ## Pipeline (routers/chat.py)
 
 ```
-POST /chat  →  sanitize  →  classify  →  rewrite?  →  topics  →  search/stream  →  SSE
-                              ↓ out-of-scope     ↓ not-specific
-                           answer (no KB)    answer (no KB)
+POST /chat  →  sanitize  →  Gate 1 override?  →  rewrite?  →  classify  →  Gate 2 branch  →  topics  →  search/stream  →  Gate 3  →  SSE
+                                 ↓ bypass                          ↓ out-of-scope  ↓ underspecified                              ↓ selected_nodes=[]
+                          (retry prior query)                  answer (no KB)  clarification Q (no KB)                   NO_EVIDENCE_REPLY (facts=[])
+                                                                                ↓ overspecified
+                                                                          generalize → retrieve → OVERSPECIFIED_NOTE prefix
+                                                                                ↓ multiple
+                                                                          Gate 2 passes (item I adds sub-q orchestration)
 ```
+
+**Gate 1 override** fires before `rewrite()` and `classify()`. Condition:
+`session["last_pipeline_path"] == "out_of_scope"` AND current message is < 15 words AND contains
+a phrase from `OVERRIDE_TRIGGER_PHRASES` (config.py). On match: substitute `session["last_query"]`
+as the working query; skip `rewrite_standalone()` and `classify()`. The `classify.override` span
+is emitted instead.
+**Note:** phrase-list intent detection is a known defect — sprint item M replaces it with
+a dedicated override-intent classifier framed around pipeline intent (not topic scope).
+
+**`rewrite_standalone()` runs before `classify()`.** When session history exists and override is
+not active, the raw user message is rewritten into a self-contained question before it reaches the
+classifier. This means `classify()` always receives a fully-resolved question — short affirmative
+follow-ups ("yes", "go ahead") are resolved to the full question they confirm before scope
+classification sees them.
+
+**`classify()` returns `ClassifyResult`.** `scope_gate.classify()` returns a dataclass with:
+- `in_scope: bool`
+- `query_type: "answerable" | "underspecified" | "overspecified" | "multiple"`
+- `sub_questions: list[str]` — populated when `query_type == "multiple"`
+- `missing_variable: str | None` — populated when `query_type == "underspecified"`
+
+`classify()` receives no session history — contextual resolution is handled entirely by the
+upstream rewrite step.
+
+**Gate 2 branches on `query_type`:**
+- `answerable` → proceed to retrieval.
+- `underspecified` → return `UNDERSPECIFIED_CLARIFICATION_TEMPLATE.format(missing_variable=...)`. No KB call.
+  `pipeline_path = "underspecified"`.
+- `overspecified` → call `rewrite.generalize_overspecified(query)` → retrieve on generalized query →
+  prepend `OVERSPECIFIED_NOTE` to answer. `pipeline_path = "overspecified_generalized"`.
+  `session["last_query"]` stores the original query so a user pushback can retry it.
+- `multiple` → Gate 2 passes with original query. Sub-question parallel orchestration is item I.
+
+**Classifier fails open.** On error: `ClassifyResult(in_scope=True, query_type="answerable")`.
+
+**Gate 3** fires after the knowledge answer arrives. Two sub-gates:
+- **Gate 3a:** `selected_nodes == []` — no retrieval. `pipeline_path = "in_scope_no_evidence"`.
+- **Gate 3b:** `selected_nodes` non-empty but `answer.strip() == ""` — synthesis abstention. `pipeline_path = "in_scope_no_synthesis"`.
+
+Both gates: `facts` cleared. If `override_active`, `fallback_reply()` is called instead of the
+canned string; `trace["fallback_reply"] = True`. The SSE `answer` event shape is unchanged.
 
 Each step is implemented in a dedicated module under `services/`. Pipeline logic never
 lives in `routers/chat.py` itself — the router only sequences the steps and assembles
 the trace.
 
-Step functions: `sanitize`, `classify`, `rewrite_standalone`, `knowledge_client.*`  
-All LLM calls: `scope_gate.py`, `rewrite.py` — never raw Vertex AI in the router.  
-All display text: `step_messages.py` — never inline strings in pipeline code.
+Step functions: `sanitize`, `classify`, `rewrite_standalone`, `generalize_overspecified`, `fallback_reply`, `knowledge_client.*`  
+All LLM calls: `scope_gate.py`, `rewrite.py`, `fallback_reply.py` — never raw Vertex AI in the router.  
+All user-facing reply strings and LLM prompt constructors: `services/prompts.py` — never in `config.py` or router code.  
+All span display text: `step_messages.py` — never inline strings in pipeline code.
 
 ---
 
@@ -51,7 +97,7 @@ own spans directly; knowledge spans arrive via `search_stream` and are relayed v
 
 ## Key design decisions
 
-**Classifier fails open.** On classifier error: `in_scope=True, specific_enough=True`.
+**Classifier fails open.** On error: `ClassifyResult(in_scope=True, query_type="answerable")`.
 Rationale: a failed classifier is more dangerous as a refusal gate than as a pass-through.
 The knowledge service is the last line of defence.
 
@@ -69,11 +115,12 @@ refreshed every 600 seconds via `time.monotonic()`. On refresh failure, the stal
 value is retained (not the hardcoded fallback string) so a transient knowledge service
 hiccup doesn't degrade classification.
 
-**Sessions are in-memory.** `_sessions` is a dict on a single process. Multi-instance
-Cloud Run scale-out means a user whose second request routes to a different instance
-will receive a context-free response (no rewrite, first turn treated as new). Acceptable
-at current scale. Firestore-backed sessions are the planned fix when multi-instance is
-required.
+**Sessions are in-memory.** `_sessions` is a dict on a single process. Each entry holds
+`{turns, last_active, last_pipeline_path, last_query}`. `last_pipeline_path` and `last_query`
+are written at every exit point (OOS, orientation, and in-scope paths) to support Gate 1
+override detection. Multi-instance Cloud Run scale-out means a user whose second request
+routes to a different instance will receive a context-free response (no rewrite, first turn
+treated as new). Acceptable at current scale. Firestore-backed sessions are the planned fix.
 
 **Trace is fire-and-forget.** `asyncio.create_task(write_trace(trace))` — trace writes
 never block the SSE response. If Firestore is unavailable, traces are silently dropped.

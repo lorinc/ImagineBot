@@ -28,15 +28,16 @@ services/
 ```
 POST /chat
   1. sanitize          Strip HTML, normalize whitespace, enforce 512-char limit
-  2. classify          LLM call → (in_scope, specific_enough)
-  3. rewrite           If session history: rewrite follow-up as standalone question
+  2. rewrite           If session history: rewrite follow-up as standalone question
+  3. classify          LLM call → ClassifyResult (in_scope, query_type)
   4. topics            Knowledge GET /topics → L1 topic list
   5. breadth check     Sibling consolidation → is query broad?
   6. search            Knowledge POST /search → {answer, facts}
   7. stream            Emit SSE events; prepend BROAD_QUERY_PREFIX if broad
 ```
 
-Steps 3–7 are skipped when classify returns out-of-scope or not-specific-enough.
+Steps 3–7 are skipped when Gate 1 override fires. Steps 4–7 are skipped when classify
+returns out-of-scope, underspecified, or overspecified with empty result.
 
 ## What stays gateway-internal
 Pipeline steps are stateless transforms tied to a single request. They scale with

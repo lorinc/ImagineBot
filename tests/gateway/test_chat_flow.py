@@ -409,6 +409,40 @@ def test_gate3a_override_active_calls_fallback_not_canned(client):
     assert data["facts"] == []
 
 
+def test_rewrite_runs_before_classify_receives_rewritten_query(client):
+    """With session history, rewrite runs first; classify receives the rewritten query, not the raw follow-up."""
+    import routers.chat as chat_mod
+    import time
+
+    session_id = "rewrite-before-classify-001"
+    chat_mod._sessions[session_id] = {
+        "turns": [{"q": "What is the uniform policy?", "a": "Students must wear..."}],
+        "last_active": time.monotonic(),
+        "last_pipeline_path": "specific",
+        "last_query": "What is the uniform policy?",
+    }
+
+    rewritten = "What is the PE kit requirement for students?"
+    classify_calls: list[str] = []
+
+    async def _capture_classify(query, corpus_summary):
+        classify_calls.append(query)
+        return _IN_SCOPE
+
+    with (
+        patch("routers.chat.classify", _capture_classify),
+        patch("routers.chat.rewrite_standalone", new_callable=AsyncMock, return_value=rewritten),
+        patch("services.knowledge_client.get_summary", new_callable=AsyncMock, return_value=""),
+        patch("services.knowledge_client.get_topics", new_callable=AsyncMock, return_value=[]),
+        patch("services.knowledge_client.search_stream", _make_search_stream()),
+    ):
+        resp = client.post("/chat", json={"message": "What about PE kit?", "session_id": session_id})
+
+    assert resp.status_code == 200
+    assert len(classify_calls) == 1
+    assert classify_calls[0] == rewritten
+
+
 def test_gate3b_override_active_empty_synthesis_calls_fallback(client):
     """Override active + nodes selected but empty synthesis → fallback_reply called."""
     import routers.chat as chat_mod

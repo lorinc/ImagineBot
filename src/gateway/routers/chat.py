@@ -164,13 +164,42 @@ async def chat(body: ChatRequest):
             if msg := _thinking_sse(span):
                 yield msg
 
-        # 2. Classify: scope + query type in one LLM call (skipped when override is active)
+        # 2. Fetch corpus_summary — needed for rewrite and classify
+        corpus_summary = await _get_corpus_summary()
+
+        # 3. Standalone rewrite (if session history exists and override not active)
+        history = session.get("turns", [])
+        final_query = query
+        rewritten: str | None = None
+        t_rewrite = time.monotonic()
+        if history and not override_active:
+            try:
+                final_query = await rewrite_standalone(query, history, corpus_summary)
+                logger.info("Rewrote query: %r → %r", query, final_query)
+                rewritten = final_query if final_query != query else None
+            except Exception as e:
+                logger.warning("Rewrite failed, using original: %s", e)
+
+        rewrite_ms = int((time.monotonic() - t_rewrite) * 1000) if history else None
+        trace["rewrite"] = {
+            "rewritten_query": rewritten,
+            "latency_ms": rewrite_ms,
+        }
+        if rewritten:
+            span = spans.record("rewrite",
+                                {"rewritten_query": rewritten, "original_query": query},
+                                duration_ms=rewrite_ms)
+        else:
+            span = spans.record("rewrite.skipped", {}, duration_ms=None)
+        if msg := _thinking_sse(span):
+            yield msg
+
+        # 4. Classify: scope + query type in one LLM call (skipped when override is active)
         in_scope = True
         if not override_active:
-            corpus_summary = await _get_corpus_summary()
             t_classify = time.monotonic()
             try:
-                clf = await classify(query, corpus_summary, history=session.get("turns", [])[-2:])
+                clf = await classify(final_query, corpus_summary)
             except Exception as e:
                 logger.error("Classifier error: %s", e)
                 clf = ClassifyResult(in_scope=True, query_type="answerable")  # fail open
@@ -234,39 +263,12 @@ async def chat(body: ChatRequest):
 
         if clf is not None and clf.query_type == "overspecified":
             try:
-                query = await generalize_overspecified(query)
-                logger.info("Generalized overspecified query to: %r", query)
+                final_query = await generalize_overspecified(final_query)
+                logger.info("Generalized overspecified query to: %r", final_query)
             except Exception as e:
                 logger.warning("generalize_overspecified failed, using original: %s", e)
 
         yield 'event: progress\ndata: {"key": "contacting"}\n\n'
-
-        # 3. Resolve session + standalone rewrite
-        history = _sessions.get(session_id, {}).get("turns", [])
-        final_query = query
-        rewritten: str | None = None
-        t_rewrite = time.monotonic()
-        if history and not override_active:
-            try:
-                final_query = await rewrite_standalone(query, history)
-                logger.info("Rewrote query: %r → %r", query, final_query)
-                rewritten = final_query if final_query != query else None
-            except Exception as e:
-                logger.warning("Rewrite failed, using original: %s", e)
-
-        rewrite_ms = int((time.monotonic() - t_rewrite) * 1000) if history else None
-        trace["rewrite"] = {
-            "rewritten_query": rewritten,
-            "latency_ms": rewrite_ms,
-        }
-        if rewritten:
-            span = spans.record("rewrite",
-                                {"rewritten_query": rewritten, "original_query": query},
-                                duration_ms=rewrite_ms)
-        else:
-            span = spans.record("rewrite.skipped", {}, duration_ms=None)
-        if msg := _thinking_sse(span):
-            yield msg
 
         yield 'event: progress\ndata: {"key": "querying_ai"}\n\n'
 

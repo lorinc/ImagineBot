@@ -40,18 +40,7 @@ lookups (e.g. "My son lost his hoodie. Who should I contact?")
 - "missing_variable": short phrase naming the missing parameter when query_type is \
 "underspecified" (e.g. "the specific topic or area", "the school level"); null otherwise
 
-{prior_exchange}Question: {query}"""
-
-
-def _prior_exchange_block(history: list[dict]) -> str:
-    if not history:
-        return ""
-    lines = ["Prior exchange:"]
-    for turn in history:
-        lines.append(f"User: {turn['q']}")
-        lines.append(f"Assistant: {turn['a']}")
-    lines.append("")
-    return "\n".join(lines) + "\n"
+Question: {query}"""
 
 
 _SCHEMA = {
@@ -82,7 +71,7 @@ def _get_model() -> GenerativeModel:
     return _model
 
 
-async def classify(query: str, corpus_summary: str, history: list[dict] | None = None) -> ClassifyResult:
+async def classify(query: str, corpus_summary: str) -> ClassifyResult:
     """Return ClassifyResult. Fails open (answerable) on error."""
     config = GenerationConfig(
         response_mime_type="application/json",
@@ -92,7 +81,6 @@ async def classify(query: str, corpus_summary: str, history: list[dict] | None =
     response = await _get_model().generate_content_async(
         _PROMPT.format(
             corpus_summary=corpus_summary,
-            prior_exchange=_prior_exchange_block(history or []),
             query=query,
         ),
         generation_config=config,

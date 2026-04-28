@@ -4,13 +4,32 @@ from vertexai.generative_models import GenerationConfig, GenerativeModel
 from config import GCP_PROJECT, REGION, MODEL
 
 _PROMPT = """\
-Rewrite the follow-up question as a fully self-contained question using the \
-conversation history below. Output ONLY the rewritten question, nothing else.
+Rewrite the user message into an ideal search question for a school information assistant.
 
-History:
+The assistant's knowledge base covers:
+{corpus_summary}
+
+Use the vocabulary from the outline above when it accurately reflects what the user asked \
+— precise terminology improves retrieval.
+
+Rules for the ideal question:
+1. Self-contained: resolve all pronouns and implicit references using the conversation history. \
+("What about teachers?" with prior context about homework → "What is the homework correction \
+policy for classroom teachers?")
+2. Interrogative form: output a proper question ("What is...", "How does...", "Who is \
+responsible for..."). Convert confirmations ("yes, go ahead" after a clarification question \
+→ the full question the user confirmed) and commands ("Tell me about fees" → "What are the \
+school fees?").
+3. Single topic: if the follow-up shifts to a new topic, cover only the new topic.
+4. Explicit qualifiers only: include constraints the user stated; do not add constraints \
+they did not mention.
+
+Output ONLY the rewritten question, nothing else.
+
+Conversation history:
 {history}
 
-Follow-up: {query}"""
+User message: {query}"""
 
 _GENERALIZE_PROMPT = """\
 The following question contains overly specific constraints that are unlikely to appear \
@@ -39,10 +58,14 @@ def _format_history(turns: list[dict]) -> str:
     return "\n".join(lines)
 
 
-async def rewrite_standalone(query: str, history: list[dict]) -> str:
+async def rewrite_standalone(query: str, history: list[dict], corpus_summary: str = "") -> str:
     config = GenerationConfig(temperature=0.0)
     response = await _get_model().generate_content_async(
-        _PROMPT.format(history=_format_history(history), query=query),
+        _PROMPT.format(
+            corpus_summary=corpus_summary or "School policies and procedures.",
+            history=_format_history(history),
+            query=query,
+        ),
         generation_config=config,
     )
     rewritten = response.text.strip()

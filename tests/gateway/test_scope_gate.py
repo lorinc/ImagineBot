@@ -74,27 +74,3 @@ def test_uniform_policy_is_answerable():
     result = asyncio.run(classify("What is the uniform policy?", _CORPUS))
     assert result.in_scope is True
     assert result.query_type == "answerable"
-
-
-# --- History (contextual classify) ---
-
-_OOS_REPLY = "I'm only able to answer questions about the school. This seems unrelated."
-_CONTACT_OFFER = "I couldn't find documentation on that topic. Would you like me to look up who handles this?"
-
-
-def test_yes_after_contact_offer_is_in_scope():
-    history = [{"q": "Who do I call for a broken desk?", "a": _CONTACT_OFFER}]
-    result = asyncio.run(classify("yes please", _CORPUS, history=history))
-    assert result.in_scope is True
-
-
-def test_acknowledgement_after_oos_is_not_in_scope():
-    history = [{"q": "What is the best pizza recipe?", "a": _OOS_REPLY}]
-    result = asyncio.run(classify("ok thanks", _CORPUS, history=history))
-    assert result.in_scope is False
-
-
-def test_no_history_behaviour_unchanged():
-    result = asyncio.run(classify("What is the uniform policy?", _CORPUS, history=None))
-    assert result.in_scope is True
-    assert result.query_type == "answerable"
