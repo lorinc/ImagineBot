@@ -27,9 +27,26 @@ _quality_model = None
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _multi_index, _structural_model, _quality_model
+    global _multi_index, _structural_model, _quality_model, KNOWLEDGE_INDEX_PATH
 
     vertexai.init(project=GCP_PROJECT, location=REGION)
+
+    gcs_index_path = os.getenv("INDEX_GCS_PATH")
+    if gcs_index_path:
+        from google.cloud import storage as gcs
+        local_index_dir = Path("/tmp/index")
+        local_index_dir.mkdir(exist_ok=True)
+        client = gcs.Client()
+        bucket_name, prefix = gcs_index_path[5:].split("/", 1)
+        bucket = client.bucket(bucket_name)
+        bucket.blob(f"{prefix}/multi_index.json").download_to_filename(
+            str(local_index_dir / "multi_index.json")
+        )
+        raw = json.loads((local_index_dir / "multi_index.json").read_text())
+        for doc in raw.get("documents", []):
+            fname = Path(doc["index_path"]).name
+            bucket.blob(f"{prefix}/{fname}").download_to_filename(str(local_index_dir / fname))
+        KNOWLEDGE_INDEX_PATH = local_index_dir / "multi_index.json"
 
     if not KNOWLEDGE_INDEX_PATH.exists():
         raise RuntimeError(

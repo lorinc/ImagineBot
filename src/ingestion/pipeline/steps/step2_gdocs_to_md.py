@@ -46,7 +46,7 @@ def _extract_styles(docs_service, gdoc_id: str) -> list[dict]:
     return styles
 
 
-def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict]) -> list[str]:
+def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict], parent_folder_id: str | None = None) -> list[str]:
     """
     Export each Google Doc to Markdown.
 
@@ -64,7 +64,7 @@ def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict]) -> list[s
         from ..config import DOCX_DIR
         from ..drive_utils import find_or_create_folder
         local_stems = {p.stem for p in DOCX_DIR.glob("*.docx")}
-        folder_id = find_or_create_folder(drive_service, DRIVE_GDOCS_FOLDER)
+        folder_id = find_or_create_folder(drive_service, DRIVE_GDOCS_FOLDER, parent_id=parent_folder_id)
         gdocs_raw = list_google_docs_in_folder(drive_service, folder_id)
         gdocs = [
             {"name": d["name"], "gdoc_id": d["id"]}

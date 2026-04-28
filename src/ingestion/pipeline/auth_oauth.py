@@ -22,7 +22,7 @@ SCOPES = [
 
 OAUTH_DIR = Path(__file__).parents[3] / "oauth"
 CREDENTIALS_FILE = OAUTH_DIR / "credentials.json"
-TOKEN_FILE = OAUTH_DIR / "token.pickle"
+TOKEN_FILE = Path(os.getenv("OAUTH_TOKEN_PATH", str(OAUTH_DIR / "token.pickle")))
 
 
 def get_credentials():

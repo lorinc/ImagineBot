@@ -12,7 +12,7 @@ from ..config import DOCX_DIR, DRIVE_GDOCS_FOLDER
 from ..drive_utils import find_or_create_folder, list_google_docs_in_folder
 
 
-def run(drive_service, run_dir: Path) -> list[dict]:
+def run(drive_service, run_dir: Path, parent_folder_id: str | None = None) -> list[dict]:
     """
     Upload all DOCX files from DOCX_DIR to Drive as Google Docs.
 
@@ -21,7 +21,7 @@ def run(drive_service, run_dir: Path) -> list[dict]:
     """
     print("=== Step 1: DOCX → Google Docs ===")
 
-    folder_id = find_or_create_folder(drive_service, DRIVE_GDOCS_FOLDER)
+    folder_id = find_or_create_folder(drive_service, DRIVE_GDOCS_FOLDER, parent_id=parent_folder_id)
     print(f"  Drive folder '{DRIVE_GDOCS_FOLDER}': {folder_id}")
 
     # Index existing docs by stem name to enable idempotency

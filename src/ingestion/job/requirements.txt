@@ -1,0 +1,2 @@
+google-cloud-storage
+google-cloud-aiplatform[generative-ai]==1.74.0
