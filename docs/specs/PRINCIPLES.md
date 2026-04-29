@@ -34,3 +34,8 @@ Step back and ask: is this error caused by a gap in the design or underspecifica
 If you find yourself guessing at a solution, assume the answer is yes.
 Call out the specific gap explicitly and ask the user to resolve it before continuing.
 Filling design gaps with assumptions is the most common cause of compounding errors.
+
+P-AGENT-02: The correct resolution to a design gap is a principled, wide, research-based
+analysis and plan — not a quick local fix. Do not perform that research yourself without
+explicit instruction. State the gap, state that a deeper analysis is needed, and wait.
+The user will direct the research when ready.
