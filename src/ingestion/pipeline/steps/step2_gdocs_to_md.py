@@ -12,10 +12,17 @@ import json
 import re
 from pathlib import Path
 
-from ...log import info, warning
+from googleapiclient.errors import HttpError
+
+from ...errors import ExportEmpty, ExportServerError, NoHeadings, PermissionDenied, ValidationError
+from ...log import error, info
 
 _TOC_LINE = re.compile(r"^\s*[-*]?\s*\[.+\]\(#.+\)\s*$")
 _TOC_HEADING = re.compile(r"^#+\s*(table of contents|contents)\s*$", re.IGNORECASE)
+_HEADING = re.compile(r"^#{1,6}\s", re.MULTILINE)
+
+_EDITOR_URL = "https://docs.google.com/document/d/{id}/edit"
+_EXPORT_EMPTY_THRESHOLD = 200
 
 
 def _strip_toc(md: str) -> str:
@@ -75,21 +82,26 @@ def _extract_styles(docs_service, gdoc_id: str) -> list[dict]:
     return styles
 
 
-def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict]) -> list[str]:
-    """
-    Export each Google Doc to Markdown.
+def run(
+    drive_service, docs_service, run_dir: Path, gdocs: list[dict]
+) -> tuple[list[str], list[ValidationError]]:
+    """Export each Google Doc to Markdown and validate the result.
 
-    *gdocs* is the list returned by step1 (each item has 'name' and 'gdoc_id').
-    Returns list of source stems successfully exported.
+    Returns (stems, errors) where stems is the list of source stems that
+    passed validation, and errors is a list of ValidationErrors for files
+    that failed.
     """
     info("Step 2 started", step=2, doc_count=len(gdocs))
 
     out_dir = run_dir / "01_baseline_md"
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    exported = []
+    exported: list[str] = []
+    errors: list[ValidationError] = []
+
     for doc in gdocs:
         stem = doc["name"]
+        drive_url = _EDITOR_URL.format(id=doc["gdoc_id"])
         md_path = out_dir / f"{stem}.md"
         styles_path = out_dir / f"{stem}_styles.json"
 
@@ -102,14 +114,33 @@ def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict]) -> list[s
         try:
             md = _export_markdown(drive_service, doc["gdoc_id"])
             styles = _extract_styles(docs_service, doc["gdoc_id"])
-        except Exception as e:
-            warning("Export failed", step=2, stem=stem, error=str(e))
+        except HttpError as e:
+            if e.resp.status == 403:
+                err = PermissionDenied(stem, drive_url)
+            else:
+                err = ExportServerError(stem, drive_url)
+            error("Step 2 export failed", step=2, stem=stem, error_type=err.error_type, detail=str(e))
+            errors.append(err)
             continue
 
-        md_path.write_text(_strip_toc(md), encoding="utf-8")
+        stripped = _strip_toc(md)
+
+        if len(stripped.strip()) < _EXPORT_EMPTY_THRESHOLD:
+            err = ExportEmpty(stem, drive_url)
+            error("Step 2 validation failed", step=2, stem=stem, error_type=err.error_type)
+            errors.append(err)
+            continue
+
+        if not _HEADING.search(stripped):
+            err = NoHeadings(stem, drive_url)
+            error("Step 2 validation failed", step=2, stem=stem, error_type=err.error_type)
+            errors.append(err)
+            continue
+
+        md_path.write_text(stripped, encoding="utf-8")
         styles_path.write_text(json.dumps(styles, indent=2, ensure_ascii=False), encoding="utf-8")
         info("Export done", step=2, stem=stem, chars=len(md))
         exported.append(stem)
 
-    info("Step 2 complete", step=2, exported=len(exported))
-    return exported
+    info("Step 2 complete", step=2, exported=len(exported), error_count=len(errors))
+    return exported, errors
