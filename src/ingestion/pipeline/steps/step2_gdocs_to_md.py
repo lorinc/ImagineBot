@@ -12,6 +12,8 @@ import json
 import re
 from pathlib import Path
 
+from ...log import info, warning
+
 _TOC_LINE = re.compile(r"^\s*[-*]?\s*\[.+\]\(#.+\)\s*$")
 _TOC_HEADING = re.compile(r"^#+\s*(table of contents|contents)\s*$", re.IGNORECASE)
 
@@ -27,15 +29,12 @@ def _strip_toc(md: str) -> str:
     i = 0
     while i < len(lines):
         line = lines[i]
-        # Skip a TOC heading line
         if _TOC_HEADING.match(line.rstrip()):
             i += 1
             continue
-        # Skip a run of anchor-link lines (TOC entries)
         if _TOC_LINE.match(line):
             while i < len(lines) and (_TOC_LINE.match(lines[i]) or lines[i].strip() == ""):
                 i += 1
-            # Drop trailing blank lines absorbed into the block
             while result and result[-1].strip() == "":
                 result.pop()
             continue
@@ -83,7 +82,7 @@ def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict]) -> list[s
     *gdocs* is the list returned by step1 (each item has 'name' and 'gdoc_id').
     Returns list of source stems successfully exported.
     """
-    print("=== Step 2: Google Docs → Baseline Markdown ===")
+    info("Step 2 started", step=2, doc_count=len(gdocs))
 
     out_dir = run_dir / "01_baseline_md"
     out_dir.mkdir(parents=True, exist_ok=True)
@@ -95,22 +94,22 @@ def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict]) -> list[s
         styles_path = out_dir / f"{stem}_styles.json"
 
         if md_path.exists():
-            print(f"  Skipping (already exported): {stem}")
+            info("Skipping: already exported", step=2, stem=stem)
             exported.append(stem)
             continue
 
-        print(f"  Exporting: {stem} ...", end=" ", flush=True)
+        info("Exporting", step=2, stem=stem)
         try:
             md = _export_markdown(drive_service, doc["gdoc_id"])
             styles = _extract_styles(docs_service, doc["gdoc_id"])
         except Exception as e:
-            print(f"FAILED: {e}")
+            warning("Export failed", step=2, stem=stem, error=str(e))
             continue
 
         md_path.write_text(_strip_toc(md), encoding="utf-8")
         styles_path.write_text(json.dumps(styles, indent=2, ensure_ascii=False), encoding="utf-8")
-        print(f"done ({len(md):,} chars)")
+        info("Export done", step=2, stem=stem, chars=len(md))
         exported.append(stem)
 
-    print(f"  Step 2 complete: {len(exported)} file(s) in {out_dir}\n")
+    info("Step 2 complete", step=2, exported=len(exported))
     return exported

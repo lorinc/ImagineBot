@@ -1,6 +1,7 @@
 """
 Minimal Drive utilities needed by the pipeline.
 """
+from ..log import info
 
 
 def find_or_create_folder(drive_service, name, parent_id=None):
@@ -18,7 +19,7 @@ def find_or_create_folder(drive_service, name, parent_id=None):
     if parent_id:
         metadata["parents"] = [parent_id]
     folder = drive_service.files().create(body=metadata, fields="id").execute()
-    print(f"  Created Drive folder: {name}")
+    info("Created Drive folder", name=name)
     return folder["id"]
 
 

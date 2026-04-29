@@ -5,6 +5,8 @@ import json
 from datetime import datetime, timezone
 from pathlib import Path
 
+from ..log import info
+
 
 def load_manifest(gcs_client, bucket: str, source_id: str) -> dict:
     """Return manifest dict, or {} if it does not exist yet (first run)."""
@@ -31,20 +33,24 @@ def save_manifest(gcs_client, bucket: str, source_id: str, files: list[dict]) ->
     gcs_client.bucket(bucket).blob(f"{source_id}/manifest.json").upload_from_string(
         json.dumps(manifest, indent=2), content_type="application/json"
     )
+    info("Manifest saved", source_id=source_id, file_count=len(files))
 
 
 def upload_index(gcs_client, bucket: str, source_id: str, index_dir: Path) -> None:
     """Upload multi_index.json and all per-doc index_*.json files to GCS."""
     b = gcs_client.bucket(bucket)
+    uploaded = []
 
     multi = index_dir / "multi_index.json"
     if multi.exists():
         b.blob(f"{source_id}/multi_index.json").upload_from_filename(str(multi))
-        print(f"  GCS: uploaded multi_index.json")
+        uploaded.append("multi_index.json")
 
     for f in sorted(index_dir.glob("index_*.json")):
         b.blob(f"{source_id}/{f.name}").upload_from_filename(str(f))
-        print(f"  GCS: uploaded {f.name}")
+        uploaded.append(f.name)
+
+    info("Index uploaded to GCS", source_id=source_id, files=uploaded)
 
 
 def has_changes(current_files: list[dict], manifest: dict) -> bool:

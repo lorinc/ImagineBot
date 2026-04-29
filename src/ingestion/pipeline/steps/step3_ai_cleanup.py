@@ -1,8 +1,8 @@
 """
 Step 3 — AI header cleanup using Gemini Flash Lite.
 
-Input:  data/pipeline/<run_id>/01_baseline_md/<stem>.md  +  <stem>_styles.json
-Output: data/pipeline/<run_id>/02_ai_cleaned/<stem>.md
+Input:  /tmp/pipeline/01_baseline_md/<stem>.md  +  <stem>_styles.json
+Output: /tmp/pipeline/02_ai_cleaned/<stem>.md
 
 IMPORTANT: The prompt explicitly preserves tables — table_to_prose (Step 4)
 runs after this step, not before.
@@ -13,6 +13,7 @@ import re
 import requests
 from pathlib import Path
 from ..config import GEMINI_MODEL, GEMINI_API_KEY_FILE, MAX_DOCUMENT_SIZE_FOR_AI
+from ...log import info, warning
 
 
 _BASE64_PATTERN = re.compile(r"[A-Za-z0-9+/]{1000,}={0,2}")
@@ -78,7 +79,7 @@ Output only the cleaned Markdown. Do not add explanations or comments."""
     result = resp.json()
     candidate = result["candidates"][0]
     if candidate.get("finishReason") not in ("STOP", "UNKNOWN", None):
-        print(f"  WARNING: Gemini finish_reason={candidate.get('finishReason')} — output may be truncated")
+        warning("Gemini output may be truncated", step=3, finish_reason=candidate.get("finishReason"))
 
     return candidate["content"]["parts"][0]["text"]
 
@@ -88,7 +89,7 @@ def run(run_dir: Path, stems: list[str]) -> list[str]:
     Apply AI header cleanup to each stem in 01_baseline_md/.
     Returns list of stems successfully cleaned.
     """
-    print("=== Step 3: AI Header Cleanup ===")
+    info("Step 3 started", step=3, stem_count=len(stems))
 
     in_dir = run_dir / "01_baseline_md"
     out_dir = run_dir / "02_ai_cleaned"
@@ -100,13 +101,13 @@ def run(run_dir: Path, stems: list[str]) -> list[str]:
     for stem in stems:
         out_path = out_dir / f"{stem}.md"
         if out_path.exists():
-            print(f"  Skipping (already cleaned): {stem}")
+            info("Skipping: already cleaned", step=3, stem=stem)
             cleaned.append(stem)
             continue
 
         md_path = in_dir / f"{stem}.md"
         if not md_path.exists():
-            print(f"  MISSING baseline: {stem}.md — skipping")
+            warning("Missing baseline file", step=3, stem=stem)
             continue
 
         styles_path = in_dir / f"{stem}_styles.json"
@@ -123,19 +124,19 @@ def run(run_dir: Path, stems: list[str]) -> list[str]:
             )
 
         if len(md_clean) > MAX_DOCUMENT_SIZE_FOR_AI:
-            print(f"  {stem}: too large ({len(md_clean):,} chars) — skipping AI, copying as-is")
+            info("Document too large for AI — copying as-is", step=3, stem=stem, chars=len(md_clean))
             out_path.write_text(md_clean, encoding="utf-8")
             cleaned.append(stem)
             continue
 
-        print(f"  Cleaning: {stem} ({len(md_clean):,} chars) ...", end=" ", flush=True)
+        info("Cleaning with Gemini", step=3, stem=stem, chars=len(md_clean))
         try:
             result = _call_gemini(api_key, md_clean, styles)
             out_path.write_text(result, encoding="utf-8")
-            print(f"done ({len(result):,} chars)")
+            info("Clean done", step=3, stem=stem, output_chars=len(result))
             cleaned.append(stem)
         except Exception as e:
-            print(f"FAILED: {e}")
+            warning("Gemini call failed", step=3, stem=stem, error=str(e))
 
-    print(f"  Step 3 complete: {len(cleaned)} file(s) in {out_dir}\n")
+    info("Step 3 complete", step=3, cleaned=len(cleaned))
     return cleaned

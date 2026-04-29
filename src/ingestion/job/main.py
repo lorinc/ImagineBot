@@ -22,6 +22,7 @@ from .config import DRIVE_FOLDER_ID, GCS_BUCKET, SOURCE_ID
 from .drive_sync import list_accepted_files
 from .gcs_io import has_changes, load_manifest, save_manifest, upload_index
 from ..build_index import build_all
+from ..log import error, info
 
 _DRIVE_SCOPES = [
     "https://www.googleapis.com/auth/drive",
@@ -34,15 +35,15 @@ _INDEX_DIR = Path("/tmp/index")
 
 def _rebuild(gcs_client, drive_svc, docs_svc) -> None:
     files = list_accepted_files(drive_svc, DRIVE_FOLDER_ID)
-    print(f"  Drive: {len(files)} file(s)")
+    info("Drive files listed", count=len(files))
 
     manifest = load_manifest(gcs_client, GCS_BUCKET, SOURCE_ID)
 
     if not has_changes(files, manifest):
-        print("  No changes detected. Exiting.")
+        info("No changes detected — exiting")
         return
 
-    print("  Changes detected — running full rebuild.")
+    info("Changes detected — running full rebuild")
 
     _SCRATCH.mkdir(parents=True, exist_ok=True)
 
@@ -66,11 +67,11 @@ def _rebuild(gcs_client, drive_svc, docs_svc) -> None:
     upload_index(gcs_client, GCS_BUCKET, SOURCE_ID, _INDEX_DIR)
     save_manifest(gcs_client, GCS_BUCKET, SOURCE_ID, files)
 
-    print(f"[ingestion-job] Done. Index at gs://{GCS_BUCKET}/{SOURCE_ID}/multi_index.json")
+    info("Rebuild complete", gcs_path=f"gs://{GCS_BUCKET}/{SOURCE_ID}/multi_index.json")
 
 
 def main() -> None:
-    print(f"[ingestion-job] folder={DRIVE_FOLDER_ID} source={SOURCE_ID} bucket={GCS_BUCKET}")
+    info("Job started", folder=DRIVE_FOLDER_ID, source=SOURCE_ID, bucket=GCS_BUCKET)
 
     creds, _ = google.auth.default(scopes=_DRIVE_SCOPES)
     gcs_client = gcs.Client()
@@ -81,7 +82,7 @@ def main() -> None:
             docs_svc = build("docs", "v1", credentials=creds)
             _rebuild(gcs_client, drive_svc, docs_svc)
     except AlreadyRunning as e:
-        print(str(e))
+        info(str(e))
         sys.exit(0)
 
 

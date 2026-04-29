@@ -1,17 +1,15 @@
 """
 Step 5 — Split prose markdown into per-section chunks.
 
-Input:  data/pipeline/<run_id>/03_chunked/<stem>_prose.md
-Output: data/pipeline/<run_id>/03_chunked/<stem>_chunk_NN.md
+Input:  /tmp/pipeline/03_chunked/<stem>_prose.md
+Output: /tmp/pipeline/03_chunked/<stem>_chunk_NN.md
 
 Splitting rule: each ## heading starts a new chunk.
-Chunk filenames: <stem>_chunk_01.md, <stem>_chunk_02.md, …
-
-The _prose.md intermediates are kept for debugging but are not the final output.
 """
 
 import re
 from pathlib import Path
+from ...log import info, warning
 
 _H2 = re.compile(r"^## ", re.MULTILINE)
 
@@ -21,11 +19,9 @@ def _split_on_h2(text: str) -> list[str]:
     positions = [m.start() for m in _H2.finditer(text)]
 
     if not positions:
-        # No ## headings — whole document is one chunk
         return [text.strip()] if text.strip() else []
 
     sections = []
-    # Content before first ## (preamble) — include if non-empty
     preamble = text[: positions[0]].strip()
     if preamble:
         sections.append(preamble)
@@ -45,7 +41,7 @@ def run(run_dir: Path, stems: list[str]) -> dict[str, list[Path]]:
 
     Returns a dict mapping stem → list of chunk Paths produced.
     """
-    print("=== Step 5: Semantic Chunking ===")
+    info("Step 5 started", step=5, stem_count=len(stems))
 
     chunk_dir = run_dir / "03_chunked"
     chunk_dir.mkdir(parents=True, exist_ok=True)
@@ -55,13 +51,12 @@ def run(run_dir: Path, stems: list[str]) -> dict[str, list[Path]]:
     for stem in stems:
         prose_path = chunk_dir / f"{stem}_prose.md"
         if not prose_path.exists():
-            print(f"  MISSING prose file: {prose_path.name} — skipping")
+            warning("Missing prose file", step=5, stem=stem)
             continue
 
-        # Check if chunks already exist
         existing = sorted(chunk_dir.glob(f"{stem}_chunk_*.md"))
         if existing:
-            print(f"  Skipping (already chunked): {stem} ({len(existing)} chunks)")
+            info("Skipping: already chunked", step=5, stem=stem, chunks=len(existing))
             all_chunks[stem] = existing
             continue
 
@@ -69,7 +64,7 @@ def run(run_dir: Path, stems: list[str]) -> dict[str, list[Path]]:
         sections = _split_on_h2(text)
 
         if not sections:
-            print(f"  {stem}: empty after split — skipping")
+            warning("Empty after split", step=5, stem=stem)
             continue
 
         chunk_paths = []
@@ -79,8 +74,8 @@ def run(run_dir: Path, stems: list[str]) -> dict[str, list[Path]]:
             chunk_paths.append(chunk_path)
 
         all_chunks[stem] = chunk_paths
-        print(f"  Chunked: {stem} → {len(chunk_paths)} chunk(s)")
+        info("Chunked", step=5, stem=stem, chunks=len(chunk_paths))
 
     total = sum(len(v) for v in all_chunks.values())
-    print(f"  Step 5 complete: {total} chunk file(s) across {len(all_chunks)} doc(s)\n")
+    info("Step 5 complete", step=5, total_chunks=total, docs=len(all_chunks))
     return all_chunks
