@@ -9,7 +9,39 @@ which Step 3 uses to fix header hierarchy.
 """
 
 import json
+import re
 from pathlib import Path
+
+_TOC_LINE = re.compile(r"^\s*[-*]?\s*\[.+\]\(#.+\)\s*$")
+_TOC_HEADING = re.compile(r"^#+\s*(table of contents|contents)\s*$", re.IGNORECASE)
+
+
+def _strip_toc(md: str) -> str:
+    """Remove Table of Contents blocks produced by Google's Markdown export.
+
+    A TOC block is a contiguous run of anchor-link lines (optionally preceded by
+    a 'Table of Contents' heading) appearing before the first non-TOC heading.
+    """
+    lines = md.splitlines(keepends=True)
+    result = []
+    i = 0
+    while i < len(lines):
+        line = lines[i]
+        # Skip a TOC heading line
+        if _TOC_HEADING.match(line.rstrip()):
+            i += 1
+            continue
+        # Skip a run of anchor-link lines (TOC entries)
+        if _TOC_LINE.match(line):
+            while i < len(lines) and (_TOC_LINE.match(lines[i]) or lines[i].strip() == ""):
+                i += 1
+            # Drop trailing blank lines absorbed into the block
+            while result and result[-1].strip() == "":
+                result.pop()
+            continue
+        result.append(line)
+        i += 1
+    return "".join(result)
 
 
 def _export_markdown(drive_service, gdoc_id: str) -> str:
@@ -75,7 +107,7 @@ def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict]) -> list[s
             print(f"FAILED: {e}")
             continue
 
-        md_path.write_text(md, encoding="utf-8")
+        md_path.write_text(_strip_toc(md), encoding="utf-8")
         styles_path.write_text(json.dumps(styles, indent=2, ensure_ascii=False), encoding="utf-8")
         print(f"done ({len(md):,} chars)")
         exported.append(stem)

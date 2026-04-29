@@ -14,10 +14,18 @@ def load_manifest(gcs_client, bucket: str, source_id: str) -> dict:
     return json.loads(blob.download_as_text())
 
 
+def _fingerprint(f: dict) -> str:
+    """Content-change fingerprint: md5Checksum for DOCX, version for Google Docs."""
+    return f.get("md5Checksum") or str(f.get("version", ""))
+
+
 def save_manifest(gcs_client, bucket: str, source_id: str, files: list[dict]) -> None:
-    """Write manifest with current file list and timestamp."""
+    """Write manifest with current file list and fingerprints."""
     manifest = {
-        "files": [{"name": f["name"], "modified_time": f["modified_time"]} for f in files],
+        "files": [
+            {"name": f["name"], "mimeType": f["mimeType"], "fingerprint": _fingerprint(f)}
+            for f in files
+        ],
         "last_run": datetime.now(timezone.utc).isoformat(),
     }
     gcs_client.bucket(bucket).blob(f"{source_id}/manifest.json").upload_from_string(
@@ -40,17 +48,14 @@ def upload_index(gcs_client, bucket: str, source_id: str, index_dir: Path) -> No
 
 
 def has_changes(current_files: list[dict], manifest: dict) -> bool:
-    """Return True if the Drive file list differs from the last saved manifest."""
-    manifest_map = {
-        f["name"]: f["modified_time"]
-        for f in manifest.get("files", [])
-    }
+    """Return True if file set or any content fingerprint differs from the last manifest."""
+    manifest_map = {f["name"]: f["fingerprint"] for f in manifest.get("files", [])}
     current_names = {f["name"] for f in current_files}
 
     if current_names != set(manifest_map):
         return True
 
     return any(
-        f["modified_time"] != manifest_map[f["name"]]
+        _fingerprint(f) != manifest_map[f["name"]]
         for f in current_files
     )
