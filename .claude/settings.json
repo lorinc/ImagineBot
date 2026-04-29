@@ -19,6 +19,16 @@
         ]
       },
       {
+        "description": "Rewrite bare python3/pytest to use .venv when present",
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 .claude/venv_rewrite.py"
+          }
+        ]
+      },
+      {
         "description": "Block git commit during EXPLORE phase",
         "matcher": "Bash",
         "hooks": [

@@ -2,9 +2,12 @@
 Unit tests for ingestion job helpers (no I/O, no network).
 """
 import time
+from unittest.mock import MagicMock, patch
 
 import pytest
+from googleapiclient.errors import HttpError
 
+from src.ingestion.job.drive_comments import _file_id_from_url, post_validation_comment
 from src.ingestion.errors import (
     ExportEmpty,
     ExportServerError,
@@ -199,3 +202,97 @@ class TestRunReport:
             files=files,
         )
         assert abs(report["cost_total_usd"] - 0.003) < 1e-9
+
+
+# ---------------------------------------------------------------------------
+# drive_comments — Drive comment posting with dedup
+# ---------------------------------------------------------------------------
+
+def _mock_drive(existing_comments=None):
+    """Return a mock drive_svc whose comments() chain behaves as specified."""
+    drive_svc = MagicMock()
+    cm = drive_svc.comments.return_value  # comments() always returns this mock
+    cm.list.return_value.execute.return_value = {"comments": existing_comments or []}
+    cm.create.return_value.execute.return_value = {"id": "new-comment-id"}
+    return drive_svc
+
+
+def _http_error(status: int) -> HttpError:
+    resp = MagicMock()
+    resp.status = status
+    return HttpError(resp=resp, content=b"error")
+
+
+class TestFileIdFromUrl:
+    def test_drive_viewer_url(self):
+        url = "https://drive.google.com/file/d/abc123XYZ/view"
+        assert _file_id_from_url(url) == "abc123XYZ"
+
+    def test_docs_editor_url(self):
+        url = "https://docs.google.com/document/d/def456/edit"
+        assert _file_id_from_url(url) == "def456"
+
+    def test_no_id_returns_none(self):
+        assert _file_id_from_url("https://example.com/no-id") is None
+
+    def test_empty_string_returns_none(self):
+        assert _file_id_from_url("") is None
+
+
+class TestPostValidationComment:
+    def test_posts_comment_when_no_duplicate(self):
+        drive_svc = _mock_drive(existing_comments=[])
+        err = ExportEmpty("my_doc", "https://docs.google.com/document/d/FILE123/edit")
+
+        post_validation_comment(drive_svc, err)
+
+        cm = drive_svc.comments.return_value
+        cm.create.assert_called_once()
+        call_kwargs = cm.create.call_args
+        assert call_kwargs.kwargs["fileId"] == "FILE123"
+        body = call_kwargs.kwargs["body"]["content"]
+        assert "[ImagineBot:EXPORT_EMPTY]" in body
+        assert err.actionable in body
+
+    def test_skips_when_duplicate_exists(self):
+        existing = [{"content": "[ImagineBot:EXPORT_EMPTY] some old comment", "resolved": False}]
+        drive_svc = _mock_drive(existing_comments=existing)
+        err = ExportEmpty("my_doc", "https://docs.google.com/document/d/FILE123/edit")
+
+        post_validation_comment(drive_svc, err)
+
+        drive_svc.comments.return_value.create.assert_not_called()
+
+    def test_posts_when_different_error_type_exists(self):
+        existing = [{"content": "[ImagineBot:NO_HEADINGS] different error", "resolved": False}]
+        drive_svc = _mock_drive(existing_comments=existing)
+        err = ExportEmpty("my_doc", "https://docs.google.com/document/d/FILE123/edit")
+
+        post_validation_comment(drive_svc, err)
+
+        drive_svc.comments.return_value.create.assert_called_once()
+
+    def test_no_op_when_drive_url_has_no_file_id(self):
+        drive_svc = _mock_drive()
+        err = ExportEmpty("my_doc", "https://example.com/no-id-here")
+
+        post_validation_comment(drive_svc, err)  # must not raise
+
+        drive_svc.comments.return_value.list.assert_not_called()
+        drive_svc.comments.return_value.create.assert_not_called()
+
+    def test_no_op_on_list_http_error(self):
+        drive_svc = MagicMock()
+        drive_svc.comments.return_value.list.return_value.execute.side_effect = _http_error(403)
+        err = ExportEmpty("my_doc", "https://docs.google.com/document/d/FILE123/edit")
+
+        post_validation_comment(drive_svc, err)  # must not raise
+
+        drive_svc.comments.return_value.create.assert_not_called()
+
+    def test_no_op_on_create_http_error(self):
+        drive_svc = _mock_drive(existing_comments=[])
+        drive_svc.comments.return_value.create.return_value.execute.side_effect = _http_error(403)
+        err = ExportEmpty("my_doc", "https://docs.google.com/document/d/FILE123/edit")
+
+        post_validation_comment(drive_svc, err)  # must not raise

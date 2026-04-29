@@ -22,11 +22,12 @@ from googleapiclient.discovery import build
 
 from .advisory_lock import AlreadyRunning, advisory_lock
 from .config import DEBUG_MODE, DRIVE_FOLDER_ID, GCS_BUCKET, SOURCE_ID, TRIGGER
+from .drive_comments import post_validation_comment
 from .drive_sync import list_accepted_files
 from .gcs_io import has_changes, load_manifest, save_manifest, upload_debug_step, upload_index
 from .run_report import build_report, file_failed, file_ok, write_report
 from ..build_index import build_all
-from ..errors import IngestionError, retry
+from ..errors import IngestionError, ValidationError, retry
 from ..log import error, info
 
 _DRIVE_SCOPES = [
@@ -74,6 +75,7 @@ def _rebuild(gcs_client, drive_svc, docs_svc, run_id: str, started_at: str) -> N
     if all_errors:
         for err in all_errors:
             error("Pre-flight validation failed", stem=err.name, error_type=err.error_type)
+            post_validation_comment(drive_svc, err)
         write_report(
             gcs_client, GCS_BUCKET, SOURCE_ID,
             build_report(
@@ -119,6 +121,8 @@ def _rebuild(gcs_client, drive_svc, docs_svc, run_id: str, started_at: str) -> N
             file_reports.append(file_ok(stem, steps_completed=[1, 2, 3, 4, 5]))
         except IngestionError as e:
             error("Pipeline step failed", stem=stem, error_type=e.error_type, detail=str(e))
+            if isinstance(e, ValidationError):
+                post_validation_comment(drive_svc, e)
             file_reports.append(file_failed(e))
 
     failed = [r for r in file_reports if r["status"] == "failed"]
