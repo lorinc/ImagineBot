@@ -53,6 +53,21 @@ def upload_index(gcs_client, bucket: str, source_id: str, index_dir: Path) -> No
     info("Index uploaded to GCS", source_id=source_id, files=uploaded)
 
 
+def upload_debug_step(
+    gcs_client, bucket: str, source_id: str, run_id: str,
+    step_dir_name: str, local_dir: Path,
+) -> None:
+    """Upload all files in local_dir to gs://<bucket>/<source_id>/debug/<run_id>/<step_dir_name>/."""
+    b = gcs_client.bucket(bucket)
+    prefix = f"{source_id}/debug/{run_id}/{step_dir_name}"
+    uploaded = []
+    for f in sorted(local_dir.glob("*")):
+        if f.is_file():
+            b.blob(f"{prefix}/{f.name}").upload_from_filename(str(f))
+            uploaded.append(f.name)
+    info("Debug step uploaded", step=step_dir_name, run_id=run_id, files=uploaded)
+
+
 def has_changes(current_files: list[dict], manifest: dict) -> bool:
     """Return True if file set or any content fingerprint differs from the last manifest."""
     manifest_map = {f["name"]: f["fingerprint"] for f in manifest.get("files", [])}

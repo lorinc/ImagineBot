@@ -25,6 +25,24 @@ gcloud storage buckets create "gs://${BUCKET}" \
 echo "gs://${BUCKET} ready"
 
 echo ""
+echo "=== 1b. GCS lifecycle: delete debug/ objects after 7 days ==="
+LIFECYCLE_JSON=$(mktemp)
+cat > "${LIFECYCLE_JSON}" <<'EOF'
+{
+  "rule": [
+    {
+      "action": { "type": "Delete" },
+      "condition": { "age": 7, "matchesPrefix": ["debug/"] }
+    }
+  ]
+}
+EOF
+gcloud storage buckets update "gs://${BUCKET}" \
+  --lifecycle-file="${LIFECYCLE_JSON}"
+rm "${LIFECYCLE_JSON}"
+echo "Lifecycle rule set: debug/ objects deleted after 7 days"
+
+echo ""
 echo "=== 2. Service account: ingestion-job ==="
 gcloud iam service-accounts create ingestion-job \
   --project="${PROJECT}" \

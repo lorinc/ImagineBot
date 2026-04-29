@@ -21,9 +21,9 @@ from google.cloud import storage as gcs
 from googleapiclient.discovery import build
 
 from .advisory_lock import AlreadyRunning, advisory_lock
-from .config import DRIVE_FOLDER_ID, GCS_BUCKET, SOURCE_ID, TRIGGER
+from .config import DEBUG_MODE, DRIVE_FOLDER_ID, GCS_BUCKET, SOURCE_ID, TRIGGER
 from .drive_sync import list_accepted_files
-from .gcs_io import has_changes, load_manifest, save_manifest, upload_index
+from .gcs_io import has_changes, load_manifest, save_manifest, upload_debug_step, upload_index
 from .run_report import build_report, file_failed, file_ok, write_report
 from ..build_index import build_all
 from ..errors import IngestionError, retry
@@ -67,6 +67,8 @@ def _rebuild(gcs_client, drive_svc, docs_svc, run_id: str, started_at: str) -> N
 
     from ..pipeline.steps.step2_gdocs_to_md import run as step2
     stems, s2_errors = step2(drive_svc, docs_svc, _SCRATCH, gdocs)
+    if DEBUG_MODE:
+        upload_debug_step(gcs_client, GCS_BUCKET, SOURCE_ID, run_id, "01_baseline_md", _SCRATCH / "01_baseline_md")
 
     all_errors = s1_errors + s2_errors
     if all_errors:
@@ -102,6 +104,8 @@ def _rebuild(gcs_client, drive_svc, docs_svc, run_id: str, started_at: str) -> N
                 lambda: _step3_run(_SCRATCH, [stem]),
                 name=stem, drive_url=drive_url, step=3,
             )
+            if DEBUG_MODE:
+                upload_debug_step(gcs_client, GCS_BUCKET, SOURCE_ID, run_id, "02_ai_cleaned", _SCRATCH / "02_ai_cleaned")
             retry(
                 lambda: _step4_run(_SCRATCH, [stem]),
                 name=stem, drive_url=drive_url, step=4,
@@ -110,6 +114,8 @@ def _rebuild(gcs_client, drive_svc, docs_svc, run_id: str, started_at: str) -> N
                 lambda: _step5_run(_SCRATCH, [stem]),
                 name=stem, drive_url=drive_url, step=5,
             )
+            if DEBUG_MODE:
+                upload_debug_step(gcs_client, GCS_BUCKET, SOURCE_ID, run_id, "03_chunked", _SCRATCH / "03_chunked")
             file_reports.append(file_ok(stem, steps_completed=[1, 2, 3, 4, 5]))
         except IngestionError as e:
             error("Pipeline step failed", stem=stem, error_type=e.error_type, detail=str(e))
