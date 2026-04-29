@@ -26,3 +26,11 @@ P-SEC-02: The allowed-users list is the sole access gate; no role or group logic
 
 P-DATA-01: Pipeline intermediary files are never deleted; trace-back requires them.
 P-DATA-02: A new top-level .py file in any service directory requires a corresponding COPY line in that service's Dockerfile.
+
+## Agent behaviour
+
+P-AGENT-01: When two errors occur in a row, stop. Do not attempt a third fix.
+Step back and ask: is this error caused by a gap in the design or underspecification?
+If you find yourself guessing at a solution, assume the answer is yes.
+Call out the specific gap explicitly and ask the user to resolve it before continuing.
+Filling design gaps with assumptions is the most common cause of compounding errors.
