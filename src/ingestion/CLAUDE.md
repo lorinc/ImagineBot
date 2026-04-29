@@ -49,6 +49,18 @@ data/pipeline/<run_id>/03_chunked/
 Step 6 ingested chunks into a Neo4j knowledge graph via Graphiti. This approach was
 abandoned in favour of PageIndex (full-context retrieval). The file was deleted 2026-04-26.
 
+## Operational tools
+
+```bash
+# Check latest run status (requires GCS access via ADC):
+python3 tools/status.py
+python3 tools/status.py --source tech_poc --debug   # per-file detail
+```
+
+`tools/status.py` reads `gs://img-dev-index/<source_id>/run_report.json` and prints
+a structured summary: status badge, run metadata, file counts, cost, and (on failure)
+actionable error detail with Drive URLs. `--debug` adds per-file step and chunk counts.
+
 ## Running the pipeline
 ```bash
 # Full run (Steps 1–5):
