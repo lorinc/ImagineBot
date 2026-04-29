@@ -602,33 +602,40 @@ stored in `run_report.json` only.
    MIME types; native Google Docs skip Step 1
 6. Fix change detection: use `md5Checksum` (DOCX) and `version` (native Google Doc)
    from Drive metadata; add both fields to `files().list()` call
-7. Replace `data/pipeline/YYYY-MM-DD_NNN/` with `/tmp/pipeline/` flat scratch space;
+7. Post-Step-2 TOC stripping: after `_export_markdown()` returns and before writing
+   `01_baseline_md/<stem>.md`, strip Table of Contents blocks. Google's Markdown export
+   renders a DOCX TOC as a block of anchor links (`[Heading Text](#anchor)`), typically
+   appearing before the first real heading. Pattern: one or more lines matching
+   `^\s*[-*]?\s*\[.+\]\(#.+\)\s*$` with no non-link lines between them. Strip the
+   entire block, including any preceding blank lines and `## Table of Contents` heading.
+   Implement as `_strip_toc(md: str) -> str` in `step2_gdocs_to_md.py`.
+8. Replace `data/pipeline/YYYY-MM-DD_NNN/` with `/tmp/pipeline/` flat scratch space;
    `run_id` = `datetime.utcnow().isoformat()` stored in `run_report.json` only
-8. Fix advisory lock: `if_generation_match` on acquire + release
-9. Structured JSON logging: replace all `print()` across job + pipeline steps
-10. `ValidationError` hierarchy: one subclass per `error_type` in the rejection table;
+9. Fix advisory lock: `if_generation_match` on acquire + release
+10. Structured JSON logging: replace all `print()` across job + pipeline steps
+11. `ValidationError` hierarchy: one subclass per `error_type` in the rejection table;
     each carries `name`, `error_type`, `error_detail`, `actionable`, `drive_url`
-11. Pre-flight validation pass: run all files through Steps 1–2, collect all
+12. Pre-flight validation pass: run all files through Steps 1–2, collect all
     `ValidationError`s, abort before Step 3 if any file fails
-12. Error handling: retry wrapper (3× exponential backoff) + `StepError` hierarchy +
+13. Error handling: retry wrapper (3× exponential backoff) + `StepError` hierarchy +
     top-level catch that writes `run_report.json` and exits non-zero
-13. `run_report.json` writer: called on every exit path (success and failure); schema
+14. `run_report.json` writer: called on every exit path (success and failure); schema
     as defined in "Error surface design" above
-14. GCS debug prefix: when `DEBUG_MODE=true`, copy each step's `/tmp/pipeline/` output
+15. GCS debug prefix: when `DEBUG_MODE=true`, copy each step's `/tmp/pipeline/` output
     to `gs://<bucket>/<source_id>/debug/<run_id>/` after that step completes;
     add 7-day lifecycle rule to `setup_gcp.sh`
-15. `tools/status.py`: reads `run_report.json`, prints structured summary; `--debug`
+16. `tools/status.py`: reads `run_report.json`, prints structured summary; `--debug`
     flag lists and downloads debug run artifacts; document in `src/ingestion/CLAUDE.md`
-16. Layer 1 (Drive comment): write comment on validation failure; check for existing
+17. Layer 1 (Drive comment): write comment on validation failure; check for existing
     ImagineBot comment before adding; update timestamp if present (pending Q5)
-17. Layer 3 (knowledge service warning): read `run_report.json` at startup and on
+18. Layer 3 (knowledge service warning): read `run_report.json` at startup and on
     `/health`; emit `warning` in SSE answer if status ≠ `ok` and report is newer than
     live index
-18. Large doc handling: `_split_at_headings()` + `_process_large_doc()` + output size
+19. Large doc handling: `_split_at_headings()` + `_process_large_doc()` + output size
     guard (reject if output > 3× input)
-19. Cost tracking: token accumulation per run, `MAX_RUN_COST_USD` abort threshold
-20. Cloud Monitoring alert on job failure + GCP Budget Alert (in `setup_gcp.sh`)
-21. Update `src/ingestion/ARCHITECTURE.md` and `CLAUDE.md` to reflect all of the above
+20. Cost tracking: token accumulation per run, `MAX_RUN_COST_USD` abort threshold
+21. Cloud Monitoring alert on job failure + GCP Budget Alert (in `setup_gcp.sh`)
+22. Update `src/ingestion/ARCHITECTURE.md` and `CLAUDE.md` to reflect all of the above
 
 ### Phase 2 — Event detection + incremental
 

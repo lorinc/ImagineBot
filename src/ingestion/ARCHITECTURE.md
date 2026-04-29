@@ -46,6 +46,19 @@ kept for backwards-compatibility with dev CLI muscle memory.
 
 ---
 
+## Document content filtering
+
+What the pipeline strips, and by what mechanism:
+
+| Element | Handling | Mechanism |
+|---|---|---|
+| Inline base64 images (`data:image/...;base64,...`) | Stripped | `_strip_images()` in Step 3, before Gemini call. Safety gate aborts if any base64 survives. |
+| URL-linked images (`![alt](https://...)`) | Pass through | Intentional — no pipeline cost, no indexing harm. |
+| Page headers and footers | Omitted | **Architecture decision: rely on Google Drive's Markdown export.** Page-level elements have no Markdown equivalent; Google's DOCX→GDoc→Markdown export omits them. The pipeline does not strip these explicitly. If Google's conversion behavior changes, this is a known single point of failure. |
+| Table of Contents | Stripped | Post-Step-2 cleanup (Phase 1 item — not yet implemented). Google's export renders the TOC as anchor links; these are noise in the index. |
+
+---
+
 ## Cloud Run Job package: `src/ingestion/job/`
 
 ```
