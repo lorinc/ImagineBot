@@ -1517,3 +1517,45 @@ ROOT_CAUSE: The 132K doc exceeds 80K skip threshold, so it goes to Gemini, hits 
 PREVENTED_BY: Phase 1 of the redesign (spike doc) addresses this: output size guard,
               section-chunked processing, retry+raise on exhaustion, top-level abort.
               Until that is implemented, the pipeline cannot complete on the current corpus.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-29]
+CATEGORY: PROCESS
+SERVICE: src/ingestion/
+TASK: Phase 1 implementation — dead code removal
+SYMPTOM: Deleted auth_oauth.py and pipeline/run.py with `rm`. User immediately
+         corrected: archive, do not delete. Files restored from git and moved to
+         pipeline/_archive/.
+ROOT_CAUSE: Default instinct was to delete dead code as the spike said "delete dead code."
+            User wants reversibility — archived files can be referenced or restored if
+            an edge case is missed.
+PREVENTED_BY: When the spike says "delete", default to archiving into a _archive/
+              subdirectory instead. Only hard-delete if the user explicitly says so.
+
+[2026-04-29]
+CATEGORY: TECHNICAL
+SERVICE: src/ingestion/
+TASK: Phase 1 item 10 — structured logging
+SYMPTOM: drive_utils.py imported log with `from ...log import info` which resolves to
+         src/log.py (does not exist). The correct import is `from ..log import info`
+         (resolves to src/ingestion/log.py).
+ROOT_CAUSE: drive_utils.py is at src/ingestion/pipeline/drive_utils.py — two levels
+            below src/ingestion/, so `..` is the correct relative depth. Files inside
+            pipeline/steps/ are one level deeper and correctly use `...log`.
+PREVENTED_BY: Before writing a relative import, count the directory depth from the
+              file to the target: each `..` is one directory up. Draw it out:
+              pipeline/drive_utils → .. → ingestion (correct). steps/step1 → ... → ingestion (correct).
+
+[2026-04-29]
+CATEGORY: ARCHITECTURE
+SERVICE: src/ingestion/
+TASK: Phase 1 items 11-14 — ValidationError hierarchy + pre-flight + retry + run_report
+SYMPTOM: Plan specified errors.py at src/ingestion/job/errors.py, but pipeline steps
+         (src/ingestion/pipeline/steps/) need to raise these errors. Putting errors in
+         job/ would require pipeline → job imports — an awkward upward dependency.
+ROOT_CAUSE: The location was specified without considering which layers needed to import
+            it. log.py already established the pattern: shared utilities live at the
+            ingestion package level (src/ingestion/), not in a sub-package.
+PREVENTED_BY: Before specifying a file location, ask: which packages need to import it?
+              If the answer spans multiple sibling packages, put it at their common parent.
+              Treat log.py as the reference pattern for ingestion-wide utilities.
