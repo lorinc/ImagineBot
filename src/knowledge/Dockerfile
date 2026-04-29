@@ -8,6 +8,7 @@ COPY src/knowledge/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY src/knowledge/main.py .
+COPY src/knowledge/models.py .
 COPY src/knowledge/indexer/ indexer/
 COPY data/index/ index/
 

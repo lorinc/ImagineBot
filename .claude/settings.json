@@ -61,6 +61,17 @@
         ]
       },
       {
+        "description": "Scan written files for secrets; alert + gitignore on match",
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 tools/check_secrets.py",
+            "timeout": 10
+          }
+        ]
+      },
+      {
         "description": "Warn if a requirements.txt is modified (dependency policy)",
         "matcher": "Write|Edit",
         "hooks": [

@@ -3,17 +3,22 @@
 ## Role in the system
 
 The ingestion pipeline converts school documents from Google Drive into a PageIndex
-that the knowledge service loads at startup. It is an **offline CLI tool** — not a
-deployed service, not on the user request path.
+that the knowledge service loads at startup.
+
+Two execution modes:
+- **CLI (dev):** `python3 -m src.ingestion.pipeline.run --all` + `python3 src/ingestion/build_index.py`
+- **Cloud Run Job (prod):** `src/ingestion/job/main.py` — polls Drive, detects DOCX changes, runs full pipeline, writes index to GCS.
 
 ```
-Google Drive  →  [pipeline steps 1–5]  →  data/pipeline/<run_id>/02_ai_cleaned/
-                                        →  [tools/build_index.py]
-                                        →  data/index/multi_index.json  →  knowledge service
+Google Drive  →  [src/ingestion/job/main.py  OR  pipeline/run.py]
+                →  Steps 1–5  →  data/pipeline/<run_id>/02_ai_cleaned/
+                →  src/ingestion/build_index.py
+                →  data/index/multi_index.json
+                →  [GCS: gs://img-dev-index/<SOURCE_ID>/]  ←  knowledge service reads at startup
 ```
 
-The knowledge service never calls the ingestion pipeline. The two are coupled only through
-the filesystem: ingestion writes to `data/index/`, the knowledge service reads from it.
+The knowledge service never calls the ingestion pipeline. They are coupled only through
+GCS (prod) or the local filesystem (dev).
 
 ---
 
@@ -22,19 +27,57 @@ the filesystem: ingestion writes to `data/index/`, the knowledge service reads f
 ```
 Step 1  DOCX → native Google Docs       (Drive API, personal OAuth)
 Step 2  Google Docs → baseline Markdown (Docs export API, personal OAuth)
-Step 3  AI header cleanup               (Gemini Flash Lite via Vertex AI / ADC)
+Step 3  AI header cleanup               (Gemini Flash Lite via REST API — GEMINI_API_KEY)
 Step 4  Table-to-prose conversion       (pure Python, no LLM)
 Step 5  Semantic chunking by ## headers (pure Python)
 ---
-tools/build_index.py                    (PageIndex build from 02_ai_cleaned/, Vertex AI / ADC)
+src/ingestion/build_index.py            (PageIndex build from 02_ai_cleaned/, Vertex AI / ADC)
 ```
 
 **Step 6 (Graphiti/Neo4j ingest) has been deleted.** It was dead code — never used in production,
 Neo4j dependency gone. Removed 2026-04-26.
 
-The index build (`tools/build_index.py`) is a separate tool, not a pipeline step. It reads
+The index build (`src/ingestion/build_index.py`) is a separate tool, not a pipeline step. It reads
 from `data/pipeline/latest/02_ai_cleaned/en_*.md`. Step 4 overwrites these files in-place with
 prose-converted versions, so the index build always sees prose output provided Step 4 ran first.
+
+`tools/build_index.py` is a runpy shim that delegates to `src/ingestion/build_index.py` —
+kept for backwards-compatibility with dev CLI muscle memory.
+
+---
+
+## Cloud Run Job package: `src/ingestion/job/`
+
+```
+job/
+  config.py       Env var defaults: DRIVE_FOLDER_ID, SOURCE_ID, GCS_BUCKET, OAUTH_TOKEN_PATH
+  drive_sync.py   list_docx_files(), download_docx_to_local(), upload_intermediaries()
+  gcs_io.py       load_manifest(), save_manifest(), upload_index(), has_changes()
+  main.py         Entrypoint: poll → diff → full rebuild → upload index + manifest to GCS
+  Dockerfile      python:3.12-slim; installs ingestion + job requirements; PYTHONPATH=/app
+  requirements.txt  google-cloud-storage, google-cloud-aiplatform[generative-ai]==1.74.0
+```
+
+**Change detection:** job compares Drive DOCX file list (name + modifiedTime) against
+`gs://<GCS_BUCKET>/<SOURCE_ID>/manifest.json`. Any add/remove/modify triggers a full rebuild.
+First run (no manifest) always rebuilds.
+
+**Idempotent uploads:** `upload_intermediaries()` checks if a file exists by name in Drive
+before uploading; updates if present, creates if absent.
+
+**GCS index layout:**
+```
+gs://img-dev-index/<SOURCE_ID>/
+  manifest.json       — file list + last_run timestamp
+  multi_index.json    — routing index (read by knowledge service)
+  index_<stem>.json   — per-doc index files
+```
+
+**Authentication in the job container:**
+- Steps 1–2: personal OAuth via `token.pickle` (mounted from Secret Manager at OAUTH_TOKEN_PATH)
+- Steps 3–5: `GEMINI_API_KEY` env var (REST API, no ADC needed)
+- build_index.py: ADC via the job's service account (Vertex AI)
+- GCS reads/writes: ADC via the job's service account
 
 ---
 

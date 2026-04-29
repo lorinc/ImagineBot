@@ -87,6 +87,8 @@ def _rebuild(gcs_client, drive_svc, docs_svc) -> None:
     from ..pipeline.steps.step5_chunk import run as step5
     step5(run_dir, stems)
 
+    _update_symlink(run_dir)
+
     result = subprocess.run(
         [sys.executable, "src/ingestion/build_index.py"],
         check=False,
@@ -94,8 +96,6 @@ def _rebuild(gcs_client, drive_svc, docs_svc) -> None:
     if result.returncode != 0:
         print("ERROR: build_index.py failed", file=sys.stderr)
         sys.exit(result.returncode)
-
-    _update_symlink(run_dir)
 
     upload_intermediaries(drive_svc, run_dir, DRIVE_FOLDER_ID)
 

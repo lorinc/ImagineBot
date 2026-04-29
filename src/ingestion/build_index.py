@@ -24,6 +24,7 @@ Requires: gcloud auth application-default login (or ADC already configured)
 import argparse
 import asyncio
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -40,12 +41,18 @@ DEFAULT_CORPUS_DIR = Path("data/pipeline/latest/02_ai_cleaned")
 DEFAULT_OUTPUT_DIR = Path("data/index")
 
 
+def _index_name(stem: str) -> str:
+    """Convert any filename stem to a safe, lowercase index key."""
+    key = re.sub(r"[^a-z0-9]+", "_", stem.lower()).strip("_")
+    return f"index_{key}.json"
+
+
 async def build_all(corpus_dir: Path, output_dir: Path) -> None:
     vertexai.init(project=GCP_PROJECT, location=REGION)
 
-    md_files = sorted(f for f in corpus_dir.iterdir() if f.name.startswith("en_") and f.suffix == ".md")
+    md_files = sorted(f for f in corpus_dir.iterdir() if f.suffix == ".md")
     if not md_files:
-        print(f"ERROR: No en_*.md files found in {corpus_dir}", file=sys.stderr)
+        print(f"ERROR: No .md files found in {corpus_dir}", file=sys.stderr)
         sys.exit(1)
 
     output_dir.mkdir(parents=True, exist_ok=True)
@@ -53,7 +60,7 @@ async def build_all(corpus_dir: Path, output_dir: Path) -> None:
 
     per_doc_paths: list[Path] = []
     for md_path in md_files:
-        out_path = output_dir / f"index_{md_path.stem}.json"
+        out_path = output_dir / _index_name(md_path.stem)
         print(f"\n[{md_path.name}] → {out_path.name}")
         await build_index(md_path, out_path)
         per_doc_paths.append(out_path)

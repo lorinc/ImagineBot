@@ -15,7 +15,7 @@ has its own `ARCHITECTURE.md` — start there for service-specific decisions.
 | `src/channel_web/` | Cloud Run service | public HTTPS | deployed |
 | `src/gateway/` | Cloud Run service | public HTTPS | deployed |
 | `src/knowledge/` | Cloud Run service | `--no-allow-unauthenticated`, ingress=all | deployed |
-| `src/ingestion/` | Cloud Run Job (future) | n/a (offline CLI now) | CLI only |
+| `src/ingestion/` | Cloud Run Job | n/a (offline job) | Job stub built; not yet deployed |
 | `src/auth/` | Cloud Run service | internal | not implemented |
 | `src/access/` | Cloud Run service | internal | not implemented |
 | `src/security/` | library (imported by gateway) | n/a | not implemented |
@@ -221,23 +221,29 @@ happen to be from unpermitted sources.
 ## Corpus and index lifecycle
 
 ```
-Google Drive  →  ingestion pipeline (local CLI, Steps 1–5)
-                 → data/pipeline/latest/02_ai_cleaned/<source_id>.md
-              →  tools/build_index.py
+Google Drive  →  ingestion pipeline (Steps 1–5)
+                 → data/pipeline/<run_id>/02_ai_cleaned/<source_id>.md
+              →  src/ingestion/build_index.py
                  → data/index/multi_index.json + per-doc index files
-              →  (baked into knowledge Docker image, or GCS upload — Phase 3.1)
-              →  knowledge service loads at startup, holds in memory
+              →  GCS: gs://img-dev-index/<SOURCE_ID>/multi_index.json + index_*.json
+              →  knowledge service downloads from GCS at startup (INDEX_GCS_PATH env var)
+                 → holds in memory
 ```
 
-**Knowledge service never calls ingestion.** They are coupled only through the
-filesystem (local now) or GCS (Phase 3.1).
+**Trigger paths:**
+- **Dev (manual):** `python3 -m src.ingestion.pipeline.run --all` + `python3 src/ingestion/build_index.py`
+- **Prod (Cloud Run Job):** `src/ingestion/job/main.py` — polls Drive folder, detects DOCX changes via manifest diff, runs full rebuild, uploads index to GCS. Triggered by Cloud Scheduler (1-minute poll) once deployed.
 
-**Corpus update = redeploy (currently).** To serve a new index: run the pipeline, build
-the image, deploy. No hot-reload exists yet. When GCS-backed index is implemented,
-hot-reload becomes possible — do not add TTL-expiry logic until then.
+**Knowledge service never calls ingestion.** They are coupled through GCS (prod) or the
+local filesystem (dev).
 
-**Drive is authoritative. `data/` is scratch.** Any local pipeline artifact can be
-regenerated from Drive. Do not treat `data/` as a canonical store.
+**GCS index read:** knowledge service checks `INDEX_GCS_PATH` env var at startup. If set
+(`gs://img-dev-index/tech_poc`), downloads `multi_index.json` + all per-doc `index_*.json`
+to `/tmp/index/` and loads from there. Falls back to `KNOWLEDGE_INDEX_PATH` local path if
+`INDEX_GCS_PATH` is not set.
+
+**Drive is authoritative. `data/` and GCS index are derived.** Any artifact can be
+regenerated from Drive. Do not treat GCS or `data/` as the canonical document store.
 
 ---
 

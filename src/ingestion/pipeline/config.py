@@ -19,7 +19,7 @@ GEMINI_MODEL = "gemini-2.5-flash-lite"
 GEMINI_API_KEY_FILE = PROJECT_ROOT / "REFERENCE_REPOS" / "DOCX2MD" / ".config"
 
 # ── Step 3 limits ──────────────────────────────────────────────────────────────
-MAX_DOCUMENT_SIZE_FOR_AI = 400_000   # characters; skip AI above this
+MAX_DOCUMENT_SIZE_FOR_AI = 80_000    # characters; skip AI above this (larger docs cause Gemini hangs)
 
 # ── Step 5 chunking ────────────────────────────────────────────────────────────
 CHUNK_HEADER_LEVEL = "##"            # split on ## headings

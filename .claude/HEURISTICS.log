@@ -1415,3 +1415,105 @@ PREVENTED_BY: When adding a bypass flag to any pipeline, enumerate every gate/br
               and explicitly decide: does this bypass flag apply here? Add the guard at each gate,
               not just the one that prompted the flag. Document which gates the flag bypasses in
               a comment at the flag's definition site.
+WARNING: Session ended with HEURISTICS_WRITTEN: no. Append findings to .claude/HEURISTICS.log.
+
+[2026-04-28]
+CATEGORY: ARCHITECTURE
+SERVICE: src/ingestion, src/knowledge
+TASK: Item R — Drive polling job
+SYMPTOM: n/a (prospective)
+ROOT_CAUSE: n/a
+LESSON: When a Cloud Run Job calls a subprocess (build_index.py) that imports from
+        a sibling service (src/knowledge/indexer), both the source tree and that
+        service's dependencies must be present in the same image. The ingestion job
+        Dockerfile copies src/ (both ingestion and knowledge trees) and installs
+        google-cloud-aiplatform from job/requirements.txt alongside the ingestion
+        base requirements. Forgetting either breaks the subprocess silently at import time.
+PREVENTED_BY: When writing a Dockerfile for a job that calls a subprocess importing
+              from a different service's package, enumerate all transitive imports
+              of that subprocess and ensure they are installed. Check with
+              `python3 -c "import <pkg>"` in the container layer before pushing.
+
+[2026-04-28]
+CATEGORY: DEBUGGING
+SERVICE: src/ingestion
+TASK: Item R — Move build_index.py to src/ingestion/
+SYMPTOM: Plan specified `Path(__file__).parents[2] / "knowledge"` to resolve src/knowledge/
+         from src/ingestion/build_index.py. This resolves to <project_root>/knowledge/ which
+         does not exist. The correct path is `parents[1] / "knowledge"` = src/knowledge/.
+ROOT_CAUSE: Off-by-one in parents[] index. pathlib `parents[0]` = immediate parent directory.
+            From src/ingestion/build_index.py: parents[0]=src/ingestion/, parents[1]=src/,
+            parents[2]=<project_root>. Plan comment said "../../knowledge = src/knowledge"
+            which is correct, but `..` from a file = `parents[0]`, so `../..` = `parents[1]`.
+PREVENTED_BY: When writing sys.path.insert with Path.parents[], verify by counting manually:
+              parents[0] = dir containing the file, parents[1] = one level up, etc. Then
+              check: `python3 -c "from pathlib import Path; print(Path('/a/b/c.py').parents[1])"`.
+              Never trust a plan's parents[] index without counting.
+
+[2026-04-28]
+CATEGORY: PROCESS
+SERVICE: deployment (all services)
+TASK: Item R — GCP setup planning
+SYMPTOM: PLAN_R.md and SESSION.md used project ID "img-dev" throughout, but all three
+         existing deploy.sh scripts hardcode "img-dev-490919". The discrepancy was not
+         caught until the next deploy session, after a gcloud config mutation had already
+         been made using the wrong ID.
+ROOT_CAUSE: Plan doc was written from memory/ARCHITECTURE.md (which uses the human-readable
+            project name "img-dev"), not cross-checked against the actual deploy scripts
+            (which use the numeric project ID "img-dev-490919"). GCP accepts both forms in
+            gcloud commands, but they are not interchangeable in all contexts.
+PREVENTED_BY: Before writing any gcloud command in a plan doc, grep existing deploy scripts
+              for the PROJECT variable and copy the exact value. Never write a project ID
+              from memory. Command: grep -r "^PROJECT=" src/*/deploy.sh tools/
+
+[2026-04-28]
+CATEGORY: PROCESS
+SERVICE: deployment (all services)
+TASK: Item R — GCP setup planning
+SYMPTOM: Ran `gcloud config set project img-dev` to switch gcloud context, mutating the
+         user's global gcloud config without asking. Active project was "weigh-in-link"
+         (a different project). Change was invisible and affected all subsequent gcloud calls.
+ROOT_CAUSE: Inferred the right project from SESSION.md and acted immediately rather than
+            surfacing the mismatch and asking. Global gcloud config state is shared across
+            all terminal sessions and all projects — it is not a local or reversible action.
+PREVENTED_BY: Never run `gcloud config set project/account/region`. Always surface config
+              mismatches to the user first: print current config, state expected value,
+              ask explicitly. Deploy scripts must hardcode PROJECT= so they never depend
+              on ambient gcloud config.
+
+[2026-04-29]
+CATEGORY: PROCESS
+SERVICE: src/ingestion/
+TASK: Item R — ingestion job debugging → architectural redesign
+SYMPTOM: Spent 2+ hours on a pipeline that kept timing out. Each fix addressed one
+         symptom (PYTHONUNBUFFERED, OAuth hang, request timeout, lock release, filename
+         filter) without addressing the structural problems: no retry logic, large docs
+         that exceed Gemini context silently skip or hang, full rebuild on every run,
+         no alerting, no cost control. The pipeline never completed end-to-end.
+ROOT_CAUSE: Entered implementation mode without first auditing the architecture for
+            correctness. Each fix revealed the next bug. 2 hours of reactive debugging
+            produced a pipeline that is still broken for different reasons.
+PREVENTED_BY: When a task exceeds 2x its estimated runtime with intermittent failures,
+              stop and do an architecture review before adding more fixes. Write a spike
+              that covers: trigger model, error model, observability, cost model, and
+              multi-tenancy. Only implement after the design is approved. A 30-minute
+              design review would have prevented 2 hours of debugging.
+
+[2026-04-29]
+CATEGORY: OPERATIONAL
+SERVICE: src/ingestion/
+TASK: Item R — ingestion job Step 3 timeout
+SYMPTOM: Step 3 (AI header cleanup) timed out on EN_Manual de familias_24_25 (3)
+         (132,085 chars) despite MAX_DOCUMENT_SIZE_FOR_AI = 80_000. The doc is larger
+         than the skip threshold, so it should have been skipped. Checked logs: the
+         last visible log line is "Step 3: AI Header Cleanup" — no indication of which
+         file caused it. SIGKILL with no PYTHONUNBUFFERED issue (that is fixed); likely
+         the 120s timeout on requests.post is hit, but the retry+raise path doesn't
+         exist yet so it silently stalls the container.
+ROOT_CAUSE: The 132K doc exceeds 80K skip threshold, so it goes to Gemini, hits the
+            120s timeout, requests.post raises Timeout, is caught by the bare
+            `except Exception as e: print(f"FAILED: {e}"); continue`, and then the
+            next file (EN_Policies_5, 378K) also goes to Gemini. No retry, no abort.
+PREVENTED_BY: Phase 1 of the redesign (spike doc) addresses this: output size guard,
+              section-chunked processing, retry+raise on exhaustion, top-level abort.
+              Until that is implemented, the pipeline cannot complete on the current corpus.

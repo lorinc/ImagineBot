@@ -72,7 +72,7 @@ Output only the cleaned Markdown. Do not add explanations or comments."""
         f"https://generativelanguage.googleapis.com/v1beta/models"
         f"/{GEMINI_MODEL}:generateContent?key={api_key}"
     )
-    resp = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]})
+    resp = requests.post(url, json={"contents": [{"parts": [{"text": prompt}]}]}, timeout=120)
     resp.raise_for_status()
 
     result = resp.json()

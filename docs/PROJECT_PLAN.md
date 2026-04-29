@@ -532,20 +532,28 @@ underspecified / false-presupposition eval families.
 
 ---
 
-### Phase 3.1 — GDrive integration UAT plan — SCOPED 2026-04-24
+### Phase 3.1 — GDrive integration: Drive polling job — CODE COMPLETE 2026-04-28
 
-**Plan:** `~/.claude/plans/awesome-do-a-gap-dynamic-stardust.md`
+**Scope (agreed):** Single Drive folder, personal OAuth, full rebuild on any DOCX change, index to GCS, knowledge reads from GCS. No admin UI. No multi-tenant isolation.
 
-**Scope (agreed):** Ops-triggered ingest via CLI (no admin UI). Single corpus. Flat Drive folder. No multi-tenant isolation.
+**What was built (commit 8aa7f4b):**
+- `src/ingestion/job/` — Cloud Run Job package: config, drive_sync, gcs_io, main (entrypoint)
+- `src/ingestion/build_index.py` — moved from `tools/`; `tools/build_index.py` is a shim
+- `src/ingestion/pipeline/auth_oauth.py` — `OAUTH_TOKEN_PATH` env var
+- `src/ingestion/pipeline/steps/step1+2` — `parent_folder_id` param
+- `src/knowledge/main.py` — `INDEX_GCS_PATH` env var → GCS download at startup
+- `src/knowledge/requirements.txt` — `google-cloud-storage` added
+- 7 unit tests for `has_changes()` — all pass
 
-**Gap summary:**
-- Ingestion: personal OAuth → service account auth; hardcoded folder name → `--drive-folder-id` param; local index → GCS write
-- Knowledge: Docker-baked index → GCS download at startup
-- GCP: create `ingestion-sa`, GCS bucket `img-dev-index`, grant roles, SA key in Secret Manager
+**GCS layout:** `gs://img-dev-index/tech_poc/{manifest,multi_index,index_*}.json`
 
-**Explicitly deferred:** admin service, Firestore `sources` collection, `group_ids` enforcement, scheduled polling, subfolder recursion, DOCX-via-SA.
+**Pending (next session):**
+- R-1: GCS bucket + IAM + Secret Manager (run commands in SESSION.md NEXT_SESSION)
+- R-8: Build + push image, create Cloud Run Job, create Cloud Scheduler
+- Redeploy knowledge service (INDEX_GCS_PATH env var + new docker image)
+- Smoke test: drop DOCX → wait 1 min → verify knowledge answers from new doc
 
-**Status:** Plan written. Not started.
+**Explicitly deferred:** admin service, Firestore `sources` collection, `group_ids` enforcement, subfolder recursion, DOCX-via-SA, multi-tenant isolation.
 
 ---
 
