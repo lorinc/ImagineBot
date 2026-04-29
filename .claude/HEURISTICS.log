@@ -1559,3 +1559,44 @@ ROOT_CAUSE: The location was specified without considering which layers needed t
 PREVENTED_BY: Before specifying a file location, ask: which packages need to import it?
               If the answer spans multiple sibling packages, put it at their common parent.
               Treat log.py as the reference pattern for ingestion-wide utilities.
+
+[2026-04-29]
+CATEGORY: TECHNICAL
+SERVICE: tests/ingestion/
+TASK: Item 17 — Drive comment tests
+SYMPTOM: MagicMock setup calling drive_svc.comments().create().execute counted as
+         a real call to create(), causing assert_called_once() to fail with "Called 2 times."
+ROOT_CAUSE: MagicMock records all calls including setup calls. Using chained ()
+            notation to set return_value triggers the call counter.
+PREVENTED_BY: Use .return_value chains to configure mock behaviour without calling
+              the method: drive_svc.comments.return_value.create.return_value.execute
+              .return_value = {...}. Never call mock methods during setup.
+
+[2026-04-29]
+CATEGORY: PROCESS
+SERVICE: src/ingestion/
+TASK: All sessions — venv vs system .venv/bin/python3
+SYMPTOM: Bare .venv/bin/python3/pytest commands hit /usr/bin/python3 (system Python, no
+         googleapiclient), causing ModuleNotFoundError that was mistaken for
+         a missing install. pip3 install appeared to succeed because the venv
+         already had the package.
+ROOT_CAUSE: .venv/bin/python3 is the correct interpreter; system Python lacks
+            project dependencies. No activation was done before running .venv/bin/pytest.
+PREVENTED_BY: PreToolUse hook in .claude/settings.json (venv_rewrite.py) now
+              rewrites bare .venv/bin/python3/pytest → .venv/bin/equivalents automatically.
+              This session the hook was added; it is now permanent.
+
+[2026-04-29]
+CATEGORY: PROCESS
+SERVICE: all
+TASK: Plan topology management
+SYMPTOM: Sub-plans in ~/.claude/plans/ accumulated with no indication of which parent
+         plan or sprint item they belong to, making it impossible to trace the hierarchy
+         without reading every file.
+ROOT_CAUSE: Plan files were created with self-contained titles but no reference to
+            their position in the plan tree (parent plan + item number/name).
+PREVENTED_BY: When spawning a sub-plan, the header must explicitly state:
+              Parent: <file or sprint item>
+              Step: <item number / name within parent>
+              Example: "Parent: .claude/INGESTION_R.md — Step: Item 18"
+              This makes the hierarchy readable from the index without opening files.

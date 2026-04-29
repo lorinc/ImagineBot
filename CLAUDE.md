@@ -6,7 +6,8 @@ At the start of every session, before anything else:
 2. Read `.claude/SPRINT.md`
 3. Run `tail -40 .claude/HEURISTICS.log`
 4. Read `docs/ARCHITECTURE.md`
-5. Output a session brief — 3–5 sentences max: what was done last session, what comes next. No headers, no bullet trees, no essay.
+5. Read `docs/specs/PRINCIPLES.md`
+6. Output a session brief — 3–5 sentences max: what was done last session, what comes next. No headers, no bullet trees, no essay.
 
 ## Operational files
 

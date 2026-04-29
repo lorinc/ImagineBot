@@ -57,13 +57,14 @@
           pipeline behavior, not a school topic — classify() correctly returns OOS regardless
           of history. Override intent requires a dedicated classifier framed around
           "did the user ask to retry search?" not "is this about school topics?"
-- [ ] R — Google Drive polling stub  (ingestion/TODO.md §Drive polling stub)
-          Single personal-OAuth folder, full rebuild on any top-level DOCX change,
-          index written to GCS, knowledge service reads from GCS.
-          Sub-tasks: R-1 GCS bucket/IAM, R-2 Job scaffold, R-3 change detection,
-          R-4 pipeline trigger, R-5 intermediary upload to Drive, R-6 GCS index+manifest,
-          R-7 knowledge GCS read, R-8 Cloud Scheduler wiring.
-          CODE COMPLETE 2026-04-28 (commit 8aa7f4b). GCP setup + deploy pending (next session).
+- [ ] R — Ingestion pipeline redesign  (tracked in .claude/INGESTION_R.md)
+          Phase 1 items 1–17 complete. Items 18–22 pending:
+            18. Knowledge service warning (plan: ~/.claude/plans/ingestion-r-item18-knowledge-warning.md)
+            19. Large doc handling (_split_at_headings + output size guard)
+            20. Cost tracking (MAX_RUN_COST_USD abort threshold)
+            21. Cloud Monitoring alert + GCP Budget Alert in setup_gcp.sh
+            22. Update src/ingestion/ARCHITECTURE.md + CLAUDE.md
+          After Phase 1 complete: GCP setup (setup_gcp.sh) + deploy + UAT.
 - [ ] S — GitHub Actions deploy  (after item R)
           Replace deploy.sh with a GitHub Actions workflow: push to main triggers
           docker build → push → gcloud run deploy via Workload Identity Federation.

@@ -38,9 +38,9 @@ Items from spike §Implementation sequence Phase 1 (numbered 1–22):
 - [x] 12. Pre-flight validation pass: run all files through Steps 1–2, collect ValidationErrors, abort before Step 3 (commit bd2a6cd)
 - [x] 13. Error handling: retry wrapper (3× exp backoff) + StepError hierarchy + top-level catch → run_report.json + exit non-zero (commit bd2a6cd)
 - [x] 14. run_report.json writer: called on every exit path; schema per spike §Error surface design (commit bd2a6cd)
-- [ ] 15. GCS debug prefix: DEBUG_MODE=true copies step outputs to gs://<bucket>/<source_id>/debug/<run_id>/; 7-day lifecycle in setup_gcp.sh
-- [ ] 16. tools/status.py: reads run_report.json, structured summary; --debug flag; documented in src/ingestion/CLAUDE.md
-- [ ] 17. Layer 1 Drive comment: on validation failure; dedup by error_type before adding
+- [x] 15. GCS debug prefix: DEBUG_MODE=true copies step outputs to gs://<bucket>/<source_id>/debug/<run_id>/; 7-day lifecycle in setup_gcp.sh (commit 7013834)
+- [x] 16. tools/status.py: reads run_report.json, structured summary; --debug flag; documented in src/ingestion/CLAUDE.md (commit 7c46806)
+- [x] 17. Layer 1 Drive comment: on validation failure; dedup by error_type before adding (commit 47e60cf)
 - [ ] 18. Layer 3 knowledge service warning: read run_report.json at startup + /health; emit warning in SSE if status ≠ ok
 - [ ] 19. Large doc handling: _split_at_headings() + _process_large_doc() + output size guard (reject if output > 3× input)
 - [ ] 20. Cost tracking: token accumulation per run; MAX_RUN_COST_USD abort threshold
