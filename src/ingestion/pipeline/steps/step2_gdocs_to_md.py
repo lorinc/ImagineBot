@@ -1,8 +1,8 @@
 """
 Step 2 — Export Google Docs to baseline Markdown, saved locally.
 
-Input:  Google Drive folder DRIVE_GDOCS_FOLDER (list from Step 1)
-Output: data/pipeline/<run_id>/01_baseline_md/<stem>.md
+Input:  list of {name, gdoc_id} dicts from step1
+Output: /tmp/pipeline/01_baseline_md/<stem>.md
 
 Also saves a <stem>_styles.json alongside each .md with font-size metadata,
 which Step 3 uses to fix header hierarchy.
@@ -10,8 +10,6 @@ which Step 3 uses to fix header hierarchy.
 
 import json
 from pathlib import Path
-from ..config import DRIVE_GDOCS_FOLDER
-from ..drive_utils import find_or_create_folder, list_google_docs_in_folder
 
 
 def _export_markdown(drive_service, gdoc_id: str) -> str:
@@ -46,7 +44,7 @@ def _extract_styles(docs_service, gdoc_id: str) -> list[dict]:
     return styles
 
 
-def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict], parent_folder_id: str | None = None) -> list[str]:
+def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict]) -> list[str]:
     """
     Export each Google Doc to Markdown.
 
@@ -57,20 +55,6 @@ def run(drive_service, docs_service, run_dir: Path, gdocs: list[dict], parent_fo
 
     out_dir = run_dir / "01_baseline_md"
     out_dir.mkdir(parents=True, exist_ok=True)
-
-    # If gdocs list is empty (step1 skipped), discover from Drive —
-    # but filter to only stems that match our local DOCX files.
-    if not gdocs:
-        from ..config import DOCX_DIR
-        from ..drive_utils import find_or_create_folder
-        local_stems = {p.stem for p in DOCX_DIR.glob("*.docx")}
-        folder_id = find_or_create_folder(drive_service, DRIVE_GDOCS_FOLDER, parent_id=parent_folder_id)
-        gdocs_raw = list_google_docs_in_folder(drive_service, folder_id)
-        gdocs = [
-            {"name": d["name"], "gdoc_id": d["id"]}
-            for d in gdocs_raw
-            if d["name"] in local_stems
-        ]
 
     exported = []
     for doc in gdocs:

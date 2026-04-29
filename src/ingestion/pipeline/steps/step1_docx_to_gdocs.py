@@ -1,67 +1,49 @@
 """
-Step 1 — Upload local DOCX files to Google Drive as native Google Docs.
+Step 1 — Convert DOCX files in Drive to native Google Docs via server-side copy.
 
-Input:  data/docx/*.docx
+Input:  list of file metadata dicts from list_accepted_files()
 Output: Google Drive folder DRIVE_GDOCS_FOLDER (created if absent)
 
-Idempotent: skips files whose stem already exists in the Drive folder.
+Native Google Docs pass through unchanged (Step 1 is a no-op for them).
 """
 
 from pathlib import Path
-from ..config import DOCX_DIR, DRIVE_GDOCS_FOLDER
-from ..drive_utils import find_or_create_folder, list_google_docs_in_folder
+
+from ..config import DRIVE_GDOCS_FOLDER
+from ..drive_utils import find_or_create_folder
+
+_DOCX_MIME = "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+_GDOC_MIME = "application/vnd.google-apps.document"
 
 
-def run(drive_service, run_dir: Path, parent_folder_id: str | None = None) -> list[dict]:
+def run(drive_service, source_folder_id: str, files: list[dict]) -> list[dict]:
     """
-    Upload all DOCX files from DOCX_DIR to Drive as Google Docs.
+    Convert DOCX files to native Google Docs via server-side copy.
+    Native Google Docs pass through unchanged.
 
-    Returns list of {name, gdoc_id} for every doc in the Drive folder
-    (including pre-existing ones).
+    Returns list of {name: stem, gdoc_id: id} for each file.
     """
     print("=== Step 1: DOCX → Google Docs ===")
 
-    folder_id = find_or_create_folder(drive_service, DRIVE_GDOCS_FOLDER, parent_id=parent_folder_id)
-    print(f"  Drive folder '{DRIVE_GDOCS_FOLDER}': {folder_id}")
-
-    # Index existing docs by stem name to enable idempotency
-    existing = {d["name"]: d["id"] for d in list_google_docs_in_folder(drive_service, folder_id)}
-
-    docx_files = sorted(DOCX_DIR.glob("*.docx"))
-    if not docx_files:
-        print(f"  No DOCX files found in {DOCX_DIR}")
-        return []
+    gdocs_folder_id = find_or_create_folder(
+        drive_service, DRIVE_GDOCS_FOLDER, parent_id=source_folder_id
+    )
 
     results = []
-    for docx_path in docx_files:
-        stem = docx_path.stem
-        if stem in existing:
-            print(f"  Skipping (already in Drive): {stem}")
-            results.append({"name": stem, "gdoc_id": existing[stem]})
+    for f in files:
+        stem = Path(f["name"]).stem
+        if f["mimeType"] == _GDOC_MIME:
+            print(f"  Pass-through (native Google Doc): {f['name']}")
+            results.append({"name": stem, "gdoc_id": f["id"]})
             continue
 
-        print(f"  Uploading: {docx_path.name} ...", end=" ", flush=True)
-        with open(docx_path, "rb") as f:
-            content = f.read()
-
-        from googleapiclient.http import MediaInMemoryUpload
-        media = MediaInMemoryUpload(
-            content,
-            mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-            resumable=False,
-        )
-        metadata = {
-            "name": stem,
-            "mimeType": "application/vnd.google-apps.document",
-            "parents": [folder_id],
-        }
-        gdoc = drive_service.files().create(
-            body=metadata,
-            media_body=media,
-            fields="id, name",
+        print(f"  Converting: {f['name']} ...", end=" ", flush=True)
+        gdoc = drive_service.files().copy(
+            fileId=f["id"],
+            body={"name": stem, "mimeType": _GDOC_MIME, "parents": [gdocs_folder_id]},
         ).execute()
         print(f"done ({gdoc['id']})")
         results.append({"name": stem, "gdoc_id": gdoc["id"]})
 
-    print(f"  Step 1 complete: {len(results)} doc(s) in Drive\n")
+    print(f"  Step 1 complete: {len(results)} doc(s)\n")
     return results
